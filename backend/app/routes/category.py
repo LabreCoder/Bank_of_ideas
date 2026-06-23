@@ -2,14 +2,14 @@
 from fastapi import APIRouter
 
 router = APIRouter(
-    prefix="/ideas",
-    tags=["Ideas"]
+    prefix="/category",
+    tags=["Category"]
 )
 
 @router.get("/")
-def list_ideas():
-    return {"message": "Listing ideias"}
+def list_category():
+    return {"message": "Listing categories"}
 
 @router.post("/")
-def create_idea():
-    return {"message": "Ideia created"}
+def create_category():
+    return {"message": "Category created"}
