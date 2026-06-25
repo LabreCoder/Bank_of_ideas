@@ -4,6 +4,8 @@ import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from typing import Generator
+from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -27,7 +29,7 @@ SessionLocal = sessionmaker(
     bind=engine
 )
 
-def get_db():
+def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
         yield db
