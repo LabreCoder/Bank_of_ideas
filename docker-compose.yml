@@ -1,5 +1,4 @@
 services:
-
   db:
     image: postgres:16-alpine
     container_name: bank_ideas_db
@@ -34,5 +33,27 @@ services:
         condition: service_healthy
     volumes:
       - ./backend/app:/app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: bank_ideas_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      # Anonymous volume: keeps the container's own node_modules
+      # (installed during build) instead of letting the bind mount
+      # above overwrite it with your host's (possibly empty/missing) one.
+      - /app/node_modules
+    environment:
+      # This URL is used by the BROWSER (see explanation below),
+      # so it must be an address your host machine can reach.
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - api
+
 volumes:
   postgres_data:
