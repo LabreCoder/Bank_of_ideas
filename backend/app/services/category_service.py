@@ -93,7 +93,6 @@ def get_category(db: Session, id: int):
 ## Get list of categories
 def list_categories(db: Session):
     try:
-        list = []
         result = db.execute(
             text(
                 """
@@ -104,15 +103,14 @@ def list_categories(db: Session):
             )
         )
         rows = result.fetchall()
-        
-        for row in rows:
-            list.append(row)
-
-        return list
-    
+        categories = [
+            {"id": row[0], "name": row[1], "description": row[2]}
+            for row in rows
+        ]
+        return categories
     except Exception as e:
         raise RuntimeError(f"Error while listing categories: {e}")
-
+    
 ## Delete category
 def delete_category(db: Session, id: int):
     try:
