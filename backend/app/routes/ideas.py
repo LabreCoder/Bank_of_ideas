@@ -1,5 +1,7 @@
 # Cria os caminhos de URL (endpoints) que o frontend vai acessar para enviar ou pedir dados.
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from database.connection import get_db
 
 router = APIRouter(
     prefix="/ideas",

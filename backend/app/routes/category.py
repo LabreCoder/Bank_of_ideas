@@ -15,11 +15,8 @@ def check():
 
 @router.get("/list-category")
 def list_category(db: Session = Depends(get_db)):
-    lista = list_categories(db)
-    for item in lista:
-        print(f"ID: {item[0]} - Name: {item[1]} - Description: {item[2]}")
-    return {"message": "List finished"}
-    # tem que converter para json, mas não sei como fazer isso ainda.
+    categories = list_categories(db)
+    return {"message": "List finished", "categories": categories}
 
 @router.get("/category-get/{category_id}")
 def get_category_info(category_id: int, db: Session = Depends(get_db)):
