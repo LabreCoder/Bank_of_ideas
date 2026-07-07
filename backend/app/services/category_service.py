@@ -1,149 +1,74 @@
-# Guarda a lógica de negócio, como a regra que você mencionou de validar se uma ideia já existe antes de salvá-la.
-
-from sqlalchemy import text
+from typing import List
+from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-## ID verification
-def id_verify(db: Session) -> int:
-    try:
-        category_exists = db.execute(
-            text("SELECT to_regclass('public.category')")
-        ).scalar()
-        if category_exists is None:
-            raise RuntimeError("Table 'category' not Found")
-    except Exception as e:
-        raise RuntimeError(f"Error while verifying table 'category': {e}")
-    
-    try:
-        last_id = db.execute(
-            text(
-                "SELECT COALESCE(MAX(id), 0) + 1 FROM category"
-            )
-        ).scalar_one()
-        return last_id
+from models.category import Category
+from schemas.category import CategoryCreate, CategoryUpdate, CategoryResponse
 
-    except Exception as e:
-        raise RuntimeError(f"Error while retrieving last category ID: {e}")
 
-## Insert new category
-def insert_category(db: Session, id: int, name: str, description: str):
-    try:
-        db.execute(
-            text(
-                """
-                INSERT INTO category (id, name, description)
-                VALUES (
-                    :id,
-                    :name,
-                    :description
-                )
-                """
-            ),
-            {"id":id, "name": name, "description": description},
+def list_categories(db: Session) -> List[CategoryResponse]:
+    categories = db.query(Category).order_by(Category.id).all()
+    return [CategoryResponse.model_validate(c) for c in categories]
+
+
+def get_category(db: Session, category_id: int) -> CategoryResponse:
+    category = db.query(Category).filter(Category.id == category_id).first()
+    if category is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Category not found"
         )
+    return CategoryResponse.model_validate(category)
 
+
+def create_category(db: Session, payload: CategoryCreate) -> CategoryResponse:
+    category = Category(name=payload.name, description=payload.description)
+    db.add(category)
+    try:
         db.commit()
-
-    except Exception as e:
+    except IntegrityError as e:
         db.rollback()
-        raise RuntimeError(f"Error while inserting the category: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not create category",
+        ) from e
+    db.refresh(category)
+    return CategoryResponse.model_validate(category)
 
-## Update category
-def update_category(db: Session, id: int, name: str, description: str):
-    try:
-        db.execute(
-            text(
-                """
-                UPDATE category
-                SET name = :name, description = :description
-                WHERE id = :id
-                """
-            ),
-            {"id":id, "name": name, "description": description},
+
+def update_category(
+    db: Session, category_id: int, payload: CategoryUpdate
+) -> CategoryResponse:
+    category = db.query(Category).filter(Category.id == category_id).first()
+    if category is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Category not found"
         )
 
+    # exclude_unset=True: only fields the client actually sent get overwritten,
+    # same pattern used in idea_services.update_idea.
+    updates = payload.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(category, field, value)
+
+    db.commit()
+    db.refresh(category)
+    return CategoryResponse.model_validate(category)
+
+
+def delete_category(db: Session, category_id: int) -> None:
+    category = db.query(Category).filter(Category.id == category_id).first()
+    if category is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Category not found"
+        )
+    try:
+        db.delete(category)
         db.commit()
-
-    except Exception as e:
+    except IntegrityError as e:
         db.rollback()
-        raise RuntimeError(f"Error while updating the category: {e}")
-
-## Get category info
-def get_category(db: Session, id: int):
-    try:
-        result = db.execute(
-            text(
-                """
-                SELECT name, description
-                FROM category
-                WHERE id = :id
-                """
-            ),
-            {"id": id},
-        )
-        row = result.fetchone()
-        name = row[0]
-        description = row[1]
-
-        return name, description
-    
-    except Exception as e:
-        raise RuntimeError(f"Error while getting category info: {e}")
-
-## Get list of categories
-def list_categories(db: Session):
-    try:
-        result = db.execute(
-            text(
-                """
-                SELECT id, name, description
-                FROM category
-                ORDER BY id
-                """
-            )
-        )
-        rows = result.fetchall()
-        categories = [
-            {"id": row[0], "name": row[1], "description": row[2]}
-            for row in rows
-        ]
-        return categories
-    except Exception as e:
-        raise RuntimeError(f"Error while listing categories: {e}")
-    
-## Delete category
-def delete_category(db: Session, id: int):
-    try:
-        db.execute(
-            text(
-                """
-                DELETE FROM category
-                WHERE id = :id
-                """
-            ),
-            {"id": id},
-        )
-        db.commit()
-        #checkident(db, id-1)
-
-    except Exception as e:
-        db.rollback()
-        raise RuntimeError(f"Error while deleting the category: {e}")
-'''
-## Alter id
-def checkident(db: Session, id: int):
-    try:
-        db.execute(
-            text(
-                """
-                UPDATE category SET id = :id;
-                """
-            ),
-            {"id": id},
-        )
-        db.commit()
-
-    except Exception as e:
-        db.rollback()
-        raise RuntimeError(f"Error while altering the sequence: {e}")
-'''
+        # Happens if some idea still points at this category via FK.
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot delete category: it is still linked to one or more ideas",
+        ) from e

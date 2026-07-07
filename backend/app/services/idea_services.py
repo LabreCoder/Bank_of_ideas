@@ -1,40 +1,95 @@
-# Guarda a lógica de negócio, como a regra que você mencionou de validar se uma ideia já existe antes de salvá-la.
+from typing import List, Optional
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.exc import IntegrityError
 
-from backend.app.models.category import Category
-from backend.app.models.owner import Owner
-from backend.app.models.idea import Idea
+from models.idea import Idea
+from schemas.idea import IdeaCreate, IdeaUpdate, IdeaResponse
 
-def main():
-    
-    # Tests sessions
 
-    ## Category
-    caterogia = Category()
-    category_id = caterogia.setCategoryId(1)
-    category_description = caterogia.setCategoryDescription(id,"Descrição bem detalhada")
-    category_name = caterogia.setCategoryName("Cyber")
+def _serialize_idea(idea: Idea) -> IdeaResponse:
+    """
+    Turns an Idea ORM object into an IdeaResponse, computing
+    `execution_status` on the fly.
 
-    ## Owner
-    owner = Owner()
-    owner_id = owner.setOwnerId("Identificação-1")
-    owner_name = owner.setOwnerName(owner_id, "João")
+    "Em Planejamento" whenever a `planning` row points at this idea,
+    "Livre" otherwise. This is set as a plain Python attribute here
+    (not persisted to the DB) purely so Pydantic can read it via
+    from_attributes when building the response.
+    """
+    idea.execution_status = "Em Planejamento" if idea.planning else "Livre"
+    return IdeaResponse.model_validate(idea)
 
-    ## Idea
-    ideia = Idea(
-        1,   
-        "Banco de Ideias",
-        "Iniciando a programação para o Banco e estudando POO e BD",
-        category_id,
-        "waiting",
-        owner_id,
-        "2026-05-27"
+
+def list_ideas(db: Session, active: Optional[bool] = None) -> List[IdeaResponse]:
+    query = db.query(Idea).options(
+        joinedload(Idea.category),
+        joinedload(Idea.owner),
+        joinedload(Idea.planning),
     )
+    if active is not None:
+        query = query.filter(Idea.is_active.is_(active))
+    ideas = query.order_by(Idea.created_at.desc()).all()
+    return [_serialize_idea(idea) for idea in ideas]
 
-    print(ideia.owner)
-    print()
-    print(caterogia.description)
-    print()
-    print(owner.name)
 
-if __name__ == "__main__":
-    main()
+def get_idea(db: Session, idea_id: int) -> IdeaResponse:
+    idea = (
+        db.query(Idea)
+        .options(
+            joinedload(Idea.category),
+            joinedload(Idea.owner),
+            joinedload(Idea.planning),
+        )
+        .filter(Idea.id == idea_id)
+        .first()
+    )
+    if idea is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Idea not found")
+    return _serialize_idea(idea)
+
+
+def create_idea(db: Session, payload: IdeaCreate) -> IdeaResponse:
+    idea = Idea(
+        name=payload.name,
+        description=payload.description,
+        category_id=payload.category_id,
+        owner_id=payload.owner_id,
+        # Simplified: no auth yet, so "created_by" mirrors the chosen owner.
+        created_by=payload.owner_id,
+    )
+    db.add(idea)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid category_id or owner_id")
+    db.refresh(idea)
+    return _serialize_idea(idea)
+
+
+def update_idea(db: Session, idea_id: int, payload: IdeaUpdate) -> IdeaResponse:
+    idea = db.query(Idea).filter(Idea.id == idea_id).first()
+    if idea is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Idea not found")
+
+    # exclude_unset=True: only fields the client actually sent get overwritten,
+    # so a partial edit can't accidentally wipe out untouched fields.
+    updates = payload.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(idea, field, value)
+
+    db.commit()
+    db.refresh(idea)
+    return _serialize_idea(idea)
+
+
+def toggle_active(db: Session, idea_id: int) -> IdeaResponse:
+    idea = db.query(Idea).filter(Idea.id == idea_id).first()
+    if idea is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Idea not found")
+
+    idea.is_active = not idea.is_active
+    db.commit()
+    db.refresh(idea)
+    return _serialize_idea(idea)
