@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 
 
+class OwnerCreate(BaseModel):
+    name: str
+
+
 class OwnerResponse(BaseModel):
     id: int
     name: str
