@@ -1,9 +1,7 @@
 # Gera uma conexão com o banco de dados
-
 import os
-
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 from typing import Generator
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
@@ -28,6 +26,12 @@ SessionLocal = sessionmaker(
     autoflush=False,
     bind=engine
 )
+
+# Every ORM model (Idea, Category, Owner, Planning...) inherits from this.
+# Keeping it here (instead of inside each model file) avoids circular
+# imports between the model files themselves.
+Base = declarative_base()
+
 
 def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
