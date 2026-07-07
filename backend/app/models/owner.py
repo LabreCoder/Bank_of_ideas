@@ -1,25 +1,10 @@
-#from pydantic import BaseModel
+# SQLAlchemy ORM model — maps directly to the "owner" table.
+from sqlalchemy import Column, Integer, String
+from database.connection import Base
 
-# Owner class model
-class Owner():
-    def __init__(self):
-        self.id = None
-        self.name = None
 
-    def setOwnerId(self, id: int):
-        self.id = id
+class Owner(Base):
+    __tablename__ = "owner"
 
-        return self.id
-
-    def setOwnerName(self, id: int, name: str):
-
-        if id == self.id:
-            self.name = name
-
-            return self.name
-        else:
-            print("Is not the same Id")
-            raise InvalidIdeaError("Ideia inválida")
-
-class InvalidIdeaError(Exception):
-    pass
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)

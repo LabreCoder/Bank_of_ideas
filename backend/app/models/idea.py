@@ -1,46 +1,35 @@
-# Define a estrutura do objeto (os dados que vão para o banco) usando classes Python. É aqui que a Orientação a Objetos brilha inicialmente.
+# SQLAlchemy ORM model — maps directly to the "idea" table.
+#
+# NOTE: this replaces the old plain-Python `Idea` class. Field validation
+# (like the old VALID_STATUS check) now belongs in the Pydantic schemas
+# (see schemas/idea.py), since that's what FastAPI actually uses to
+# validate incoming requests. This class's only job is persistence.
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from database.connection import Base
 
-#from pydantic import BaseModel
-from backend.app.models.category import Category
-from backend.app.models.owner import Owner
 
-# Idea class model
-class Idea:
+class Idea(Base):
+    __tablename__ = "idea"
 
-    VALID_STATUS = ["Waiting", "Doing", "Done"]
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String(200), nullable=True)
+    category_id = Column(Integer, ForeignKey("category.id"), nullable=True)
+    owner_id = Column(Integer, ForeignKey("owner.id"), nullable=False)
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    # Simplified for now: there's no authentication system yet, so this
+    # just mirrors owner_id at creation time. Once auth exists, point
+    # this at a real "logged in user" instead.
+    created_by = Column(Integer, ForeignKey("owner.id"), nullable=True)
 
-    def __init__(
-        self,
-        id: int,
-        name: str,
-        description: str,
-        category_id: int,
-        status: str,
-        owner: int,
-        date: str
-    ):
+    # relationships give convenient Python-side access, e.g. idea.category.name
+    category = relationship("Category")
+    owner = relationship("Owner", foreign_keys=[owner_id])
 
-        if status.strip().capitalize() not in self.VALID_STATUS:
-            raise ValueError("Status inválido")
-
-        self._id = id
-        self.name = name
-        self.description = description
-        self.category_id = category_id
-        self.status = status
-        self.owner = owner
-        self.date = date
-
-    def set_status(self, status: str):
-
-        status = status.strip().capitalize()
-        if status not in self.VALID_STATUS:
-            raise ValueError("Status inválido")
-
-        if self.status.capitalize() == status:
-            raise ValueError("A ideia já possui esse status")
-
-        self.status = status
-
-    def get_status(self):
-        return f"Id: {self._id} - Status: {self.status}"
+    # uselist=False => at most one Planning row per idea (see schema.sql UNIQUE
+    # constraint). This is what lets us derive "Livre" vs "Em Planejamento"
+    # without storing that status anywhere.
+    planning = relationship("Planning", uselist=False, back_populates="idea")
