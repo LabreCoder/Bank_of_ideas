@@ -30,7 +30,7 @@ INSERT INTO idea (name, description, category_id, owner_id, created_by) VALUES
 -- references them here.
 -- ============================================================
 INSERT INTO planning (idea_id, details, start_date, due_date, status) VALUES
-    (1, 'Detalhar os 5 pontos principais e revisar antes de publicar', '2026-07-10', '2026-07-15', 'Em Desenvolvimento');
+    (1, 'Detalhar os 5 pontos principais e revisar antes de publicar', '2026-07-10', '2026-07-15', 'In Development');
 
 -- ============================================================
 -- PLANNING CHECKLIST ITEMS

@@ -51,7 +51,7 @@ CREATE TABLE planning (
     details TEXT,                       -- "Detalhamento"
     start_date DATE,                    -- "Data de Início"
     due_date DATE,                      -- "Data de Entrega"
-    status VARCHAR NOT NULL DEFAULT 'Não Iniciado',
+    status VARCHAR NOT NULL DEFAULT 'Not Started',
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
