@@ -31,7 +31,7 @@ export default function Ideas() {
       setCategories(categoriesData);
       setOwners(ownersData);
     } catch (err) {
-      setError(err.message || "Não foi possível carregar os dados.");
+      setError(err.message || "It was not possible to load the data.");
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,7 @@ export default function Ideas() {
       const updated = await ideasApi.toggleActive(idea.id);
       setIdeas((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
     } catch (err) {
-      setError(err.message || "Não foi possível atualizar o status da ideia.");
+      setError(err.message || "It was not possible to update the idea status.");
     }
   };
 
@@ -130,11 +130,11 @@ export default function Ideas() {
 
       {loading ? (
         <div className="bg-white rounded-lg border border-gray-200 p-4 h-96 flex items-center justify-center text-gray-400">
-          Carregando ideias...
+          Loading ideas...
         </div>
       ) : filteredIdeas.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-4 h-96 flex items-center justify-center text-gray-400">
-          Nenhuma ideia encontrada com os filtros atuais.
+          No ideas found with the current filters.
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
