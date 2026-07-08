@@ -28,11 +28,11 @@ export default function IdeaFormModal({ idea, categories, owners, onClose, onSub
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) {
-      setError("O nome da ideia é obrigatório.");
+      setError("The idea must have a name.");
       return;
     }
     if (!form.owner_id) {
-      setError("Selecione um dono para a ideia.");
+      setError("Select an owner for the idea.");
       return;
     }
 
@@ -47,7 +47,7 @@ export default function IdeaFormModal({ idea, categories, owners, onClose, onSub
       };
       await onSubmit(payload);
     } catch (err) {
-      setError(err.message || "Não foi possível salvar a ideia.");
+      setError(err.message || "It was not possible to save the idea.");
     } finally {
       setSaving(false);
     }
@@ -57,12 +57,12 @@ export default function IdeaFormModal({ idea, categories, owners, onClose, onSub
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg border border-gray-200 w-full max-w-md p-6">
         <h3 className="text-lg font-semibold mb-4">
-          {isEditing ? "Editar ideia" : "Nova ideia"}
+          {isEditing ? "Edit idea" : "New idea"}
         </h3>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
             <input
               type="text"
               value={form.name}
@@ -73,7 +73,7 @@ export default function IdeaFormModal({ idea, categories, owners, onClose, onSub
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <textarea
               value={form.description}
               onChange={(e) => update("description", e.target.value)}
@@ -83,13 +83,13 @@ export default function IdeaFormModal({ idea, categories, owners, onClose, onSub
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
             <select
               value={form.category_id}
               onChange={(e) => update("category_id", e.target.value)}
               className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             >
-              <option value="">Sem categoria</option>
+              <option value="">No category</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -99,13 +99,13 @@ export default function IdeaFormModal({ idea, categories, owners, onClose, onSub
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Dono</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Owner</label>
             <select
               value={form.owner_id}
               onChange={(e) => update("owner_id", e.target.value)}
               className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             >
-              <option value="">Selecione...</option>
+              <option value="">Select...</option>
               {owners.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.name}
@@ -122,14 +122,14 @@ export default function IdeaFormModal({ idea, categories, owners, onClose, onSub
               onClick={onClose}
               className="text-sm font-medium px-4 py-2 rounded-md text-gray-600 hover:bg-gray-100"
             >
-              Cancelar
+              Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
               className="bg-accent-600 hover:bg-accent-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-md"
             >
-              {saving ? "Salvando..." : "Salvar"}
+              {saving ? "Saving..." : "Save"}
             </button>
           </div>
         </form>

@@ -20,7 +20,7 @@ export default function IdeaFilters({
     <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4 flex flex-wrap gap-3">
       <input
         type="text"
-        placeholder="Buscar por nome..."
+        placeholder="Searching by name..."
         value={filters.name}
         onChange={(e) => update("name", e.target.value)}
         className="flex-1 min-w-[180px] text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
@@ -31,7 +31,7 @@ export default function IdeaFilters({
         onChange={(e) => update("categoryId", e.target.value)}
         className="text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
       >
-        <option value="">Todas as categorias</option>
+        <option value="">All categories</option>
         {categories.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}
@@ -44,7 +44,7 @@ export default function IdeaFilters({
         onChange={(e) => update("ownerId", e.target.value)}
         className="text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
       >
-        <option value="">Todos os donos</option>
+        <option value="">All owners</option>
         {owners.map((o) => (
           <option key={o.id} value={o.id}>
             {o.name}
@@ -57,7 +57,7 @@ export default function IdeaFilters({
         onChange={(e) => update("status", e.target.value)}
         className="text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
       >
-        <option value="">Todos os status</option>
+        <option value="">All status</option>
         <option value="Livre">Livre</option>
         <option value="Em Planejamento">Em Planejamento</option>
       </select>
@@ -67,9 +67,9 @@ export default function IdeaFilters({
         onChange={(e) => update("active", e.target.value)}
         className="text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
       >
-        <option value="">Ativas e inativas</option>
-        <option value="true">Somente ativas</option>
-        <option value="false">Somente inativas</option>
+        <option value="">Active and inactive</option>
+        <option value="true">Only active</option>
+        <option value="false">Only inactive</option>
       </select>
       <button
         onClick={clearFilters}

@@ -21,13 +21,13 @@ export default function IdeaCard({ idea, onEdit, onToggleActive }) {
         </span>
       </div>
 
-      {idea.description && (
-        <p className="text-sm text-gray-500 line-clamp-3">{idea.description}</p>
+      {(
+        <p className="text-sm text-gray-500 line-clamp-3">{idea.description == null ? "Description: --" : idea.description}</p>
       )}
 
       <div className="flex flex-wrap gap-2 mt-auto pt-2 text-xs text-gray-500">
-        {idea.category && (
-          <span className="bg-gray-100 px-2 py-1 rounded-md">{idea.category.name}</span>
+        {(
+          <span className="bg-gray-100 px-2 py-1 rounded-md">{idea.category == null ? "Category: --" : idea.category.name}</span>
         )}
         <span className="bg-gray-100 px-2 py-1 rounded-md">{idea.owner.name}</span>
       </div>
@@ -37,13 +37,13 @@ export default function IdeaCard({ idea, onEdit, onToggleActive }) {
           onClick={() => onToggleActive(idea)}
           className="text-xs font-medium text-gray-500 hover:text-gray-800"
         >
-          {idea.is_active ? "Desativar" : "Ativar"}
+          {idea.is_active ? "Deactivate" : "Activate"}
         </button>
         <button
           onClick={() => onEdit(idea)}
           className="text-xs font-medium text-accent-600 hover:text-accent-700"
         >
-          Editar
+          Edit
         </button>
       </div>
     </div>
