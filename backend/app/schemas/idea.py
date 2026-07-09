@@ -34,7 +34,7 @@ class IdeaResponse(BaseModel):
     owner: OwnerResponse
     is_active: bool
     created_at: datetime
-    execution_status: str  # "Livre" or "Em Planejamento" — never stored, always derived
+    execution_status: str  # "Free" or "In Planning" — never stored, always derived
 
     class Config:
         from_attributes = True

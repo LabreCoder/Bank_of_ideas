@@ -12,12 +12,12 @@ def _serialize_idea(idea: Idea) -> IdeaResponse:
     Turns an Idea ORM object into an IdeaResponse, computing
     `execution_status` on the fly.
 
-    "Em Planejamento" whenever a `planning` row points at this idea,
-    "Livre" otherwise. This is set as a plain Python attribute here
+    "In Planning" whenever a `planning` row points at this idea,
+    "Free" otherwise. This is set as a plain Python attribute here
     (not persisted to the DB) purely so Pydantic can read it via
     from_attributes when building the response.
     """
-    idea.execution_status = "Em Planejamento" if idea.planning else "Livre"
+    idea.execution_status = "In Planning" if idea.planning else "Free"
     return IdeaResponse.model_validate(idea)
 
 

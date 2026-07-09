@@ -26,7 +26,7 @@ INSERT INTO idea (name, description, category_id, owner_id, created_by) VALUES
 -- ============================================================
 -- PLANNING
 -- Linking idea #1 to a planning row is what makes it show up as
--- "Em Planejamento" — ideas #2 and #3 stay "Livre" since nothing
+-- "In Planning" — ideas #2 and #3 stay "Free" since nothing
 -- references them here.
 -- ============================================================
 INSERT INTO planning (idea_id, details, start_date, due_date, status) VALUES

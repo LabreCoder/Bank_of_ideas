@@ -1,6 +1,6 @@
 const STATUS_STYLES = {
-  Livre: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "Em Planejamento": "bg-amber-50 text-amber-700 border-amber-200",
+  Free: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  "In Planning": "bg-amber-50 text-amber-700 border-amber-200",
 };
 
 export default function IdeaCard({ idea, onEdit, onToggleActive }) {

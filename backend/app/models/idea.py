@@ -30,6 +30,6 @@ class Idea(Base):
     owner = relationship("Owner", foreign_keys=[owner_id])
 
     # uselist=False => at most one Planning row per idea (see schema.sql UNIQUE
-    # constraint). This is what lets us derive "Livre" vs "Em Planejamento"
+    # constraint). This is what lets us derive "Free" vs "In Planning"
     # without storing that status anywhere.
     planning = relationship("Planning", uselist=False, back_populates="idea")

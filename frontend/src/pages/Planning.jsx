@@ -34,9 +34,9 @@ export default function Planning() {
     loadAll();
   }, []);
 
-  // Só ideias "Livre" (sem planning) podem ser escolhidas ao criar um novo planning.
+  // Só ideias "Free" (sem planning) podem ser escolhidas ao criar um novo planning.
   const availableIdeas = useMemo(
-    () => ideas.filter((idea) => idea.execution_status === "Livre" && idea.is_active),
+    () => ideas.filter((idea) => idea.execution_status === "Free" && idea.is_active),
     [ideas]
   );
 
@@ -45,7 +45,7 @@ export default function Planning() {
     setPlannings((prev) => [created, ...prev]);
     setIdeas((prev) =>
       prev.map((idea) =>
-        idea.id === created.idea.id ? { ...idea, execution_status: "Em Planejamento" } : idea
+        idea.id === created.idea.id ? { ...idea, execution_status: "In Planning" } : idea
       )
     );
     setCreateOpen(false);
@@ -62,7 +62,7 @@ export default function Planning() {
     if (removed) {
       setIdeas((prev) =>
         prev.map((idea) =>
-          idea.id === removed.idea.id ? { ...idea, execution_status: "Livre" } : idea
+          idea.id === removed.idea.id ? { ...idea, execution_status: "Free" } : idea
         )
       );
     }

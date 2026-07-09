@@ -1,8 +1,8 @@
 -- ============================================================
--- OWNER: people who can be assigned as an idea's "dono"
+-- OWNER: people who can be assigned as an idea's "owner"
 -- ============================================================
 CREATE TABLE owner (
-    id SERIAL PRIMARY KEY,          -- SERIAL = auto-incrementing, matches "Automático pelo sistema"
+    id SERIAL PRIMARY KEY,          -- SERIAL = auto-incrementing, matches "Automatic Primary Key" in the original schema
     name VARCHAR NOT NULL
 );
 
@@ -19,10 +19,10 @@ CREATE TABLE category (
 -- IDEA
 -- Notes on design decisions vs. the original schema:
 --   - "status" (Waiting/Doing/Done) was REMOVED. The new
---     "Status de Execução" (Livre / Em Planejamento) is NOT
+--     "Execution Status" (Free / In Planning) is NOT
 --     stored here — it's derived by checking whether a row
 --     exists in `planning` for this idea (see query pattern below).
---   - "is_active" added for the Ativa/Inativa toggle.
+--   - "is_active" added for the Active/Inactive toggle.
 --   - "created_at" / "created_by" added, both filled automatically.
 --     NOTE: since there's no authentication system yet, created_by
 --     references `owner` as a placeholder for "the current user".
@@ -43,14 +43,14 @@ CREATE TABLE idea (
 -- PLANNING
 -- One planning record per idea (UNIQUE on idea_id) for the MVP.
 -- If later you need to re-plan an idea multiple times, drop the
--- UNIQUE constraint and adjust the "Livre" check accordingly.
+-- UNIQUE constraint and adjust the "Free" check accordingly.
 -- ============================================================
 CREATE TABLE planning (
     id SERIAL PRIMARY KEY,
     idea_id INTEGER NOT NULL UNIQUE REFERENCES idea(id),
-    details TEXT,                       -- "Detalhamento"
-    start_date DATE,                    -- "Data de Início"
-    due_date DATE,                      -- "Data de Entrega"
+    details TEXT,                       -- "Details"
+    start_date DATE,                    -- "Start Date"
+    due_date DATE,                      -- "Due Date"
     status VARCHAR NOT NULL DEFAULT 'Not Started',
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -68,11 +68,11 @@ CREATE TABLE planning_checklist_item (
 );
 
 -- ============================================================
--- Example query: how "Status de Execução" gets derived
+-- Example query: how "Execution Status" gets derived
 -- (this is what the Ideas listing endpoint will use)
 -- ============================================================
 -- SELECT
 --     idea.*,
---     CASE WHEN planning.id IS NULL THEN 'Livre' ELSE 'Em Planejamento' END AS execution_status
+--     CASE WHEN planning.id IS NULL THEN 'Free' ELSE 'In Planning' END AS execution_status
 -- FROM idea
 -- LEFT JOIN planning ON planning.idea_id = idea.id;
