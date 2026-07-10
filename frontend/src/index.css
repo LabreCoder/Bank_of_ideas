@@ -2,9 +2,12 @@
    classes and utility classes. Everything else in the app is styled
    using Tailwind utility classes directly in JSX (no custom CSS files
    per component, which is the idiomatic Tailwind approach). */
+
+@import "./theme-variables.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 
 body {
   @apply bg-gray-50 text-gray-900;
