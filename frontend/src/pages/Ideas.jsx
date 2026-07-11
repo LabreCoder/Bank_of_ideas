@@ -109,7 +109,7 @@ export default function Ideas() {
         </div>
         <button
           onClick={openCreateModal}
-          className="bg-accent-600 hover:bg-accent-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-4 py-2 rounded-md"
         >
           + New Idea
         </button>

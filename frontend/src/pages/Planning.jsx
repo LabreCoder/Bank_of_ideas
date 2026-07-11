@@ -80,7 +80,7 @@ export default function Planning() {
         </div>
         <button
           onClick={() => setCreateOpen(true)}
-          className="bg-accent-600 hover:bg-accent-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-4 py-2 rounded-md"
         >
           + New Planning
         </button>
@@ -103,7 +103,10 @@ export default function Planning() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {plannings.map((planning) => (
-            <PlanningCard key={planning.id} planning={planning} onOpen={setDetailPlanning} />
+            <PlanningCard 
+              key={planning.id} 
+              planning={planning} 
+              onOpen={setDetailPlanning} />
           ))}
         </div>
       )}
