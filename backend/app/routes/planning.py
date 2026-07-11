@@ -12,7 +12,6 @@ router = APIRouter(prefix="/planning", tags=["Planning"])
 
 @router.get("/plannings", response_model=List[PlanningResponse])
 def list_planning(db: Session = Depends(get_db)):
-    print("Listing plannings...")
     return planning_service.list_plannings(db)
 
 
