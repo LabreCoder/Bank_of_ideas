@@ -30,7 +30,6 @@ def _get_or_404(db: Session, planning_id: int) -> Planning:
 
 
 def list_plannings(db: Session) -> List[PlanningResponse]:
-    print("Listing plannings...")
     plannings = (
         db.query(Planning)
         .options(joinedload(Planning.idea), joinedload(Planning.checklist_items))
