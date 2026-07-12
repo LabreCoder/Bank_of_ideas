@@ -12,7 +12,10 @@ const NAV_ITEMS = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-60 shrink-0 bg-gray-900 text-gray-200 min-h-screen flex flex-col">
+    // w-56 (14rem): a escala padrão do Tailwind não tem "50" (pula de 48
+    // pra 52), então "w-50" não gerava CSS nenhum — a sidebar ficava sem
+    // largura fixa de verdade.
+    <aside className="w-56 shrink-0 bg-gray-900 text-gray-200 min-h-screen flex flex-col">
       <div className="px-5 py-6 border-b border-gray-800">
         <h1 className="text-lg font-semibold text-white">Bank of Ideas</h1>
       </div>
