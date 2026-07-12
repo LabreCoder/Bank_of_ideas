@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { ideasApi } from "../services/ideas";
 import { categoriesApi } from "../services/categories";
 import { ownersApi } from "../services/owners";
-import IdeaCard from "../components/IdeaCard";
-import IdeaFilters from "../components/IdeaFilters";
-import IdeaFormModal from "../components/IdeaFormModal";
+import IdeaCard from "../components/Ideas/IdeaCard";
+import IdeaFilters from "../components/Ideas/IdeaFilters";
+import IdeaFormModal from "../components/Ideas/IdeaFormModal";
 
 const EMPTY_FILTERS = { name: "", categoryId: "", ownerId: "", status: "",active: "" };
 

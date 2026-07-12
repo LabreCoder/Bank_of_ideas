@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { planningApi } from "../services/planning";
 import { ideasApi } from "../services/ideas";
-import PlanningCard from "../components/PlanningCard";
-import PlanningFormModal from "../components/PlanningFormModal";
-import PlanningDetailModal from "../components/PlanningDetailModal";
+import PlanningCard from "../components/Planning/PlanningCard";
+import PlanningFormModal from "../components/Planning/PlanningFormModal";
+import PlanningDetailModal from "../components/Planning/PlanningDetailModal";
 
 export default function Planning() {
   const [plannings, setPlannings] = useState([]);

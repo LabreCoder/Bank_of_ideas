@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { planningApi } from "../services/planning";
 import { ideasApi } from "../services/ideas";
-import CalendarGrid from "../components/CalendarGrid";
-import CalendarLegend from "../components/CalendarLegend";
-import DayIdeasModal from "../components/DayIdeasModal";
-import DashboardStats from "../components/DashboardStats";
+import CalendarGrid from "../components/Calendar/CalendarGrid";
+import CalendarLegend from "../components/Calendar/CalendarLegend";
+import DayIdeasModal from "../components/Dashboard/DayIdeasModal";
+import DashboardStats from "../components/Dashboard/DashboardStats";
 
 export default function Dashboard() {
   const today = new Date();

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import CategoriesPanel from "../components/CategoriesPanel";
-import ThemePanel from "../components/ThemePanel";
+import CategoriesPanel from "../components/Settings/CategoriesPanel";
+import ThemePanel from "../components/Settings/ThemePanel";
 
 const TABS = [
   { id: "categories", label: "Categories" },
