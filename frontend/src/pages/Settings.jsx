@@ -1,9 +1,11 @@
 import { useState } from "react";
 import CategoriesPanel from "../components/Settings/CategoriesPanel";
 import ThemePanel from "../components/Settings/ThemePanel";
+import OwnersPanel from "../components/Settings/OwnersPanel";
 
 const TABS = [
   { id: "categories", label: "Categories" },
+  { id: "owners", label: "Owners" },
   { id: "theme", label: "Theme" },
 ];
 
@@ -33,7 +35,13 @@ export default function Settings() {
         ))}
       </div>
 
-      {activeTab === "categories" ? <CategoriesPanel /> : <ThemePanel />}
+      {activeTab === "categories" ? (
+        <CategoriesPanel />
+      ) : activeTab === "theme" ? (
+        <ThemePanel />
+      ) : (
+        <OwnersPanel />
+      )}
     </div>
   );
 }

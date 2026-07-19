@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { planningApi } from "../services/planning";
 import { ideasApi } from "../services/ideas";
+import { ownersApi } from "../services/owners";
+import {categoriesApi} from "../services/categories";
 import CalendarGrid from "../components/Calendar/CalendarGrid";
 import CalendarLegend from "../components/Calendar/CalendarLegend";
 import DayIdeasModal from "../components/Dashboard/DayIdeasModal";
@@ -12,6 +14,8 @@ export default function Dashboard() {
   const [month, setMonth] = useState(today.getMonth());
   const [plannings, setPlannings] = useState([]);
   const [ideas, setIdeas] = useState([]);
+  const [owners, setOwners] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null); // { key, plannings }
@@ -21,14 +25,17 @@ export default function Dashboard() {
       setLoading(true);
       setError(null);
       try {
-        const [planningsData, ideasData] = await Promise.all([
+        const [planningsData, ideasData, categoriesData] = await Promise.all([
           planningApi.list(),
           ideasApi.list(),
+          categoriesApi.list(),
         ]);
         setPlannings(planningsData);
         setIdeas(ideasData);
+        //setOwners(ownersData);
+        setCategories(categoriesData);
       } catch (err) {
-        setError(err.message || "Não foi possível carregar o dashboard.");
+        setError(err.message || "It was not possible to load the dashboard data.");
       } finally {
         setLoading(false);
       }
@@ -80,7 +87,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          <DashboardStats ideas={ideas} plannings={plannings} />
+          <DashboardStats ideas={ideas} plannings={plannings} categories={categories} />
 
           <div className="mb-3">
             <CalendarLegend />
