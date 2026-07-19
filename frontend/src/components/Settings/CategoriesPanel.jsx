@@ -40,7 +40,7 @@ export default function CategoriesPanel() {
       const data = await categoriesApi.list();
       setCategories(data);
     } catch (err) {
-      setError(err.message || "Não foi possível carregar as categorias.");
+      setError(err.message || "It was not possible to load the categories.");
     } finally {
       setLoading(false);
     }
@@ -62,7 +62,7 @@ export default function CategoriesPanel() {
       setCategories((prev) => [created, ...prev]);
       setNewDraft(EMPTY_DRAFT);
     } catch (err) {
-      setError(err.message || "Não foi possível adicionar a categoria.");
+      setError(err.message || "It was not possible to add the category.");
     } finally {
       setSaving(false);
     }
@@ -89,7 +89,7 @@ export default function CategoriesPanel() {
       setCategories((prev) => prev.map((c) => (c.id === id ? updated : c)));
       cancelEditing();
     } catch (err) {
-      setError(err.message || "Não foi possível atualizar a categoria.");
+      setError(err.message || "It was not possible to update the category.");
     }
   };
 
@@ -100,7 +100,7 @@ export default function CategoriesPanel() {
       setCategories((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
       // Ex: 409 se alguma ideia ainda referencia essa categoria.
-      setError(err.message || "Não foi possível remover a categoria.");
+      setError(err.message || "It was not possible to remove the category.");
     }
   };
 
