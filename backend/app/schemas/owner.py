@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 
 
@@ -13,3 +14,6 @@ class OwnerResponse(BaseModel):
         # Allows building this schema directly from an ORM object
         # (idea.owner) instead of requiring a dict.
         from_attributes = True
+
+class OwnerUpdate(BaseModel):
+    name: Optional[str] = None

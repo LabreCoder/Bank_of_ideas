@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from database.connection import get_db
-from schemas.owner import OwnerCreate, OwnerResponse
+from schemas.owner import OwnerCreate, OwnerUpdate, OwnerResponse
 from services import owner_service
 
 router = APIRouter(prefix="/owner", tags=["Owner"])
@@ -23,3 +23,14 @@ def get_owner_info(owner_id: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=OwnerResponse, status_code=status.HTTP_201_CREATED)
 def create_owner(payload: OwnerCreate, db: Session = Depends(get_db)):
     return owner_service.create_owner(db, payload)
+
+@router.put("/{owner_id}", response_model=OwnerResponse)
+def update_owner_info(
+    owner_id: int, payload: OwnerUpdate, db: Session = Depends(get_db)
+):
+    return owner_service.update_owner(db, owner_id, payload)
+
+
+@router.delete("/{owner_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete(owner_id: int, db: Session = Depends(get_db)):
+    owner_service.delete_owner(db, owner_id)
