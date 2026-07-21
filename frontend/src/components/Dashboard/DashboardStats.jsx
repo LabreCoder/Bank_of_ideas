@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import StatCard from "./StatCard";
-import PizzaGraphic from "./Graphics/Pizza";
+import  PizzaGraphic  from "./Graphics/Pizza";
+import SimpleRadarChart from "./Graphics/Radar";
 import { PLANNING_STATUS_OPTIONS, PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 
 export default function DashboardStats({ ideas, plannings, categories }) {
@@ -45,58 +46,47 @@ export default function DashboardStats({ ideas, plannings, categories }) {
   const FreePct = stats.totalIdeas ? (stats.FreeCount / stats.totalIdeas) * 100 : 0;
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4 text-center text-sm">
-      <PizzaGraphic categories={categories} ideas={ideas} />
-      {/*<StatCard title="categories">
-        <ul className="flex flex-col gap-3 mt-1">
-          {categories.map((owner) => (
-            <li key={owner.id} className="flex items-center justify-between text-xs">
-              <span className="px-3 py-1 rounded-full border text-[14px]">{owner.name}</span>
-              <span className="text-gray-500 font-medium">{stats.categoriesIdeasCount[owner.id] || 0}</span>
-            </li>
-          ))}
-        </ul>
-      </StatCard>
-      <StatCard 
-        title="Ideas"
-        value={stats.totalIdeas}
-        subtitle={`${stats.activeIdeas} active · ${stats.inactiveIdeas} inactive`}
-      />*/}
+    <div>
+      <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 mb-4 text-center text-sm" >
+        <PizzaGraphic categories={categories} ideas={ideas} />
+        <SimpleRadarChart categories={categories} ideas={ideas} />
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4 text-center text-sm">
+        <StatCard title="Execution status" value={`${stats.FreeCount} / ${stats.totalIdeas}`} >
+          <div className="h-3 bg-amber-100 rounded-full overflow-hidden mt-1">
+            <div className="h-full bg-emerald-500" style={{ width: `${FreePct}%` }} />
+          </div>
+          <div className="flex justify-between text-[12px] text-gray-400 mt-1">
+            <span>Free: {stats.FreeCount}</span>
+            <span>In Planning: {stats.inPlanningCount}</span>
+          </div>
+        </StatCard>
 
-      <StatCard title="Execution status" value={`${stats.FreeCount} / ${stats.totalIdeas}`} >
-        <div className="h-3 bg-amber-100 rounded-full overflow-hidden mt-1">
-          <div className="h-full bg-emerald-500" style={{ width: `${FreePct}%` }} />
-        </div>
-        <div className="flex justify-between text-[12px] text-gray-400 mt-1">
-          <span>Free: {stats.FreeCount}</span>
-          <span>In Planning: {stats.inPlanningCount}</span>
-        </div>
-      </StatCard>
+        <StatCard title="Plannings">
+          <ul className="flex flex-col gap-3 mt-1">
+            {PLANNING_STATUS_OPTIONS.map((status) => (
+              <li key={status} className="flex items-center justify-between text-xs">
+                <span
+                  className={`px-3 py-1 rounded-full border text-[14px] ${PLANNING_STATUS_STYLES[status]}`}
+                >
+                  {status}
+                </span>
+                <span className="text-gray-500 font-medium">{stats.planningsByStatus[status]}</span>
+              </li>
+            ))}
+          </ul>
+        </StatCard>
 
-      <StatCard title="Plannings">
-        <ul className="flex flex-col gap-3 mt-1">
-          {PLANNING_STATUS_OPTIONS.map((status) => (
-            <li key={status} className="flex items-center justify-between text-xs">
-              <span
-                className={`px-3 py-1 rounded-full border text-[14px] ${PLANNING_STATUS_STYLES[status]}`}
-              >
-                {status}
-              </span>
-              <span className="text-gray-500 font-medium">{stats.planningsByStatus[status]}</span>
-            </li>
-          ))}
-        </ul>
-      </StatCard>
-
-      <StatCard
-        title="Checklist progress"
-        value={`${stats.checklistProgress}%`}
-        subtitle={`${stats.doneItems} of ${stats.totalItems} items done`}
-      >
-        <div className="h-3 bg-gray-100 rounded-full overflow-hidden mt-1 text-[12px]">
-          <div className="h-full bg-accent-600" style={{ width: `${stats.checklistProgress}%` }} />
-        </div>
-      </StatCard>
+        <StatCard
+          title="Checklist progress"
+          value={`${stats.checklistProgress}%`}
+          subtitle={`${stats.doneItems} of ${stats.totalItems} items done`}
+        >
+          <div className="h-3 bg-gray-100 rounded-full overflow-hidden mt-1 text-[12px]">
+            <div className="h-full bg-accent-600" style={{ width: `${stats.checklistProgress}%` }} />
+          </div>
+        </StatCard>
+      </div>
     </div>
   );
 }

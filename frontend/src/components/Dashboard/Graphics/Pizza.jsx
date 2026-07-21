@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import StatCard from "../StatCard";
-import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A569BD', '#E74C3C', '#F1C40F', '#2ECC71'];
 
@@ -21,29 +21,33 @@ export default function PizzaGraphic({ categories, ideas }) {
         return { data, categoriesIdeasCount };
     }, [categories, ideas]);
 
-    console.log("PizzaGraphic stats:", stats); // Debugging line
-
     return (
-        <StatCard title="Categories" >
-            <PieChart style={{ width: '100%', maxWidth: '200px', height: '100%', maxHeight: '200px' }} >
-                <Pie
+        <StatCard title="Categories" maxWidth="max-w-[50vw]">
+            {/* Definimos uma altura fixa ou proporcional para o container do gráfico */}
+            <div className="w-full h-[300px] sm:h-[350px] flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                    <Pie
                     data={stats.data}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    //label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
                     borderRadius={10}
-                    outerRadius={150}
+                    //label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`} 
+                    // Mudamos de 150 para uma porcentagem (ex: 70% ou 80%) para ele ser responsivo
+                    outerRadius="80%" 
                     fill="#8884d8"
                     dataKey="value"
-                >
+                    >
                     {stats.data.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))} 
-                </Pie>
+                    </Pie>
                     <Tooltip />
                     <Legend />
-            </PieChart>
+                </PieChart>
+                </ResponsiveContainer>
+            </div>
         </StatCard>
     );
 }
