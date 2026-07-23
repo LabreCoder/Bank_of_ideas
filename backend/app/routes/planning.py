@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from database.connection import get_db
-from schemas.planning import PlanningCreate, PlanningUpdate, PlanningResponse, ChecklistItemCreate
+from schemas.planning import PlanningCreate, PlanningUpdate, PlanningResponse, ChecklistItemCreate, ChecklistItemUpdate
 from services import planning_service
 
 router = APIRouter(prefix="/planning", tags=["Planning"])
@@ -43,6 +43,11 @@ def add_checklist_item(
 ):
     return planning_service.add_checklist_item(db, planning_id, payload.description)
 
+@router.put("/{planning_id}/checklist/{item_id}", response_model=PlanningResponse)
+def update_checklist_item(
+    planning_id: int, item_id: int, payload: ChecklistItemUpdate, db: Session = Depends(get_db)
+):
+    return planning_service.update_checklist_item(db, planning_id, item_id, payload)
 
 @router.patch("/{planning_id}/checklist/{item_id}/toggle", response_model=PlanningResponse)
 def toggle_checklist_item(planning_id: int, item_id: int, db: Session = Depends(get_db)):
