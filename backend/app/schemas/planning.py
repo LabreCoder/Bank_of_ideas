@@ -29,6 +29,12 @@ class ChecklistItemResponse(BaseModel):
 
     class Config:
         from_attributes = True
+    
+    
+class ChecklistItemUpdate(BaseModel):
+    description: Optional[str] = None
+    is_done: Optional[bool] = None
+    position: Optional[int] = None
 
 
 # ---------- Planning ----------
