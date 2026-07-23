@@ -24,8 +24,6 @@ export function ThemeProvider({ children }) {
     return localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME;
   });
 
-  // Aplica o atributo no <html> sempre que o tema mudar — é isso que faz
-  // o CSS em index.css selecionar o bloco de variáveis certo.
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem(STORAGE_KEY, theme);
@@ -43,8 +41,6 @@ export function ThemeProvider({ children }) {
   );
 }
 
-// Hook que a tela de Settings (ou qualquer outro componente) vai usar:
-// const { theme, setTheme, availableThemes } = useTheme();
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (!context) {
