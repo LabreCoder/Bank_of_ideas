@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from models.planning import Planning, PlanningChecklistItem
 from models.idea import Idea
-from schemas.planning import PlanningCreate, PlanningUpdate, PlanningResponse
+from schemas.planning import PlanningCreate, PlanningUpdate, PlanningResponse, ChecklistItemUpdate
 
 
 def _serialize(planning: Planning) -> PlanningResponse:
@@ -127,6 +127,30 @@ def toggle_checklist_item(
     item.is_done = not item.is_done
     db.commit()
     planning = _get_or_404(db, planning_id)
+    return _serialize(planning)
+
+
+def update_checklist_item(
+    db: Session, planning_id: int, item_id: int, payload: ChecklistItemUpdate
+) -> PlanningResponse:
+    planning = _get_or_404(db, planning_id)
+    item = (
+        db.query(PlanningChecklistItem)
+        .filter(
+            PlanningChecklistItem.id == item_id,
+            PlanningChecklistItem.planning_id == planning_id,
+        )
+        .first()
+    )
+    if item is None:
+        raise HTTPException(status_code=404, detail="Checklist item not found")
+    if payload.description is not None:
+        item.description = payload.description
+    if payload.is_done is not None:
+        item.is_done = payload.is_done
+    if payload.position is not None:
+        item.position = payload.position
+    db.commit()
     return _serialize(planning)
 
 
