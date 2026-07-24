@@ -3,6 +3,7 @@ import { useState } from "react";
 const STATUS_OPTIONS = [
   "Not Started",
   "Under Review", 
+  "Started",
   "In Development", 
   "Completed"
 ];

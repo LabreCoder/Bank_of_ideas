@@ -4,6 +4,7 @@ import { planningApi } from "../../services/planning";
 const STATUS_OPTIONS = [
   "Not Started",
   "Under Review",
+  "Started",
   "In Development",
   "Completed"
 ];

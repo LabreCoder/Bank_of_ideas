@@ -11,19 +11,8 @@ export const planningApi = {
     api.post(`/planning/${planningId}/checklist`, { description }),
   toggleChecklistItem: (planningId, itemId) =>
     api.patch(`/planning/${planningId}/checklist/${itemId}/toggle`),
-  /*updateChecklistItem: (planningId, itemId, description) =>
-    api.put(`/planning/${planningId}/checklist/${itemId}`, { description }),*/
-  updateChecklistItem: async (planningId, itemId, descriptionText) => {
-  const response = await fetch(`/api/plannings/${planningId}/checklist/${itemId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    // Envia o texto entre aspas no JSON, ex: "Finish the basic course."
-    body: JSON.stringify(descriptionText), 
-  });
-  return response.json();
-},
+  updateChecklistItem: (planningId, itemId, description) =>
+    api.put(`/planning/${planningId}/checklist/${itemId}`, { description }),
   deleteChecklistItem: (planningId, itemId) =>
     api.delete(`/planning/${planningId}/checklist/${itemId}`),
 };
