@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import StatCard from "../StatCard";
+import StatCard from "../../StatCard";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
 
 export default function SimpleRadarChart({ categories, ideas }) {

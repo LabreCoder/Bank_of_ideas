@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import StatCard from "../StatCard";
+import StatCard from "../../StatCard";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A569BD', '#E74C3C', '#F1C40F', '#2ECC71'];
