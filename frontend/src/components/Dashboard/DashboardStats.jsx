@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import StatCard from "./StatCard";
+import StatCard from "../StatCard";
 import  PizzaGraphic  from "./Graphics/Pizza";
 import SimpleRadarChart from "./Graphics/Radar";
 import { PLANNING_STATUS_OPTIONS, PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
