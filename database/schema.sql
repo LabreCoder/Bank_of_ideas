@@ -63,6 +63,7 @@ CREATE TABLE planning_checklist_item (
     id SERIAL PRIMARY KEY,
     planning_id INTEGER NOT NULL REFERENCES planning(id) ON DELETE CASCADE,
     description VARCHAR NOT NULL,
+    due_date DATE,                      -- optional due date for the checklist item
     is_done BOOLEAN NOT NULL DEFAULT FALSE,
     position INTEGER NOT NULL DEFAULT 0   -- controls display order in the checklist
 );
