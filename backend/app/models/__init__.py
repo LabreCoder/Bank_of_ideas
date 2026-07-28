@@ -6,4 +6,5 @@
 from models.owner import Owner
 from models.category import Category
 from models.idea import Idea
-from models.planning import Planning, PlanningChecklistItem
+from models.planning import Planning
+from models.checklist import PlanningChecklistItem

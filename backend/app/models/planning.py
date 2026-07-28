@@ -6,6 +6,7 @@ from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, F
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database.connection import Base
+from models.checklist import PlanningChecklistItem
 
 
 class Planning(Base):
@@ -25,15 +26,3 @@ class Planning(Base):
         back_populates="planning",
         cascade="all, delete-orphan",
     )
-
-
-class PlanningChecklistItem(Base):
-    __tablename__ = "planning_checklist_item"
-
-    id = Column(Integer, primary_key=True, index=True)
-    planning_id = Column(Integer, ForeignKey("planning.id"), nullable=False)
-    description = Column(String, nullable=False)
-    is_done = Column(Boolean, nullable=False, default=False)
-    position = Column(Integer, nullable=False, default=0)
-
-    planning = relationship("Planning", back_populates="checklist_items")
