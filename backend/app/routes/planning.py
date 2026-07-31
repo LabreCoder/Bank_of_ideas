@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from database.connection import get_db
-from schemas.planning import PlanningCreate, PlanningUpdate, PlanningResponse, ChecklistItemCreate, ChecklistItemUpdate
+from schemas.planning import PlanningCreate, PlanningUpdate, PlanningResponse
+from schemas.checklist import ChecklistItemCreate, ChecklistItemUpdate
 from services import planning_service
 
 router = APIRouter(prefix="/planning", tags=["Planning"])
@@ -35,25 +36,3 @@ def update_planning_info(
 @router.delete("/{planning_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_planning(planning_id: int, db: Session = Depends(get_db)):
     planning_service.delete_planning(db, planning_id)
-
-
-@router.post("/{planning_id}/checklist", response_model=PlanningResponse, status_code=status.HTTP_201_CREATED)
-def add_checklist_item(
-    planning_id: int, payload: ChecklistItemCreate, db: Session = Depends(get_db)
-):
-    return planning_service.add_checklist_item(db, planning_id, payload.description)
-
-@router.put("/{planning_id}/checklist/{item_id}", response_model=PlanningResponse)
-def update_checklist_item(
-    planning_id: int, item_id: int, payload: ChecklistItemUpdate, db: Session = Depends(get_db)
-):
-    return planning_service.update_checklist_item(db, planning_id, item_id, payload)
-
-@router.patch("/{planning_id}/checklist/{item_id}/toggle", response_model=PlanningResponse)
-def toggle_checklist_item(planning_id: int, item_id: int, db: Session = Depends(get_db)):
-    return planning_service.toggle_checklist_item(db, planning_id, item_id)
-
-
-@router.delete("/{planning_id}/checklist/{item_id}", response_model=PlanningResponse)
-def delete_checklist_item(planning_id: int, item_id: int, db: Session = Depends(get_db)):
-    return planning_service.delete_checklist_item(db, planning_id, item_id)
