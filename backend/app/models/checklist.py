@@ -9,7 +9,7 @@ from database.connection import Base
 
 
 class PlanningChecklistItem(Base):
-    __tablename__ = "planning_checklist_item"
+    __tablename__ = "checklist"
 
     id = Column(Integer, primary_key=True, index=True)
     planning_id = Column(Integer, ForeignKey("planning.id"), nullable=False)
