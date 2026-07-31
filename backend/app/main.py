@@ -7,9 +7,9 @@ from routes.category import router as category_router
 from routes.owner import router as owner_router
 from routes.planning import router as planning_router
 from routes.checklist import router as checklist_router
+from routes.cycle import router as cycle_router
 
 app = FastAPI()
-
 
 
 app.add_middleware(
@@ -25,6 +25,7 @@ app.include_router(category_router)
 app.include_router(owner_router)
 app.include_router(planning_router)
 app.include_router(checklist_router)
+app.include_router(cycle_router)
 
 @app.get("/")
 def home():
