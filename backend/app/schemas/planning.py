@@ -2,44 +2,19 @@ from typing import List, Optional
 from datetime import date, datetime
 from enum import Enum
 from pydantic import BaseModel
+from schemas.checklist import ChecklistItemResponse, ChecklistItemUpdate
 
 
-# Valores permitidos para o status do planning. Ajuste aqui se o fluxo
-# de trabalho usar outros nomes — hoje o banco não tem CHECK constraint,
-# então essa validação vive só na aplicação.
 class PlanningStatus(str, Enum):
     not_started = "Not Started"
-    in_development = "In Development"
     under_review = "Under Review"
+    started = "Started"
+    in_development = "In Development"
     completed = "Completed"
+    cancelled = "Cancelled"
 
+TERMINAL_PLANNING_STATUSES = {PlanningStatus.completed, PlanningStatus.cancelled}
 
-# ---------- Checklist items ----------
-
-class ChecklistItemCreate(BaseModel):
-    description: str
-    position: Optional[int] = None  # se None, o service calcula o próximo
-
-
-class ChecklistItemResponse(BaseModel):
-    id: int
-    description: str
-    is_done: bool
-    position: int
-
-    class Config:
-        from_attributes = True
-    
-    
-class ChecklistItemUpdate(BaseModel):
-    description: Optional[str] = None
-    is_done: Optional[bool] = None
-    position: Optional[int] = None
-
-
-# ---------- Planning ----------
-
-# Usado ao criar um planning a partir de uma ideia já existente.
 class PlanningCreate(BaseModel):
     idea_id: int
     details: Optional[str] = None
@@ -54,10 +29,9 @@ class PlanningUpdate(BaseModel):
     start_date: Optional[date] = None
     due_date: Optional[date] = None
     status: Optional[PlanningStatus] = None
+    checklist_items: Optional[List[ChecklistItemUpdate]] = None
 
 
-# Resumo leve da ideia vinculada, só o suficiente pra exibir no card
-# de planning sem precisar de outra chamada à API.
 class PlanningIdeaSummary(BaseModel):
     id: int
     name: str

@@ -22,6 +22,7 @@ class ChecklistItemResponse(BaseModel):
     
     
 class ChecklistItemUpdate(BaseModel):
+    id: Optional[int] = None  
     description: Optional[str] = None
     due_date: Optional[date] = None
     is_done: Optional[bool] = None
