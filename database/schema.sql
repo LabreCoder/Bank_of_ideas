@@ -56,10 +56,10 @@ CREATE TABLE planning (
 );
 
 -- ============================================================
--- PLANNING CHECKLIST ITEMS
+-- CHECKLIST ITEMS
 -- One-to-many: each planning row can have several checklist tasks.
 -- ============================================================
-CREATE TABLE planning_checklist_item (
+CREATE TABLE checklist (
     id SERIAL PRIMARY KEY,
     planning_id INTEGER NOT NULL REFERENCES planning(id) ON DELETE CASCADE,
     description VARCHAR NOT NULL,
@@ -68,6 +68,24 @@ CREATE TABLE planning_checklist_item (
     position INTEGER NOT NULL DEFAULT 0   -- controls display order in the checklist
 );
 
+-- ============================================================
+-- CYCLE
+-- One cycle can have several planning rows.
+-- ============================================================
+CREATE TABLE cycle (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    start_date DATE NOT NULL,
+    due_date DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE cycle_planning (
+    cycle_id INT NOT NULL REFERENCES cycle(id) ON DELETE CASCADE,
+    planning_id INT NOT NULL REFERENCES planning(id) ON DELETE CASCADE,
+    PRIMARY KEY (cycle_id, planning_id)
+);
 -- ============================================================
 -- Example query: how "Execution Status" gets derived
 -- (this is what the Ideas listing endpoint will use)

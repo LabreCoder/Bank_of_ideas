@@ -33,10 +33,28 @@ INSERT INTO planning (idea_id, details, start_date, due_date, status) VALUES
     (1, 'Detalhar os 5 pontos principais e revisar antes de publicar', '2026-07-10', '2026-07-15', 'In Development');
 
 -- ============================================================
--- PLANNING CHECKLIST ITEMS
+-- CHECKLIST ITEMS
 -- (planning_id below assumes the insert above got id 1)
 -- ============================================================
-INSERT INTO planning_checklist_item (planning_id, description, is_done, position) VALUES
-    (1, 'Escrever rascunho do texto', TRUE, 0),
-    (1, 'Revisar gramática e clareza', FALSE, 1),
-    (1, 'Criar imagem de capa', FALSE, 2);
+INSERT INTO checklist (planning_id, description, due_date, is_done, position) VALUES
+    (1, 'Escrever rascunho do texto', '2026-07-11', TRUE, 0),
+    (1, 'Revisar gramática e clareza', '2026-07-12', FALSE, 1),
+    (1, 'Criar imagem de capa', '2026-07-13', FALSE, 2);
+
+-- ============================================================
+-- CYCLE
+-- create a cycle to group planning rows together (if needed)
+-- ============================================================
+INSERT INTO cycle (name, description, start_date, due_date) VALUES
+    ('Ciclo 1', 'Primeiro ciclo de planejamento', '2026-07-01', '2026-07-31');
+INSERT INTO cycle (name, description, start_date, due_date) VALUES
+    ('Ciclo 2', 'Segundo ciclo de planejamento', '2026-08-01', '2026-08-31');
+
+-- ============================================================
+-- CYCLE_PLANNING
+-- link planning rows to cycles (if needed)
+-- ============================================================
+INSERT INTO cycle_planning (cycle_id, planning_id) VALUES
+    (1, 1);
+INSERT INTO cycle_planning (cycle_id, planning_id) VALUES
+    (1, 2);
