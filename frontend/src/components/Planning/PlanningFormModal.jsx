@@ -1,14 +1,9 @@
 import { useState } from "react";
+import { STATUS_OPTIONS } from "../../pages/Planning";
 
-const STATUS_OPTIONS = [
-  "Not Started",
-  "Under Review", 
-  "Started",
-  "In Development", 
-  "Completed"
-];
 
 export default function PlanningFormModal({ availableIdeas, onClose, onSubmit }) {
+  // Estado do Formulário Principal
   const [form, setForm] = useState({
     idea_id: "",
     details: "",
@@ -16,17 +11,26 @@ export default function PlanningFormModal({ availableIdeas, onClose, onSubmit })
     due_date: "",
     status: "Not Started",
   });
+
+  // Estado da Lista de Checklist
   const [checklistDraft, setChecklistDraft] = useState([]);
-  const [newItem, setNewItem] = useState("");
+  
+  // Estado do Input do Checklist (declarado no topo do componente)
+  const [checklistItem, setChecklistItem] = useState({
+    description: "",
+    due_date: "",
+  });
+
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const update = (field, value) => setForm((f) => ({ ...f, [field]: value }));
+  const updateForm = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
-  const addChecklistDraftItem = () => {
-    if (!newItem.trim()) return;
-    setChecklistDraft((items) => [...items, newItem.trim()]);
-    setNewItem("");
+  const handleAddChecklistItem = () => {
+    if (!checklistItem.description.trim()) return;
+
+    setChecklistDraft((prev) => [...prev, { ...checklistItem }]);
+    setChecklistItem({ description: "", due_date: "" });
   };
 
   const removeChecklistDraftItem = (index) => {
@@ -60,7 +64,7 @@ export default function PlanningFormModal({ availableIdeas, onClose, onSubmit })
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg border border-gray-200 w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg border border-gray-200 w-full max-w-[84vw] p-8 max-h-[90vh] overflow-y-auto" style={{ left: "12%", right: "14%", position: "fixed" }}>
         <h3 className="text-lg font-semibold mb-4">New planning</h3>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -68,7 +72,7 @@ export default function PlanningFormModal({ availableIdeas, onClose, onSubmit })
             <label className="block text-sm font-medium text-gray-700 mb-1">Idea</label>
             <select
               value={form.idea_id}
-              onChange={(e) => update("idea_id", e.target.value)}
+              onChange={(e) => updateForm("idea_id", e.target.value)}
               className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             >
               <option value="">Select...</option>
@@ -89,7 +93,7 @@ export default function PlanningFormModal({ availableIdeas, onClose, onSubmit })
             <label className="block text-sm font-medium text-gray-700 mb-1">Details</label>
             <textarea
               value={form.details}
-              onChange={(e) => update("details", e.target.value)}
+              onChange={(e) => updateForm("details", e.target.value)}
               rows={3}
               className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             />
@@ -101,7 +105,7 @@ export default function PlanningFormModal({ availableIdeas, onClose, onSubmit })
               <input
                 type="date"
                 value={form.start_date}
-                onChange={(e) => update("start_date", e.target.value)}
+                onChange={(e) => updateForm("start_date", e.target.value)}
                 className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
               />
             </div>
@@ -110,7 +114,7 @@ export default function PlanningFormModal({ availableIdeas, onClose, onSubmit })
               <input
                 type="date"
                 value={form.due_date}
-                onChange={(e) => update("due_date", e.target.value)}
+                onChange={(e) => updateForm("due_date", e.target.value)}
                 className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
               />
             </div>
@@ -120,7 +124,7 @@ export default function PlanningFormModal({ availableIdeas, onClose, onSubmit })
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
               value={form.status}
-              onChange={(e) => update("status", e.target.value)}
+              onChange={(e) => updateForm("status", e.target.value)}
               className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             >
               {STATUS_OPTIONS.map((s) => (
@@ -135,40 +139,60 @@ export default function PlanningFormModal({ availableIdeas, onClose, onSubmit })
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Initial checklist (optional)
             </label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={newItem}
-                onChange={(e) => setNewItem(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addChecklistDraftItem();
+            <div className="flex gap-2 mb-2 items-end">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={checklistItem.description}
+                  onChange={(e) =>
+                    setChecklistItem((prev) => ({ ...prev, description: e.target.value }))
                   }
-                }}
-                placeholder="Item description..."
-                className="flex-1 text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
-              />
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault(); // Evita submeter o formulário principal
+                      handleAddChecklistItem();
+                    }
+                  }}
+                  placeholder="Item description..."
+                  className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                />
+              </div>
+              <div>
+                <input
+                  type="date"
+                  value={checklistItem.due_date}
+                  onChange={(e) =>
+                    setChecklistItem((prev) => ({ ...prev, due_date: e.target.value }))
+                  }
+                  className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                />
+              </div>
               <button
                 type="button"
-                onClick={addChecklistDraftItem}
-                className="text-sm font-medium px-3 py-2 rounded-md border border-gray-200 hover:bg-gray-50"
+                onClick={handleAddChecklistItem}
+                className="text-sm font-medium px-3 py-2 rounded-md border border-gray-200 hover:bg-gray-50 shrink-0"
               >
                 Add
               </button>
             </div>
+
             {checklistDraft.length > 0 && (
-              <ul className="flex flex-col gap-1">
+              <ul className="flex flex-col gap-1 mt-2">
                 {checklistDraft.map((item, index) => (
                   <li
                     key={index}
-                    className="flex items-center justify-between text-sm bg-gray-50 rounded-md px-3 py-1.5"
+                    className="flex items-center justify-between text-sm bg-gray-50 rounded-md px-3 py-1.5 border border-gray-100"
                   >
-                    <span>{item}</span>
+                    <span className="truncate">
+                      {item.description}{" "}
+                      {item.due_date && (
+                        <span className="text-xs text-gray-400">({item.due_date})</span>
+                      )}
+                    </span>
                     <button
                       type="button"
                       onClick={() => removeChecklistDraftItem(index)}
-                      className="text-gray-400 hover:text-red-600 text-xs"
+                      className="text-gray-400 hover:text-red-600 text-xs ml-2"
                     >
                       remove
                     </button>

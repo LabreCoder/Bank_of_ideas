@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react";
 import { planningApi } from "../../services/planning";
+import { STATUS_OPTIONS } from "../../pages/Planning";
 
-const STATUS_OPTIONS = [
-  "Not Started",
-  "Under Review",
-  "Started",
-  "In Development",
-  "Completed"
-];
 
 function PencilIcon() {
   return (
@@ -29,45 +23,51 @@ function TrashIcon() {
 }
 
 export default function PlanningDetailModal({ planning, onClose, onUpdated, onDeleted }) {
-  // Guardamos a lista de checklist localmente para atualizar na tela sem disparar re-render do PAI
+  // Estado local do checklist (rascunho)
   const [checklistItems, setChecklistItems] = useState(planning.checklist_items || []);
 
-  // Campos do formulário principal
   const [status, setStatus] = useState(planning.status);
   const [startDate, setStartDate] = useState(planning.start_date || "");
   const [dueDate, setDueDate] = useState(planning.due_date || "");
   const [details, setDetails] = useState(planning.details || "");
 
-  const [newItem, setNewItem] = useState("");
+  const [newItem, setNewItem] = useState({ description: "", due_date: "" });
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const [editingItemId, setEditingItemId] = useState(null);
-  const [editItemText, setEditItemText] = useState("");
+  const [editItem, setEditItem] = useState({ description: "", due_date: "" });
 
   useEffect(() => {
     setChecklistItems(planning.checklist_items || []);
-  }, [planning.checklist_items]);
+    setStatus(planning.status);
+    setStartDate(planning.start_date || "");
+    setDueDate(planning.due_date || "");
+    setDetails(planning.details || "");
+  }, [planning.id]);
 
   const handleSave = async () => {
     setError(null);
-    setSaving(true);
     setSavedSuccess(false);
 
+    if (!hasChanges()) {
+      setError("No changes detected to save.");
+      return;
+    }
+
+    setSaving(true);
     try {
       const patch = {
         status,
         start_date: startDate || null,
         due_date: dueDate || null,
         details: details.trim() || null,
+        checklist_items: checklistItems,
       };
 
       const updated = await planningApi.update(planning.id, patch);
-      
-      // Notifica o pai sobre as mudanças do formulário principal
       onUpdated(updated);
-      
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);
     } catch (err) {
@@ -77,64 +77,60 @@ export default function PlanningDetailModal({ planning, onClose, onUpdated, onDe
     }
   };
 
-  // Operações do Checklist atualizam localmente primeiro sem acionar o `onUpdated` do pai de imediato
-  const handleAddItem = async () => {
-    if (!newItem.trim()) return;
-    setError(null);
-    try {
-      const updated = await planningApi.addChecklistItem(planning.id, newItem.trim());
-      setChecklistItems(updated.checklist_items);
-      setNewItem("");
-    } catch (err) {
-      setError(err.message || "It was not possible to add the item.");
-    }
+  const handleAddItem = () => {
+    if (!newItem.description.trim()) return;
+
+    const itemToAdd = {
+      id: Date.now(), // ID temporário local
+      description: newItem.description.trim(),
+      due_date: newItem.due_date || null,
+      is_done: false,
+    };
+
+    setChecklistItems((prev) => [...prev, itemToAdd]);
+    setNewItem({ description: "", due_date: "" });
   };
 
-  const handleToggleItem = async (itemId) => {
-    setError(null);
-    try {
-      const updated = await planningApi.toggleChecklistItem(planning.id, itemId);
-      setChecklistItems(updated.checklist_items);
-    } catch (err) {
-      setError(err.message || "It was not possible to update the item.");
-    }
+  const handleToggleItem = (itemId) => {
+    setChecklistItems((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, is_done: !item.is_done } : item
+      )
+    );
   };
 
-  const handleDeleteItem = async (itemId) => {
-    setError(null);
-    try {
-      const updated = await planningApi.deleteChecklistItem(planning.id, itemId);
-      setChecklistItems(updated.checklist_items);
-    } catch (err) {
-      setError(err.message || "It was not possible to remove the item.");
-    }
+  const handleDeleteItem = (itemId) => {
+    setChecklistItems((prev) => prev.filter((item) => item.id !== itemId));
   };
 
   const startEditingItem = (item) => {
     setEditingItemId(item.id);
-    setEditItemText(item.description);
+    setEditItem({
+      description: item.description,
+      due_date: item.due_date || "",
+    });
   };
 
   const cancelEditingItem = () => {
     setEditingItemId(null);
-    setEditItemText("");
+    setEditItem({ description: "", due_date: "" });
   };
 
-  const handleSaveEditItem = async (itemId) => {
-    if (!editItemText.trim()) return;
-    setError(null);
-    try {
-      // Enviamos apenas a string em vez do objeto { description: ... }
-      const updated = await planningApi.updateChecklistItem(
-        planning.id, 
-        itemId, 
-        editItemText.trim()
-      );
-      setChecklistItems(updated.checklist_items);
-      cancelEditingItem();
-    } catch (err) {
-      setError(err.message || "It was not possible to update the item description.");
-    }
+  const handleSaveEditItem = (itemId) => {
+    if (!editItem.description.trim()) return;
+
+    setChecklistItems((prev) =>
+      prev.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              description: editItem.description.trim(),
+              due_date: editItem.due_date ? editItem.due_date : null,
+            }
+          : item
+      )
+    );
+    cancelEditingItem();
   };
 
   const handleDeletePlanning = async () => {
@@ -150,9 +146,34 @@ export default function PlanningDetailModal({ planning, onClose, onUpdated, onDe
     }
   };
 
+  const hasChanges = () => {
+    const currentDetails = details.trim() || null;
+    const originalDetails = planning.details || null;
+    const currentStart = startDate || null;
+    const originalStart = planning.start_date || null;
+    const currentDue = dueDate || null;
+    const originalDue = planning.due_date || null;
+
+    // Compara campos simples
+    if (
+      status !== planning.status ||
+      currentDetails !== originalDetails ||
+      currentStart !== originalStart ||
+      currentDue !== originalDue
+    ) {
+      return true;
+    }
+
+    // Compara itens do checklist
+    return JSON.stringify(checklistItems) !== JSON.stringify(planning.checklist_items || []);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg border border-gray-200 w-full max-w-[84vw] p-8 max-h-[90vh] overflow-y-auto" style={{ left: "12%", right: "14%", position: "fixed" }}>
+      <div
+        className="bg-white rounded-lg border border-gray-200 w-full max-w-[84vw] p-8 max-h-[90vh] overflow-y-auto"
+        style={{ left: "12%", right: "14%", position: "fixed" }}
+      >
         <div className="flex items-start justify-between mb-4">
           <h3 className="text-lg font-semibold">{planning.idea.name}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm">
@@ -209,24 +230,40 @@ export default function PlanningDetailModal({ planning, onClose, onUpdated, onDe
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Checklist</label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={newItem}
-                onChange={(e) => setNewItem(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddItem();
-                  }
-                }}
-                placeholder="New item..."
-                className="flex-1 text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
-              />
+
+            {/* Seção para adicionar novo item com Rótulos/Titulos */}
+            <div className="flex gap-2 mb-2 items-end">
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-gray-500 mb-1">Description</label>
+                <input
+                  type="text"
+                  value={newItem.description}
+                  onChange={(e) => setNewItem((prev) => ({ ...prev, description: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddItem();
+                    }
+                  }}
+                  placeholder="New item..."
+                  className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Due</label>
+                <input
+                  type="date"
+                  value={newItem.due_date}
+                  onChange={(e) => setNewItem((prev) => ({ ...prev, due_date: e.target.value }))}
+                  className="text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                />
+              </div>
+
               <button
                 type="button"
                 onClick={handleAddItem}
-                className="text-sm font-medium px-3 py-2 rounded-md border border-gray-200 hover:bg-gray-50"
+                className="text-sm font-medium px-3 py-2 rounded-md border border-gray-200 hover:bg-gray-50 shrink-0"
               >
                 Add
               </button>
@@ -245,8 +282,10 @@ export default function PlanningDetailModal({ planning, onClose, onUpdated, onDe
                       <div className="flex items-center gap-2 w-full">
                         <input
                           type="text"
-                          value={editItemText}
-                          onChange={(e) => setEditItemText(e.target.value)}
+                          value={editItem.description}
+                          onChange={(e) =>
+                            setEditItem((prev) => ({ ...prev, description: e.target.value }))
+                          }
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
                               e.preventDefault();
@@ -258,18 +297,26 @@ export default function PlanningDetailModal({ planning, onClose, onUpdated, onDe
                           autoFocus
                           className="flex-1 text-sm border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent-600"
                         />
+                        <input
+                          type="date"
+                          value={editItem.due_date}
+                          onChange={(e) =>
+                            setEditItem((prev) => ({ ...prev, due_date: e.target.value }))
+                          }
+                          className="text-sm border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                        />
                         <button
                           type="button"
                           onClick={() => handleSaveEditItem(item.id)}
-                          disabled={!editItemText.trim()}
-                          className="text-xs font-medium bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white px-2 py-1 rounded"
+                          disabled={!editItem.description.trim()}
+                          className="text-xs font-medium bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white px-2 py-1 rounded shrink-0"
                         >
                           Save
                         </button>
                         <button
                           type="button"
                           onClick={cancelEditingItem}
-                          className="text-xs font-medium text-gray-500 hover:text-gray-700 px-1 py-1"
+                          className="text-xs font-medium text-gray-500 hover:text-gray-700 px-1 py-1 shrink-0"
                         >
                           Cancel
                         </button>
@@ -285,6 +332,9 @@ export default function PlanningDetailModal({ planning, onClose, onUpdated, onDe
                         <span className={`flex-1 ${item.is_done ? "line-through text-gray-400" : ""}`}>
                           {item.description}
                         </span>
+                        {item.due_date && (
+                          <span className="text-xs text-gray-400">({item.due_date})</span>
+                        )}
                         <div className="flex gap-1 shrink-0">
                           <button
                             type="button"

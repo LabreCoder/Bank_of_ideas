@@ -4,23 +4,24 @@ const STATUS_STYLES = {
   "Started": "bg-purple-50 text-purple-700 border-purple-200",
   "In Development": "bg-amber-50 text-amber-700 border-amber-200",
   "Completed": "bg-emerald-50 text-emerald-700 border-emerald-200",
+  "Cancelled": "bg-red-50 text-red-700 border-red-200",
 };
 
 function formatDate(value) {
   if (!value) return "—";
-  return new Date(value + "T00:00:00").toLocaleDateString("pt-BR");
+  return new Date(value + "T00:00:00").toLocaleDateString("en-US");
 }
 
-export default function PlanningCard({ planning, onOpen }) {
+export default function PlanningCard({ planning, checklist, onOpen }) {
   const statusClass =
     STATUS_STYLES[planning.status] || "bg-gray-100 text-gray-600 border-gray-200";
-  const total = planning.checklist_items.length;
-  const done = planning.checklist_items.filter((i) => i.is_done).length;
+  const total = checklist.length;
+  const done = checklist.filter((i) => i.is_done).length;
 
   return (
     <button
       onClick={() => onOpen(planning)}
-      className="text-left bg-white rounded-lg border border-gray-200 p-4 flex flex-col gap-3 hover:border-accent-300 transition-colors"
+      className="text-left bg-white rounded-lg border border-gray-200 p-4 flex flex-col justify-between gap-3 hover:border-accent-300 transition-colors"
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-medium text-gray-900 leading-snug">{planning.idea.name}</h3>
@@ -29,10 +30,6 @@ export default function PlanningCard({ planning, onOpen }) {
         </span>
       </div>
 
-      <div className="text-xs text-gray-500 flex gap-3">
-        <span>Start: {formatDate(planning.start_date) === "—" ? "--" : formatDate(planning.start_date)}</span>
-        <span>End: {formatDate(planning.due_date) === "—" ? "--" : formatDate(planning.due_date)}</span>
-      </div>
 
       {total > 0 && (
         <div className="mt-1">
@@ -50,6 +47,14 @@ export default function PlanningCard({ planning, onOpen }) {
           </div>
         </div>
       )}
+      <div className="pt-3 border-t border-gray-100 flex justify-between text-xs text-gray-500">
+        <div>
+          <span>Start: {planning.start_date || "--"}</span>
+        </div>
+        <div>
+          <span>End: {planning.due_date || "--"}</span>
+        </div>
+      </div>
     </button>
   );
 }
