@@ -10,9 +10,9 @@ import {
 // Mesma escala de cores usada na legenda — se ajustar aqui, ajusta lá também.
 // Usa só os degraus que existem em tailwind.config.js (100/500/700).
 function intensityClass(count) {
-  if (count >= 3) return "bg-accent-700 text-white";
+  if (count >= 3) return "bg-accent-800 text-white";
   if (count === 2) return "bg-accent-500 text-white";
-  if (count === 1) return "bg-accent-100 text-accent-700";
+  if (count === 1) return "bg-accent-200 text-accent-700";
   return "";
 }
 

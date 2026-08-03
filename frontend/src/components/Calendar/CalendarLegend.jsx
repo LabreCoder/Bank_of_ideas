@@ -1,7 +1,7 @@
 const LEGEND_ITEMS = [
   { label: "1 idea", className: "bg-accent-200" },
   { label: "2 ideas", className: "bg-accent-400" },
-  { label: "3 or more", className: "bg-accent-700" },
+  { label: "3 or more", className: "bg-accent-800" },
 ];
 
 export default function CalendarLegend() {
