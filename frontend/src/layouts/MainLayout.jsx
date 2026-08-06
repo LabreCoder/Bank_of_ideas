@@ -6,7 +6,7 @@ import Sidebar from "../components/Sidebar.jsx";
 // (Dashboard, Ideas, Planning or Settings).
 export default function MainLayout() {
   return (
-    <div className="flex min-h-screen dark:bg-gray-100">
+    <div className="flex min-h-screen dark:bg-gray-300">
       <Sidebar />
       {/* min-w-0: sem isso, um filho flex nunca encolhe menor que seu
           conteúdo (min-width: auto é o padrão do Flexbox). Grids largos,
