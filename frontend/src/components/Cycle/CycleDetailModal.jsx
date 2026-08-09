@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
 import { cycleApi } from "../../services/cycle";
+import DetailModal from "../Default/DetailModal";
+
+const CYCLE_STATUS_STYLES = {
+  "Waiting Start": "bg-gray-100 text-gray-600 border-gray-200",
+  "In Progress": "bg-amber-50 text-amber-700 border-amber-200",
+  Finished: "bg-emerald-50 text-emerald-700 border-emerald-200",
+};
 
 export default function CycleDetailModal({
   cycle,
@@ -18,7 +25,6 @@ export default function CycleDetailModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  // Estados de confirmação
   const [confirmationPrompt, setConfirmationPrompt] = useState(null);
   const [conflictPrompt, setConflictPrompt] = useState(null);
 
@@ -48,17 +54,13 @@ export default function CycleDetailModal({
     }
   };
 
-  const handleUpdateDueDate = async (force = false) => {
+  const handleUpdateDueDate = async () => {
     setSaving(true);
     setError(null);
     setConflictPrompt(null);
 
     try {
-      const updated = await cycleApi.updateDueDate(
-        currentCycle.id,
-        dueDate || null,
-        force
-      );
+      const updated = await cycleApi.updateDueDate(currentCycle.id, dueDate || null);
       setCurrentCycle(updated);
       onUpdated(updated);
     } catch (err) {
@@ -125,25 +127,26 @@ export default function CycleDetailModal({
     }
   };
 
-  // Filtra plannings que já estão vinculados a este ciclo
   const boundIds = new Set((currentCycle.plannings || []).map((p) => p.id));
   const unassignedPlannings = availablePlannings.filter((p) => !boundIds.has(p.id));
+  const statusClass =
+    CYCLE_STATUS_STYLES[currentCycle.status] || "bg-gray-100 text-gray-600 border-gray-200";
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-      <div 
-        className="bg-white rounded-lg border border-gray-200 w-full max-w-[80vw] p-8 max-h-[90vh] overflow-y-auto"
-        style={{ left: "12%", right: "14%", position: "fixed" }}
-      >
+    <DetailModal>
         <div className="flex items-start justify-between mb-4">
-          <h3 className="text-lg font-semibold">{currentCycle.name}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold">{currentCycle.name}</h3>
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusClass}`}>
+              {currentCycle.status}
+            </span>
+          </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm">
             Close
           </button>
         </div>
 
         <div className="flex flex-col gap-5">
-          {/* Informações Principais */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
@@ -188,11 +191,8 @@ export default function CycleDetailModal({
 
           <hr className="border-gray-100" />
 
-          {/* Gerenciamento de Due Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Cycle Due Date
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Cycle Due Date</label>
             <div className="flex gap-2">
               <input
                 type="date"
@@ -202,7 +202,7 @@ export default function CycleDetailModal({
               />
               <button
                 type="button"
-                onClick={() => handleUpdateDueDate(false)}
+                onClick={handleUpdateDueDate}
                 disabled={saving}
                 className="border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-medium px-3 py-2 rounded-md"
               >
@@ -210,40 +210,33 @@ export default function CycleDetailModal({
               </button>
             </div>
 
-            {/* Modal/Aviso de Conflitos na Edição de Data */}
             {conflictPrompt && (
               <div className="mt-3 bg-amber-50 border border-amber-200 rounded-md p-3 text-sm text-amber-800">
-                <p className="font-semibold mb-1">Date Conflict Detected:</p>
+                <p className="font-semibold mb-1">This due date conflicts with bound plannings:</p>
                 <ul className="list-disc pl-5 mb-2 text-xs">
                   {conflictPrompt.map((c) => (
                     <li key={c.planning_id}>
-                      {c.idea_name}: candidate date ({c.candidate_due_date}) falls outside cycle.
+                      {c.idea_name}: due {c.candidate_due_date} — {c.message}
                     </li>
                   ))}
                 </ul>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateDueDate(true)}
-                    className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium px-3 py-1.5 rounded-md"
-                  >
-                    Force Update Anyway
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConflictPrompt(null)}
-                    className="text-xs text-gray-600 hover:underline px-2 py-1.5"
-                  >
-                    Cancel
-                  </button>
-                </div>
+                <p className="text-xs mb-2">
+                  Fix this by editing the conflicting planning's due date, or pick a different
+                  cycle due date.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setConflictPrompt(null)}
+                  className="text-xs text-gray-600 hover:underline px-2 py-1.5"
+                >
+                  Dismiss
+                </button>
               </div>
             )}
           </div>
 
           <hr className="border-gray-100" />
 
-          {/* Seção de Vinculação de Plannings */}
           <div>
             <h4 className="text-sm font-semibold text-gray-800 mb-2">Bound Plannings</h4>
 
@@ -270,7 +263,6 @@ export default function CycleDetailModal({
               </button>
             </div>
 
-            {/* Aviso de Confirmação para Fallback de Data */}
             {confirmationPrompt && (
               <div className="mb-3 bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800 flex flex-col gap-2">
                 <p>{confirmationPrompt.message}</p>
@@ -340,7 +332,6 @@ export default function CycleDetailModal({
             </button>
           </div>
         </div>
-      </div>
-    </div>
+    </DetailModal>
   );
 }
