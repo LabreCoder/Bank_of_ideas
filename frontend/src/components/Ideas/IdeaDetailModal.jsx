@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { planningApi } from "../../services/planning";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
+import DetailModal from "../Default/DetailModal";
 
 const IDEA_STATUS_STYLES = {
   Livre: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -46,8 +47,7 @@ export default function IdeaDetailModal({ idea, planning, onClose, onPlanningUpd
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg border border-gray-200 w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+    <DetailModal>
         <div className="flex items-start justify-between gap-2 mb-4">
           <h3 className="text-lg font-semibold">{idea.name}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm">
@@ -179,7 +179,6 @@ export default function IdeaDetailModal({ idea, planning, onClose, onPlanningUpd
 
           {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
         </div>
-      </div>
-    </div>
+    </DetailModal>
   );
 }
