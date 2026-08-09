@@ -3,20 +3,44 @@ import { ideasApi } from "../services/ideas";
 import { categoriesApi } from "../services/categories";
 import { ownersApi } from "../services/owners";
 import IdeaCard from "../components/Ideas/IdeaCard";
-import IdeaFilters from "../components/Ideas/IdeaFilters";
 import IdeaFormModal from "../components/Ideas/IdeaFormModal";
-
-const EMPTY_FILTERS = { name: "", categoryId: "", ownerId: "", status: "",active: "" };
+import FilterInfo from "../components/Filters/FilterInfo";
+import { useIdeaFilters } from "../hooks/useIdeaFilters";
 
 export default function Ideas() {
   const [ideas, setIdeas] = useState([]);
   const [categories, setCategories] = useState([]);
   const [owners, setOwners] = useState([]);
-  const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [loading, setLoading] = useState(true);
+  const { filters, setFilters, resetFilters } = useIdeaFilters();
   const [error, setError] = useState(null);
   const [modalIdea, setModalIdea] = useState(null); // null = fechado, {} = criar, {...} = editar
   const [modalOpen, setModalOpen] = useState(false);
+
+
+  const filteredIdeas = useMemo(() => {
+    return ideas.filter((idea) => {
+      if (filters.name && !idea.name.toLowerCase().includes(filters.name.toLowerCase())) {
+        return false;
+      }
+      if (filters.categoryId && idea.category?.id !== Number(filters.categoryId)) {
+        return false;
+      }
+      if (filters.ownerId && idea.owner?.id !== Number(filters.ownerId)) {
+        return false;
+      }
+      if (filters.status && idea.execution_status !== filters.status) {
+        return false;
+      }
+      if (filters.active === "true" && !idea.is_active) {
+        return false;
+      }
+      if (filters.active === "false" && idea.is_active) {
+        return false;
+      }
+      return true;
+    });
+  }, [ideas, filters]);
 
   const loadAll = async () => {
     setLoading(true);
@@ -40,31 +64,6 @@ export default function Ideas() {
   useEffect(() => {
     loadAll();
   }, []);
-
-  // Filtragem combinada no cliente. Para o volume de dados de um painel
-  // pessoal isso é suficiente; se a lista crescer muito, mover os filtros
-  // de categoria/dono/nome para query params no backend (como já existe
-  // para "active") evita trafegar tudo de uma vez.
-  const filteredIdeas = useMemo(() => {
-    return ideas.filter((idea) => {
-      if (
-        filters.name &&
-        !idea.name.toLowerCase().includes(filters.name.toLowerCase())
-      ) {
-        return false;
-      }
-      if (filters.categoryId && idea.category?.id !== Number(filters.categoryId)) {
-        return false;
-      }
-      if (filters.ownerId && idea.owner.id !== Number(filters.ownerId)) {
-        return false;
-      }
-      if (filters.status && idea.execution_status !== filters.status) return false;
-      if (filters.active === "true" && !idea.is_active) return false;
-      if (filters.active === "false" && idea.is_active) return false;
-      return true;
-    });
-  }, [ideas, filters]);
 
   const openCreateModal = () => {
     setModalIdea(null);
@@ -115,11 +114,12 @@ export default function Ideas() {
         </button>
       </div>
 
-      <IdeaFilters
+      <FilterInfo
         categories={categories}
         owners={owners}
         filters={filters}
         onChange={setFilters}
+        onClear={resetFilters} 
       />
 
       {error && (
