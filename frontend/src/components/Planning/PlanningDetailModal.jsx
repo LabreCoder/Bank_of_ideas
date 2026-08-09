@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { planningApi } from "../../services/planning";
 import { STATUS_OPTIONS } from "../../pages/Planning";
-
+import DetailModal from "../Default/DetailModal";
 
 function PencilIcon() {
   return (
@@ -169,11 +169,7 @@ export default function PlanningDetailModal({ planning, onClose, onUpdated, onDe
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-      <div
-        className="bg-white rounded-lg border border-gray-200 w-full max-w-[84vw] p-8 max-h-[90vh] overflow-y-auto"
-        style={{ left: "12%", right: "14%", position: "fixed" }}
-      >
+      <DetailModal>
         <div className="flex items-start justify-between mb-4">
           <h3 className="text-lg font-semibold">{planning.idea.name}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm">
@@ -385,7 +381,6 @@ export default function PlanningDetailModal({ planning, onClose, onUpdated, onDe
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </DetailModal>
   );
 }
