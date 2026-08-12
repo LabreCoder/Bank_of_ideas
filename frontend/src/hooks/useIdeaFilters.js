@@ -1,17 +1,16 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
-export const DEFAULT_FILTERS = {
+const DEFAULT_FILTERS = {
   name: "",
   categoryId: "",
   ownerId: "",
-  status: "",
   active: "",
 };
 
-export function useIdeaFilters(initialValues = DEFAULT_FILTERS) {
-  const [filters, setFilters] = useState(initialValues);
+export function useIdeaFilters() {
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
-  const resetFilters = () => setFilters(DEFAULT_FILTERS);
+  const resetFilters = useCallback(() => setFilters(DEFAULT_FILTERS), []);
 
   return { filters, setFilters, resetFilters };
-}   
+}

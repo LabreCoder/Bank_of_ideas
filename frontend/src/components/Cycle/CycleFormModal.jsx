@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { cycleApi } from "../../services/cycle";
+import DetailModal from "../Default/DetailModal";
 
 export default function CycleFormModal({ onClose, onCreated }) {
   const [form, setForm] = useState({
@@ -38,8 +39,7 @@ export default function CycleFormModal({ onClose, onCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg border border-gray-200 w-full max-w-lg p-6">
+    <DetailModal onClose={onClose}>
         <h3 className="text-lg font-semibold mb-4">New Cycle</h3>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -106,7 +106,6 @@ export default function CycleFormModal({ onClose, onCreated }) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </DetailModal>
   );
 }

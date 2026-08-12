@@ -4,20 +4,30 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recha
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A569BD', '#E74C3C', '#F1C40F', '#2ECC71'];
 
+function getCategoryColor(index, totalItems) {
+    if (index < COLORS.length) {
+        return COLORS[index];
+    }
+
+    // Fallback for extra categories: generate evenly spaced hues for visual distinction.
+    const hue = Math.round((index / Math.max(totalItems, 1)) * 360);
+    return `hsl(${hue}, 65%, 55%)`;
+}
+
 export default function PizzaGraphic({ categories, ideas }) {
     const stats = useMemo(() => {
         const categoriesIdeasCount = categories.reduce((acc, category) => {
-            console.log(`Category: ${category.name}, Ideas Count: ${ideas.filter((idea) => idea.category.id === category.id).length}`); // Debugging line
             acc[category.id] = ideas.filter((idea) => idea.category.id === category.id).length;
+
             return acc;
         }, {});
-        const data = categories.map((category) => {
-            const name = category.name;
-            return {
-                name,
-                value: categoriesIdeasCount[category.id] = categoriesIdeasCount[category.id] ? categoriesIdeasCount[category.id] : 0, // Use ideas_count or default to 0
-            };
-        });
+        const data = categories
+            .map((category) => ({
+                name: category.name,
+                value: categoriesIdeasCount[category.id] || 0,
+            }))
+            .filter((category) => category.value > 0);
+
         return { data, categoriesIdeasCount };
     }, [categories, ideas]);
 
@@ -40,7 +50,7 @@ export default function PizzaGraphic({ categories, ideas }) {
                     dataKey="value"
                     >
                     {stats.data.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell key={`cell-${index}`} fill={getCategoryColor(index, stats.data.length)} />
                     ))} 
                     </Pie>
                     <Tooltip />

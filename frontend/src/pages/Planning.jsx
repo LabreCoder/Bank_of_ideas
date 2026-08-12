@@ -7,15 +7,16 @@ import PlanningCard from "../components/Planning/PlanningCard";
 import PlanningFormModal from "../components/Planning/PlanningFormModal";
 import PlanningDetailModal from "../components/Planning/PlanningDetailModal";
 import FilterInfo from "../components/Filters/FilterInfo";
+import TabBar from "../components/Filters/TabBar";
 import { useIdeaFilters } from "../hooks/useIdeaFilters";
 
 export const STATUS_OPTIONS = [
   "Not Started",
-  "Under Review", 
+  "Under Review",
   "Started",
-  "In Development", 
+  "In Development",
   "Completed",
-  "Cancelled"
+  "Cancelled",
 ];
 
 export default function Planning() {
@@ -27,15 +28,15 @@ export default function Planning() {
   const [error, setError] = useState(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [detailPlanning, setDetailPlanning] = useState(null);
+  const [activeTab, setActiveTab] = useState("All");
   const { filters, setFilters, resetFilters } = useIdeaFilters();
 
-  // 1. Carrega os Plannings da API junto com os outros dados
   const loadAll = async () => {
     setLoading(true);
     setError(null);
     try {
       const [planningsData, ideasData, categoriesData, ownersData] = await Promise.all([
-        planningApi.list(), // <-- Adicionado aqui!
+        planningApi.list(),
         ideasApi.list(),
         categoriesApi.list(),
         ownersApi.list(),
@@ -55,47 +56,47 @@ export default function Planning() {
     loadAll();
   }, []);
 
-  // 2. Filtra a lista de PLANNINGS (acessando planning.idea)
+  // Contagem por status, pra mostrar o número em cada aba (ex: "Started (3)").
+  const tabCounts = useMemo(() => {
+    const counts = { All: plannings.length };
+    for (const status of STATUS_OPTIONS) {
+      counts[status] = plannings.filter((p) => p.status === status).length;
+    }
+    return counts;
+  }, [plannings]);
+
+  const tabs = useMemo(
+    () => [
+      { value: "All", label: "All", count: tabCounts.All },
+      ...STATUS_OPTIONS.map((status) => ({
+        value: status,
+        label: status,
+        count: tabCounts[status],
+      })),
+    ],
+    [tabCounts]
+  );
+
   const filteredPlannings = useMemo(() => {
     if (!Array.isArray(plannings)) return [];
 
     return plannings.filter((planning) => {
+      // Aba: filtra por status do planning. "All" não filtra nada aqui.
+      if (activeTab !== "All" && planning.status !== activeTab) {
+        return false;
+      }
+
       const idea = planning.idea || {};
 
-      // Filtro por Nome da Ideia
-      if (
-        filters.name &&
-        !idea.name?.toLowerCase().includes(filters.name.toLowerCase())
-      ) {
+      if (filters.name && !idea.name?.toLowerCase().includes(filters.name.toLowerCase())) {
         return false;
       }
-
-      // Filtro por Categoria
-      if (
-        filters.categoryId &&
-        idea.category?.id !== Number(filters.categoryId)
-      ) {
+      if (filters.categoryId && idea.category?.id !== Number(filters.categoryId)) {
         return false;
       }
-
-      // Filtro por Dono/Proprietário
-      if (
-        filters.ownerId &&
-        idea.owner?.id !== Number(filters.ownerId)
-      ) {
+      if (filters.ownerId && idea.owner?.id !== Number(filters.ownerId)) {
         return false;
       }
-
-      // Filtro por Status (Compara com o status do planning ou execution_status da ideia)
-      if (filters.status) {
-        const matchesPlanningStatus = planning.status === filters.status;
-        const matchesExecutionStatus = idea.execution_status === filters.status;
-        if (!matchesPlanningStatus && !matchesExecutionStatus) {
-          return false;
-        }
-      }
-
-      // Filtro por Ativo/Inativo
       if (filters.active === "true" && !idea.is_active) {
         return false;
       }
@@ -105,9 +106,8 @@ export default function Planning() {
 
       return true;
     });
-  }, [plannings, filters]);
+  }, [plannings, filters, activeTab]);
 
-  // Ideias "Free" para o modal de criação
   const availableIdeas = useMemo(
     () => ideas.filter((idea) => idea.execution_status === "Free" && idea.is_active),
     [ideas]
@@ -159,12 +159,14 @@ export default function Planning() {
         </button>
       </div>
 
+      <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+
       <FilterInfo
         categories={categories}
         owners={owners}
         filters={filters}
         onChange={setFilters}
-        onClear={resetFilters} 
+        onClear={resetFilters}
       />
 
       {error && (
@@ -177,18 +179,18 @@ export default function Planning() {
         <div className="bg-white rounded-lg border border-gray-200 p-4 h-96 flex items-center justify-center text-gray-400">
           Loading plannings...
         </div>
-      ) : filteredPlannings.length === 0 ? ( // 3. Renderiza filteredPlannings em vez de plannings
+      ) : filteredPlannings.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-4 h-96 flex items-center justify-center text-gray-400">
           No planning found with the current filters.
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredPlannings.map((planning) => ( // 3. Mapeia a lista filtrada
-            <PlanningCard 
-              key={planning.id} 
+          {filteredPlannings.map((planning) => (
+            <PlanningCard
+              key={planning.id}
               planning={planning}
-              checklist={planning.checklist_items} 
-              onOpen={setDetailPlanning} 
+              checklist={planning.checklist_items}
+              onOpen={setDetailPlanning}
             />
           ))}
         </div>
