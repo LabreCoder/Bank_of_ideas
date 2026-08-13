@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { cycleApi } from "../services/cycle";
 import { planningApi } from "../services/planning";
 import CycleCard from "../components/Cycle/CycleCard";
@@ -52,16 +52,10 @@ export default function Cycles() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Cycles</h1>
-          <p className="text-sm text-gray-500">
-            Organize and schedule group plannings within execution windows.
-          </p>
-        </div>
+      <div className="mb-4 flex justify-end">
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="bg-accent-600 hover:bg-accent-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-700"
         >
           + New Cycle
         </button>
