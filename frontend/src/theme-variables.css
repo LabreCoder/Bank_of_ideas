@@ -6,6 +6,14 @@
 
 :root,
 [data-theme="indigo"] {
+  --color-ui-page: 10 14 23;
+  --color-ui-surface: 17 24 39;
+  --color-ui-surface-2: 30 41 59;
+  --color-ui-border: 71 85 105;
+  --color-ui-text-primary: 241 245 249;
+  --color-ui-text-secondary: 203 213 225;
+  --color-ui-text-muted: 148 163 184;
+
   --color-accent-50:  238 242 255;
   --color-accent-100: 224 231 255;
   --color-accent-200: 199 210 254;
@@ -16,6 +24,16 @@
   --color-accent-700: 55 48 163;
   --color-accent-800: 49 46 129;
   --color-accent-900: 30 27 75;
+}
+
+[data-mode="light"] {
+  --color-ui-page: 249 250 251;
+  --color-ui-surface: 255 255 255;
+  --color-ui-surface-2: 243 244 246;
+  --color-ui-border: 229 231 235;
+  --color-ui-text-primary: 17 24 39;
+  --color-ui-text-secondary: 75 85 99;
+  --color-ui-text-muted: 107 114 128;
 }
 
 [data-theme="cyan"] {

@@ -10,5 +10,39 @@
 
 
 body {
-  @apply bg-gray-50 text-gray-900;
+  @apply bg-ui-page text-ui-text-primary;
+}
+
+html[data-mode="dark"] .bg-white {
+  background-color: rgb(var(--color-ui-surface) / 1);
+}
+
+html[data-mode="dark"] .bg-gray-50,
+html[data-mode="dark"] .bg-gray-100 {
+  background-color: rgb(var(--color-ui-surface-2) / 1);
+}
+
+html[data-mode="dark"] .text-gray-900,
+html[data-mode="dark"] .text-gray-800,
+html[data-mode="dark"] .text-gray-700,
+html[data-mode="dark"] .text-gray-600,
+html[data-mode="dark"] .text-gray-500,
+html[data-mode="dark"] .text-gray-400,
+html[data-mode="dark"] .text-gray-300 {
+  color: rgb(var(--color-ui-text-secondary) / 1);
+}
+
+html[data-mode="dark"] .border-gray-200,
+html[data-mode="dark"] .border-gray-300,
+html[data-mode="dark"] .border-gray-700,
+html[data-mode="dark"] .border-gray-800 {
+  border-color: rgb(var(--color-ui-border) / 1);
+}
+
+html[data-mode="dark"] input,
+html[data-mode="dark"] select,
+html[data-mode="dark"] textarea {
+  background-color: rgb(var(--color-ui-surface-2) / 1);
+  color: rgb(var(--color-ui-text-primary) / 1);
+  border-color: rgb(var(--color-ui-border) / 1);
 }
