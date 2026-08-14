@@ -51,7 +51,7 @@ export default function CalendarGrid({ year, month, dueMap, onMonthChange, onDay
             onClick={goToToday}
             className="text-sm px-3 py-1 rounded-md border border-gray-200 hover:bg-gray-50"
           >
-            Hoje
+            Today
           </button>
           <button
             onClick={goToNextMonth}
@@ -70,11 +70,6 @@ export default function CalendarGrid({ year, month, dueMap, onMonthChange, onDay
         ))}
       </div>
 
-      {/* Altura fixa (h-14) em vez de aspect-square: numa tela larga, uma
-          célula quadrada fica alta o suficiente pra empurrar as 6 semanas
-          pra fora da viewport. Como não precisa ser responsivo pra mobile,
-          fixar a altura é mais previsível — ajuste h-14 pra h-16/h-20 se
-          quiser células mais altas, ou h-12 se ainda não couber na tela. */}
       <div className="grid grid-cols-7 gap-1">
         {weeks.flat().map((date) => {
           const key = localDateToKey(date);
@@ -87,7 +82,7 @@ export default function CalendarGrid({ year, month, dueMap, onMonthChange, onDay
               key={key}
               onClick={() => ideasDue.length > 0 && onDayClick(key, ideasDue)}
               disabled={ideasDue.length === 0}
-              className={`h-20 rounded-md p-1.5 flex flex-col items-start justify-between text-left transition-colors
+              className={`h-14 md:h-16 rounded-md p-1 md:p-1.5 flex flex-col items-start justify-between text-left transition-colors
                 ${inCurrentMonth ? "text-gray-700" : "text-gray-300"}
                 ${today ? "ring-2 ring-accent-600" : ""}
                 ${ideasDue.length > 0 ? "cursor-pointer hover:opacity-80" : "cursor-default"}
