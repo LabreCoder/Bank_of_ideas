@@ -1,5 +1,5 @@
 const STATUS_STYLES = {
-  Free: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  "Free": "bg-emerald-50 text-emerald-700 border-emerald-200",
   "In Planning": "bg-amber-50 text-amber-700 border-amber-200",
 };
 
@@ -15,7 +15,7 @@ export default function IdeaCard({ idea, onOpen }) {
       }`}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-medium text-gray-900 leading-snug">{idea.name}</h3>
+        <h3 className="font-bold text-gray-900 leading-snug">{idea.name}</h3>
         <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full border ${statusClass}`}>
           {idea.execution_status}
         </span>

@@ -32,9 +32,8 @@ export default function PizzaGraphic({ categories, ideas }) {
     }, [categories, ideas]);
 
     return (
-        <StatCard title="Categories" maxWidth="max-w-[50vw]">
-            {/* Definimos uma altura fixa ou proporcional para o container do gráfico */}
-            <div className="w-full h-[300px] sm:h-[350px] flex items-center justify-center">
+        <StatCard title="Categories distribution">
+            <div className="w-full h-64 md:h-72 flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie
@@ -43,8 +42,6 @@ export default function PizzaGraphic({ categories, ideas }) {
                     cy="50%"
                     labelLine={false}
                     borderRadius={10}
-                    //label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`} 
-                    // Mudamos de 150 para uma porcentagem (ex: 70% ou 80%) para ele ser responsivo
                     outerRadius="80%" 
                     fill="#8884d8"
                     dataKey="value"

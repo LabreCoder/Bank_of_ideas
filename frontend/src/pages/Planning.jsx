@@ -144,22 +144,16 @@ export default function Planning() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-semibold mb-1">Planning</h2>
-          <p className="text-gray-500">
-            Organize ideas into content plans, track dates and checklist progress.
-          </p>
-        </div>
+      <div className="mb-4 flex justify-between items-center">
+        <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
         <button
           onClick={() => setCreateOpen(true)}
-          className="bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-700"
         >
           + New Planning
         </button>
       </div>
 
-      <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
 
       <FilterInfo
         categories={categories}
