@@ -243,13 +243,13 @@ export default function IdeaDetailModal({
                       <span className={`flex-1 ${item.is_done ? "line-through text-gray-400" : ""}`}>
                         {item.description}
                       </span>
-                      <button
+                      {/*<button
                         type="button"
                         onClick={() => handleDeleteItem(item.id)}
                         className="text-gray-400 hover:text-red-600 text-xs"
                       >
                         Remove
-                      </button>
+                      </button>*/} 
                     </li>
                   ))}
                 </ul>
@@ -269,13 +269,13 @@ export default function IdeaDetailModal({
         >
           {idea.is_active ? "Deactivate" : "Activate"}
         </button>
-        <button
+        {/*<button
           type="button"
           onClick={onClose}
           className="text-sm font-medium px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700"
         >
           Close
-        </button>
+        </button>*/}
       </div>
     </DetailModal>
   );
