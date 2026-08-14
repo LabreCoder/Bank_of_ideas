@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { planningApi } from "../services/planning";
 import { ideasApi } from "../services/ideas";
-import { ownersApi } from "../services/owners";
 import {categoriesApi} from "../services/categories";
 import CalendarGrid from "../components/Calendar/CalendarGrid";
 import CalendarLegend from "../components/Calendar/CalendarLegend";
@@ -14,7 +13,6 @@ export default function Dashboard() {
   const [month, setMonth] = useState(today.getMonth());
   const [plannings, setPlannings] = useState([]);
   const [ideas, setIdeas] = useState([]);
-  const [owners, setOwners] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -67,7 +65,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div>
+    <div className="max-w-6xl mx-auto">
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-1">Dashboard</h2>
         <p className="text-gray-500">

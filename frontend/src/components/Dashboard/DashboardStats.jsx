@@ -47,12 +47,16 @@ export default function DashboardStats({ ideas, plannings, categories }) {
 
   return (
     <div>
-      <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 mb-4 text-center text-sm" >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-center text-sm">
         <PizzaGraphic categories={categories} ideas={ideas} />
         <SimpleRadarChart categories={categories} ideas={ideas} />
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4 text-center text-sm">
-        <StatCard title="Execution status" value={`${stats.FreeCount} / ${stats.totalIdeas}`} >
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-4 text-center text-sm">
+        <StatCard
+          title="Execution status"
+          value={`${stats.FreeCount} / ${stats.totalIdeas}`}
+          valueClassName="text-[28px] md:text-[32px]"
+        >
           <div className="h-3 bg-amber-100 rounded-full overflow-hidden mt-1">
             <div className="h-full bg-emerald-500" style={{ width: `${FreePct}%` }} />
           </div>
@@ -80,6 +84,7 @@ export default function DashboardStats({ ideas, plannings, categories }) {
         <StatCard
           title="Checklist progress"
           value={`${stats.checklistProgress}%`}
+          valueClassName="text-[28px] md:text-[32px]"
           subtitle={`${stats.doneItems} of ${stats.totalItems} items done`}
         >
           <div className="h-3 bg-gray-100 rounded-full overflow-hidden mt-1 text-[12px]">
