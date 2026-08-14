@@ -14,12 +14,7 @@ export default function Settings() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold mb-1">Settings</h2>
-        <p className="text-gray-500">Customize your application settings.</p>
-      </div>
-
-      <div className="flex gap-2 mb-4 border-b border-gray-200">
+      <div className="mb-6 flex gap-2 border-b border-gray-200">
         {TABS.map((tab) => (
           <button
             key={tab.id}
