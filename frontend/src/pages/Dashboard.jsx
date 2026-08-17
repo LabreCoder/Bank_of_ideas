@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { planningApi } from "../services/planning";
 import { ideasApi } from "../services/ideas";
-import {categoriesApi} from "../services/categories";
+import { categoriesApi } from "../services/categories";
 import CalendarGrid from "../components/Calendar/CalendarGrid";
 import CalendarLegend from "../components/Calendar/CalendarLegend";
 import DayIdeasModal from "../components/Dashboard/DayIdeasModal";
@@ -16,7 +16,7 @@ export default function Dashboard() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedDay, setSelectedDay] = useState(null); // { key, plannings }
+  const [selectedDay, setSelectedDay] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -30,7 +30,6 @@ export default function Dashboard() {
         ]);
         setPlannings(planningsData);
         setIdeas(ideasData);
-        //setOwners(ownersData);
         setCategories(categoriesData);
       } catch (err) {
         setError(err.message || "It was not possible to load the dashboard data.");
@@ -41,14 +40,11 @@ export default function Dashboard() {
     load();
   }, []);
 
-  // Agrupa plannings por due_date (chave "YYYY-MM-DD"), independente do
-  // status de execução/planning — o requisito é mostrar TODA ideia com
-  // vencimento marcado, não importa em que fase ela está.
   const dueMap = useMemo(() => {
     const map = new Map();
     for (const planning of plannings) {
       if (!planning.due_date) continue;
-      const key = planning.due_date; // já vem como "YYYY-MM-DD" da API
+      const key = planning.due_date;
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(planning);
     }
@@ -65,7 +61,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div>
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-1">Dashboard</h2>
         <p className="text-gray-500">
