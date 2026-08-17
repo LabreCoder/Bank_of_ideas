@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import "./index.css";
 import { ThemeProvider } from "./context/ThemeContext";
+import { SoundProvider } from "./context/SoundContext.jsx";
 
 // This is the actual entry point of the app — Vite injects this file
 // through the <script> tag in index.html.
@@ -13,7 +14,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <ThemeProvider>
-        <App />
+        <SoundProvider>
+          <App />
+        </SoundProvider>
       </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>
