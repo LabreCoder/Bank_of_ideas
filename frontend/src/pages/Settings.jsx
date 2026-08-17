@@ -2,11 +2,13 @@ import { useState } from "react";
 import CategoriesPanel from "../components/Settings/CategoriesPanel";
 import ThemePanel from "../components/Settings/ThemePanel";
 import OwnersPanel from "../components/Settings/OwnersPanel";
+import SoundPanel from "../components/Settings/SoundPanel";
 
 const TABS = [
   { id: "categories", label: "Categories" },
   { id: "owners", label: "Owners" },
   { id: "theme", label: "Theme" },
+  { id: "sound", label: "Sound" },
 ];
 
 export default function Settings() {
@@ -14,7 +16,12 @@ export default function Settings() {
 
   return (
     <div>
-      <div className="mb-6 flex gap-2 border-b border-gray-200">
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold mb-1">Settings</h2>
+        <p className="text-gray-500">Customize your application settings.</p>
+      </div>
+
+      <div className="flex gap-2 mb-4 border-b border-gray-200">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -30,13 +37,10 @@ export default function Settings() {
         ))}
       </div>
 
-      {activeTab === "categories" ? (
-        <CategoriesPanel />
-      ) : activeTab === "theme" ? (
-        <ThemePanel />
-      ) : (
-        <OwnersPanel />
-      )}
+      {activeTab === "categories" && <CategoriesPanel />}
+      {activeTab === "owners" && <OwnersPanel />}
+      {activeTab === "theme" && <ThemePanel />}
+      {activeTab === "sound" && <SoundPanel />}
     </div>
   );
 }

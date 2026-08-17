@@ -1,5 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Topbar from "../components/Topbar.jsx";
+import Sidebar from "../components/Sidebar.jsx";
+import AmbientAudio from "../components/AmbientAudio.jsx";
 
 // This layout wraps every page. <Outlet /> is where React Router
 // renders whichever page component matches the current URL
@@ -15,6 +17,7 @@ export default function MainLayout() {
       <main className="mx-auto w-full max-w-[1400px] min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         <Outlet />
       </main>
+      <AmbientAudio />
     </div>
   );
 }
