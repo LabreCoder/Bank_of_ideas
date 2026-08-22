@@ -19,6 +19,66 @@ export function localDateToKey(date) {
   return `${year}-${month}-${day}`;
 }
 
+export function startOfDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+export function addDays(date, amount) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + amount);
+  return next;
+}
+
+export function getStartOfWeek(date) {
+  const base = startOfDay(date);
+  const weekday = base.getDay(); // 0 = Sunday
+  return addDays(base, -weekday);
+}
+
+export function getWeekDates(anchorDate) {
+  const start = getStartOfWeek(anchorDate);
+  return Array.from({ length: 7 }, (_, index) => addDays(start, index));
+}
+
+export function shiftAnchorDate(anchorDate, view, direction) {
+  if (view === "day") return addDays(anchorDate, direction);
+  if (view === "week") return addDays(anchorDate, direction * 7);
+
+  const next = new Date(anchorDate);
+  next.setMonth(next.getMonth() + direction);
+  return next;
+}
+
+export function getPeriodLabel(anchorDate, view) {
+  if (view === "day") {
+    return anchorDate.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  }
+
+  if (view === "week") {
+    const weekDates = getWeekDates(anchorDate);
+    const start = weekDates[0];
+    const end = weekDates[6];
+
+    const startLabel = start.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+    });
+    const endLabel = end.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    });
+
+    return `${startLabel} - ${endLabel}`;
+  }
+
+  return `${MONTH_LABELS[anchorDate.getMonth()]} ${anchorDate.getFullYear()}`;
+}
+
 // Gera a matriz de semanas (arrays de 7 dias) pro mês informado, incluindo
 // dias do mês anterior/seguinte pra completar as semanas — padrão de
 // qualquer calendário em grid.
@@ -57,7 +117,7 @@ export function isToday(date) {
   );
 }
 
-export const WEEKDAY_LABELS = ["Sun", "Mon", "Thu", "Wed", "Tue", "Fri", "Sat"];
+export const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export const MONTH_LABELS = [
   "January", "February", "March", "April", "May", "June",
