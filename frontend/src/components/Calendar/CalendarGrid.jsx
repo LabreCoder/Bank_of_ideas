@@ -1,48 +1,52 @@
 import {
+  addDays,
+  getPeriodLabel,
   getMonthMatrix,
-  isSameMonth,
-  isToday,
-  localDateToKey,
-  WEEKDAY_LABELS,
-  MONTH_LABELS,
+  getWeekDates,
+  shiftAnchorDate,
 } from "../../utils/calendar";
+import TabBar from "../Filters/TabBar";
+import CalendarMonthView from "./CalendarMonthView";
+import CalendarWeekView from "./CalendarWeekView";
+import CalendarDayView from "./CalendarDayView";
 
-// Mesma escala de cores usada na legenda — se ajustar aqui, ajusta lá também.
-// Usa só os degraus que existem em tailwind.config.js (100/500/700).
-function intensityClass(count) {
-  if (count >= 3) return "bg-accent-800 text-white";
-  if (count === 2) return "bg-accent-500 text-white";
-  if (count === 1) return "bg-accent-200 text-accent-700";
-  return "";
-}
+export default function CalendarGrid({
+  anchorDate,
+  view,
+  onViewChange,
+  plannings,
+  dueMap,
+  onAnchorDateChange,
+  onDayClick,
+  onOpenPlanning,
+}) {
+  const monthWeeks = getMonthMatrix(anchorDate.getFullYear(), anchorDate.getMonth());
+  const weekDates = getWeekDates(anchorDate);
+  const dayDate = addDays(anchorDate, 0);
 
-export default function CalendarGrid({ year, month, dueMap, onMonthChange, onDayClick }) {
-  const weeks = getMonthMatrix(year, month);
+  const viewTabs = [
+    { value: "month", label: "Month" },
+    { value: "week", label: "Week" },
+    { value: "day", label: "Day" },
+  ];
 
-  const goToPrevMonth = () => {
-    const prev = new Date(year, month - 1, 1);
-    onMonthChange(prev.getFullYear(), prev.getMonth());
-  };
+  const monthDueMap = dueMap;
 
-  const goToNextMonth = () => {
-    const next = new Date(year, month + 1, 1);
-    onMonthChange(next.getFullYear(), next.getMonth());
-  };
+  const goPrev = () => onAnchorDateChange(shiftAnchorDate(anchorDate, view, -1));
+  const goNext = () => onAnchorDateChange(shiftAnchorDate(anchorDate, view, 1));
+  const goToToday = () => onAnchorDateChange(new Date());
 
-  const goToToday = () => {
-    const today = new Date();
-    onMonthChange(today.getFullYear(), today.getMonth());
-  };
+  const periodLabel = getPeriodLabel(anchorDate, view);
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <TabBar tabs={viewTabs} active={view} onChange={onViewChange} />
+
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">
-          {MONTH_LABELS[month]} {year}
-        </h3>
+        <h3 className="text-lg font-semibold">{periodLabel}</h3>
         <div className="flex items-center gap-2">
           <button
-            onClick={goToPrevMonth}
+            onClick={goPrev}
             className="text-sm px-2 py-1 rounded-md border border-gray-200 hover:bg-gray-50"
           >
             ‹
@@ -54,7 +58,7 @@ export default function CalendarGrid({ year, month, dueMap, onMonthChange, onDay
             Today
           </button>
           <button
-            onClick={goToNextMonth}
+            onClick={goNext}
             className="text-sm px-2 py-1 rounded-md border border-gray-200 hover:bg-gray-50"
           >
             ›
@@ -62,40 +66,20 @@ export default function CalendarGrid({ year, month, dueMap, onMonthChange, onDay
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 mb-1">
-        {WEEKDAY_LABELS.map((label) => (
-          <div key={label} className="text-xs font-medium text-gray-400 text-center py-1">
-            {label}
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-7 gap-1">
-        {weeks.flat().map((date) => {
-          const key = localDateToKey(date);
-          const ideasDue = dueMap.get(key) || [];
-          const inCurrentMonth = isSameMonth(date, year, month);
-          const today = isToday(date);
-
-          return (
-            <button
-              key={key}
-              onClick={() => ideasDue.length > 0 && onDayClick(key, ideasDue)}
-              disabled={ideasDue.length === 0}
-              className={`h-14 md:h-16 rounded-md p-1 md:p-1.5 flex flex-col items-start justify-between text-left transition-colors
-                ${inCurrentMonth ? "text-gray-700" : "text-gray-300"}
-                ${today ? "ring-2 ring-accent-600" : ""}
-                ${ideasDue.length > 0 ? "cursor-pointer hover:opacity-80" : "cursor-default"}
-                ${intensityClass(ideasDue.length)}`}
-            >
-              <span className="text-xs font-medium">{date.getDate()}</span>
-              {ideasDue.length > 0 && (
-                <span className="text-[10px] font-semibold self-end">{ideasDue.length}</span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {view === "month" && (
+        <CalendarMonthView
+          weeks={monthWeeks}
+          anchorDate={anchorDate}
+          dueMap={monthDueMap}
+          onDayClick={onDayClick}
+        />
+      )}
+      {view === "week" && (
+        <CalendarWeekView weekDates={weekDates} plannings={plannings} onDayClick={onDayClick} />
+      )}
+      {view === "day" && (
+        <CalendarDayView dayDate={dayDate} plannings={plannings} onOpenPlanning={onOpenPlanning} />
+      )}
     </div>
   );
 }
