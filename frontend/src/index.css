@@ -32,6 +32,14 @@ html[data-mode="dark"] .text-gray-300 {
   color: rgb(var(--color-ui-text-secondary) / 1);
 }
 
+html[data-mode="dark"] .text-ui-text-muted {
+  color: rgb(var(--color-ui-text-muted) / 1);
+}
+
+html[data-mode="dark"] .text-ui-text-secondary {
+  color: rgb(var(--color-ui-text-secondary) / 1);
+}
+
 html[data-mode="dark"] .border-gray-200,
 html[data-mode="dark"] .border-gray-300,
 html[data-mode="dark"] .border-gray-700,
