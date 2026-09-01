@@ -32,7 +32,7 @@ export default function PizzaGraphic({ categories, ideas }) {
     }, [categories, ideas]);
 
     return (
-        <StatCard title="Categories distribution">
+        <StatCard title="Ideas distribution by category" variant="chart">
             <div className="w-full h-64 md:h-72 flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -50,8 +50,15 @@ export default function PizzaGraphic({ categories, ideas }) {
                         <Cell key={`cell-${index}`} fill={getCategoryColor(index, stats.data.length)} />
                     ))} 
                     </Pie>
-                    <Tooltip />
-                    <Legend />
+                        <Tooltip
+                            contentStyle={{
+                                borderRadius: "10px",
+                                border: "1px solid rgb(var(--color-ui-border) / 1)",
+                                backgroundColor: "rgb(var(--color-ui-surface) / 1)",
+                                color: "rgb(var(--color-ui-text-primary) / 1)",
+                            }}
+                        />
+                        <Legend wrapperStyle={{ fontSize: 12, color: "rgb(var(--color-ui-text-secondary) / 1)" }} />
                 </PieChart>
                 </ResponsiveContainer>
             </div>
