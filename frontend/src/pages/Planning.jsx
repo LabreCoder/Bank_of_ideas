@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { planningApi } from "../services/planning";
 import { ideasApi } from "../services/ideas";
 import { categoriesApi } from "../services/categories";
@@ -20,6 +21,7 @@ export const STATUS_OPTIONS = [
 ];
 
 export default function Planning() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [plannings, setPlannings] = useState([]);
   const [ideas, setIdeas] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -55,6 +57,24 @@ export default function Planning() {
   useEffect(() => {
     loadAll();
   }, []);
+
+  useEffect(() => {
+    const planningIdParam = searchParams.get("planningId");
+    if (!planningIdParam || !plannings.length) return;
+
+    const planningId = Number(planningIdParam);
+    if (!Number.isFinite(planningId)) return;
+
+    const targetPlanning = plannings.find((planning) => planning.id === planningId);
+    if (!targetPlanning) return;
+
+    setDetailPlanning(targetPlanning);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("planningId");
+      return next;
+    });
+  }, [searchParams, plannings, setSearchParams]);
 
   // Contagem por status, pra mostrar o número em cada aba (ex: "Started (3)").
   const tabCounts = useMemo(() => {
