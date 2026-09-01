@@ -1,6 +1,6 @@
 export default function TabBar({ tabs, active, onChange }) {
   return (
-    <div className="flex gap-2 mb-4 border-b border-gray-200 overflow-x-auto">
+    <div className="flex gap-2 mb-4 border-b border-gray-200 ">
       {tabs.map((tab) => (
         <button
           key={tab.value}
