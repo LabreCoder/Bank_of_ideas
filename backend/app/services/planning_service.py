@@ -53,9 +53,13 @@ def create_planning(db: Session, payload: PlanningCreate) -> PlanningResponse:
         due_date=payload.due_date,
         status=payload.status.value,
     )
-    for i, description in enumerate(payload.checklist_items):
+    for i, item in enumerate(payload.checklist_items):
         planning.checklist_items.append(
-            PlanningChecklistItem(description=description, position=i)
+            PlanningChecklistItem(
+                description=item.description,
+                due_date=item.due_date,
+                position=item.position if item.position is not None else i,
+            )
         )
 
     db.add(planning)

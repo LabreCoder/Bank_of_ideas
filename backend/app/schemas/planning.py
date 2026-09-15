@@ -2,8 +2,7 @@ from typing import List, Optional
 from datetime import date, datetime
 from enum import Enum
 from pydantic import BaseModel
-from schemas.checklist import ChecklistItemResponse, ChecklistItemUpdate
-
+from schemas.checklist import ChecklistItemCreate, ChecklistItemResponse, ChecklistItemUpdate
 
 class PlanningStatus(str, Enum):
     not_started = "Not Started"
@@ -21,8 +20,8 @@ class PlanningCreate(BaseModel):
     start_date: Optional[date] = None
     due_date: Optional[date] = None
     status: PlanningStatus = PlanningStatus.not_started
-    checklist_items: List[str] = []  # descrições iniciais, opcional
-
+    checklist_items: List[ChecklistItemCreate] = []
+    
 
 class PlanningUpdate(BaseModel):
     details: Optional[str] = None
