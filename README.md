@@ -21,22 +21,25 @@
 
 **Content Planner** helps you organize the full lifecycle of content creation — from a raw idea to a scheduled post — in one place. It was built to solve a simple problem: ideas get lost in notes apps, spreadsheets get outdated, and nobody remembers what's due for publishing this week.
 
-The system is split into three core areas:
+The system is split into four core areas:
 
-- 💡 **Ideas** — register, edit, and activate/deactivate content ideas as they come to mind.
-- 🗂️ **Planning** — organize ideas into content plans, giving structure to what gets published and when.
-- 📊 **Dashboard** — track key indicators at a glance, with a calendar view showing which posts are coming up.
+- 💡 **Ideas** — register, edit, and activate/deactivate raw content ideas as they come to mind.
+- 🗂️ **Planning** — turn an idea into an actionable plan: details, dates, status, and a checklist (each item with its own optional due date).
+- 🔄 **Cycles** — group several plannings under a shared time window (e.g. "August LinkedIn posts") to plan and track batches of content without conflicts or overload.
+- 📊 **Dashboard** — indicator cards (ideas, execution status, plannings by status, checklist progress) plus a calendar highlighting upcoming due dates.
 
 ---
 
 ## ✨ Features
 
 - ✅ Full CRUD for ideas (create, edit, activate/deactivate)
-- ✅ Assign ideas to existing content plans
-- ✅ Calendar view of scheduled posts
-- ✅ Indicator widgets on the dashboard
+- ✅ Categories and Owners management (Settings)
+- ✅ One planning per idea, with details, start/due dates, status (`Not Started`, `Under Review`, `Started`, `In Development`, `Completed`, `Cancelled`), and a checklist with per-item due dates
+- ✅ Cycles: bind multiple plannings to a shared date range, with an automatically derived status (`Waiting Start` / `In Progress` / `Finished`) and progress tracking
+- ✅ Dashboard with summary indicators and a due-date calendar
+- ✅ Light / dark theme toggle
+- ✅ Optional ambient sound player
 - ✅ Fully containerized (API + database + frontend) with a single command
-- 🚧 More indicators and reporting features — *in progress*
 
 ---
 
@@ -53,12 +56,13 @@ The system is split into three core areas:
 
 ## 📂 Project Structure
 
-```
+```bash
 .
 ├── backend
 │   └── app
 │       ├── database     # DB connection setup
-│       ├── models       # Pydantic schemas
+│       ├── models       # SQLAlchemy models (idea, planning, checklist, cycle, category, owner)
+│       ├── schemas      # Pydantic request/response schemas
 │       ├── routes       # API endpoints
 │       └── services     # Business logic / data access
 ├── database
@@ -66,10 +70,14 @@ The system is split into three core areas:
 │   └── seeds.sql        # Initial seed data
 ├── frontend
 │   └── src
-│       ├── components   # Reusable UI pieces (Sidebar, etc.)
-│       ├── layouts       # Shared page layout
-│       ├── pages         # Dashboard, Ideas, Planning, Settings
-│       └── router        # Route definitions
+│       ├── components   # UI pieces, grouped by domain (Ideas, Planning, Cycle, Dashboard, Settings, ...)
+│       ├── context      # Theme and ambient sound providers
+│       ├── hooks        # Shared hooks (e.g. filters)
+│       ├── layouts      # Shared page layout (Topbar, Sidebar)
+│       ├── pages        # Dashboard, Ideas, Planning, Cycles, Settings
+│       ├── router       # Route and navigation definitions
+│       ├── services     # API clients, one per resource
+│       └── utils        # Date/calendar helpers, shared status maps
 └── docker-compose.yml
 ```
 
@@ -117,24 +125,25 @@ Once everything is up:
 
 ## 📡 API Examples
 
-> These are illustrative examples of how the Ideas endpoints are consumed. Refer to `/docs` for the full, up-to-date contract.
+> These are illustrative examples of how the Ideas endpoints are consumed. Refer to `/docs` for the full, up-to-date contract across all resources (Ideas, Planning, Cycles, Categories, Owners).
 
 **Create a new idea**
 
 ```bash
-curl -X POST http://localhost:8000/ideas \
+curl -X POST http://localhost:8000/ideas/ \
   -H "Content-Type: application/json" \
   -d '{
-    "title": "5 tips for organizing a home office",
+    "name": "5 tips for organizing a home office",
     "description": "Short-form post with practical setup tips",
-    "category_id": 2
+    "category_id": 2,
+    "owner_id": 1
   }'
 ```
 
 **List all active ideas**
 
 ```bash
-curl http://localhost:8000/ideas?active=true
+curl "http://localhost:8000/ideas/?active=true"
 ```
 
 **Toggle an idea's active status**
@@ -147,10 +156,10 @@ curl -X PATCH http://localhost:8000/ideas/14/toggle-active
 
 ## 🗺️ Roadmap
 
-- [ ] Rich dashboard indicators (posts per category, completion rate, etc.)
 - [ ] Drag-and-drop calendar for rescheduling posts
 - [ ] Multi-user support with authentication
 - [ ] Notifications for upcoming post deadlines
+- [ ] Kanban view for Cycles (alternative to the current timeline view)
 
 ---
 
