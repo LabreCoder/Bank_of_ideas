@@ -39,10 +39,35 @@ def _compute_cycle_status(plannings: List[Planning]) -> str:
     return "In Progress"
 
 
-def _attach_status(cycle: Cycle) -> Cycle:
-    # Plain Python attribute, not a DB column — Pydantic reads it via
+def _compute_progress(plannings: List[Planning]) -> Tuple[int, int, float]:
+    """
+    completed_plannings, total_plannings, progress_percentage.
+
+    progress_percentage = completed / (total - cancelled) * 100.
+    Cancelled plannings are removed from the denominator entirely (they
+    neither help nor hurt progress). When the denominator is 0 — no
+    plannings bound yet, or every bound planning was cancelled — progress
+    is 0.0. Both cases already fall under (or keep) "Waiting Start"-like
+    conditions, so 0% is an accurate reading, not a placeholder.
+    """
+    total = len(plannings)
+    completed = sum(1 for p in plannings if p.status == PlanningStatus.completed.value)
+    cancelled = sum(1 for p in plannings if p.status == PlanningStatus.cancelled.value)
+
+    denominator = total - cancelled
+    progress_percentage = round((completed / denominator) * 100, 1) if denominator > 0 else 0.0
+
+    return completed, total, progress_percentage
+
+
+def _attach_computed_fields(cycle: Cycle) -> Cycle:
+    # Plain Python attributes, not DB columns — Pydantic reads them via
     # from_attributes when building the CycleResponse.
     cycle.status = _compute_cycle_status(cycle.plannings)
+    completed, total, progress = _compute_progress(cycle.plannings)
+    cycle.completed_plannings = completed
+    cycle.total_plannings = total
+    cycle.progress_percentage = progress
     return cycle
 
 
@@ -110,7 +135,7 @@ def create_cycle(db: Session, payload: CycleCreate) -> Cycle:
     db.add(cycle)
     db.commit()
     db.refresh(cycle)
-    return _attach_status(cycle)
+    return _attach_computed_fields(cycle)
 
 
 def list_cycles(db: Session) -> List[Cycle]:
@@ -123,11 +148,11 @@ def list_cycles(db: Session) -> List[Cycle]:
         .order_by(Cycle.created_at.desc())
         .all()
     )
-    return [_attach_status(c) for c in cycles]
+    return [_attach_computed_fields(c) for c in cycles]
 
 
 def get_cycle(db: Session, cycle_id: int) -> Cycle:
-    return _attach_status(_get_cycle_or_404(db, cycle_id))
+    return _attach_computed_fields(_get_cycle_or_404(db, cycle_id))
 
 
 def bind_planning_to_cycle(db: Session, cycle_id: int, payload: CyclePlanningBind) -> Cycle:
@@ -140,14 +165,12 @@ def bind_planning_to_cycle(db: Session, cycle_id: int, payload: CyclePlanningBin
             detail="Planning is already bound to this cycle.",
         )
 
-    # If Cycle has no due_date yet, bind freely — nothing to validate against.
     if not cycle.due_date:
         cycle.plannings.append(planning)
         db.commit()
         db.refresh(cycle)
-        return _attach_status(cycle)
+        return _attach_computed_fields(cycle)
 
-    # Cycle has a due_date: run the fallback algorithm.
     candidate_date, origin = calculate_planning_candidate_due_date(planning, cycle.due_date)
 
     if candidate_date:
@@ -180,7 +203,7 @@ def bind_planning_to_cycle(db: Session, cycle_id: int, payload: CyclePlanningBin
     cycle.plannings.append(planning)
     db.commit()
     db.refresh(cycle)
-    return _attach_status(cycle)
+    return _attach_computed_fields(cycle)
 
 
 def unbind_planning_from_cycle(db: Session, cycle_id: int, planning_id: int) -> Cycle:
@@ -196,7 +219,7 @@ def unbind_planning_from_cycle(db: Session, cycle_id: int, planning_id: int) -> 
     cycle.plannings.remove(planning)
     db.commit()
     db.refresh(cycle)
-    return _attach_status(cycle)
+    return _attach_computed_fields(cycle)
 
 
 def update_cycle_due_date(db: Session, cycle_id: int, payload: CycleDueDateUpdate) -> Cycle:
@@ -209,10 +232,6 @@ def update_cycle_due_date(db: Session, cycle_id: int, payload: CycleDueDateUpdat
             detail="Cycle due_date cannot be earlier than start_date.",
         )
 
-    # Conflicts are only possible against plannings that ALREADY have their
-    # own due_date — plannings without one aren't validated here (see the
-    # open question about whether this should also trigger fallback
-    # assignment, same as bind_planning_to_cycle does).
     if new_due_date:
         conflicts = []
         for planning in cycle.plannings:
@@ -234,9 +253,6 @@ def update_cycle_due_date(db: Session, cycle_id: int, payload: CycleDueDateUpdat
                     )
                 )
 
-        # No override path anymore — a conflict always blocks the update.
-        # Resolve it by editing the conflicting planning's due_date, or by
-        # choosing a different due_date for the cycle.
         if conflicts:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -249,7 +265,7 @@ def update_cycle_due_date(db: Session, cycle_id: int, payload: CycleDueDateUpdat
     cycle.due_date = new_due_date
     db.commit()
     db.refresh(cycle)
-    return _attach_status(cycle)
+    return _attach_computed_fields(cycle)
 
 
 def update_cycle(db: Session, cycle_id: int, payload: CycleUpdate) -> Cycle:
@@ -261,7 +277,7 @@ def update_cycle(db: Session, cycle_id: int, payload: CycleUpdate) -> Cycle:
 
     db.commit()
     db.refresh(cycle)
-    return _attach_status(cycle)
+    return _attach_computed_fields(cycle)
 
 
 def delete_cycle(db: Session, cycle_id: int) -> None:

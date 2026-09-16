@@ -20,21 +20,13 @@ class CycleUpdate(BaseModel):
 
 class CycleDueDateUpdate(BaseModel):
     due_date: Optional[date] = None
-    # NOTE: "force" was removed on purpose — conflicts between the new
-    # due_date and a bound planning's own due_date must be resolved
-    # manually (edit the planning's date, or pick a different cycle
-    # due_date), never overridden silently.
 
 
 class CyclePlanningBind(BaseModel):
     planning_id: int
-    confirm_candidate_due_date: bool = False  # True once the user accepts the proposed fallback date
+    confirm_candidate_due_date: bool = False
 
 
-# Was a plain `class DateCandidateOrigin(str)` before — that's just a
-# namespace of string constants, not an actual type Pydantic can validate
-# against. A real Enum (same pattern as PlanningStatus) gets validation
-# for free and matches the rest of the codebase's style.
 class DateCandidateOrigin(str, Enum):
     planning = "planning"
     checklist = "checklist"
@@ -60,6 +52,14 @@ class CycleResponse(BaseModel):
     # Derived, never stored — same philosophy as Idea.execution_status.
     # One of: "Waiting Start", "In Progress", "Finished".
     status: str
+    # Também derivados. progress_percentage = completed / (total - cancelled),
+    # em % (0-100). Quando o denominador é 0 (nenhum planning ainda, ou
+    # todos os vinculados foram cancelados), o valor é 0.0 — esses casos
+    # sempre caem em status "Waiting Start" ou continuam sem nenhum
+    # planning ativo, então 0% é uma leitura correta, não um placeholder.
+    completed_plannings: int
+    total_plannings: int
+    progress_percentage: float
     created_at: datetime
     plannings: List[PlanningResponse] = []
 
