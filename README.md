@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📅 Content Planner
+# 📅 Bank of Ideas
 
 **A self-hosted content planning system — from idea to scheduled post.**
 
@@ -19,7 +19,7 @@
 
 ## 📖 About
 
-**Content Planner** helps you organize the full lifecycle of content creation — from a raw idea to a scheduled post — in one place. It was built to solve a simple problem: ideas get lost in notes apps, spreadsheets get outdated, and nobody remembers what's due for publishing this week.
+**Bank of Ideas** helps you organize the full lifecycle of content creation — from a raw idea to a scheduled post — in one place. It was built to solve a simple problem: ideas get lost in notes apps, spreadsheets get outdated, and nobody remembers what's due for publishing this week.
 
 The system is split into four core areas:
 
