@@ -27,7 +27,7 @@
 }
 
 [data-mode="light"] {
-  --color-ui-page: 249 250 251;
+  --color-ui-page: 255 253 242;
   --color-ui-surface: 255 255 255;
   --color-ui-surface-2: 243 244 246;
   --color-ui-border: 229 231 235;
