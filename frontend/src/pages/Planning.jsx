@@ -5,8 +5,8 @@ import { ideasApi } from "../services/ideas";
 import { categoriesApi } from "../services/categories";
 import { ownersApi } from "../services/owners";
 import PlanningCard from "../components/Planning/PlanningCard";
-import PlanningFormModal from "../components/Planning/PlanningFormModal";
-import PlanningDetailModal from "../components/Planning/PlanningDetailModal";
+import PlanningFormPanel from "../components/Planning/PlanningFormPanel";
+import PlanningDetailPanel from "../components/Planning/PlanningDetailPanel";
 import FilterInfo from "../components/Filters/FilterInfo";
 import TabBar from "../components/Filters/TabBar";
 import { useIdeaFilters } from "../hooks/useIdeaFilters";
@@ -76,7 +76,6 @@ export default function Planning() {
     });
   }, [searchParams, plannings, setSearchParams]);
 
-  // Contagem por status, pra mostrar o número em cada aba (ex: "Started (3)").
   const tabCounts = useMemo(() => {
     const counts = { All: plannings.length };
     for (const status of STATUS_OPTIONS) {
@@ -101,7 +100,6 @@ export default function Planning() {
     if (!Array.isArray(plannings)) return [];
 
     return plannings.filter((planning) => {
-      // Aba: filtra por status do planning. "All" não filtra nada aqui.
       if (activeTab !== "All" && planning.status !== activeTab) {
         return false;
       }
@@ -162,18 +160,50 @@ export default function Planning() {
     setDetailPlanning(null);
   };
 
+  if (detailPlanning) {
+    return (
+      <PlanningDetailPanel
+        planning={detailPlanning}
+        onClose={() => setDetailPlanning(null)}
+        onUpdated={handleUpdated}
+        onDeleted={handleDeleted}
+      />
+    );
+  }
+
+  if (createOpen) {
+    return (
+      <PlanningFormPanel
+        availableIdeas={availableIdeas}
+        onClose={() => setCreateOpen(false)}
+        onSubmit={handleCreate}
+      />
+    );
+  }
+
   return (
     <div>
-      <div className="mb-4 flex justify-between items-center">
-        <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-3xl font-bold text-gray-900">Planning</h1>
+            <span className="text-xs font-medium text-gray-500 bg-gray-100 rounded-full px-2.5 py-1">
+              {plannings.length} plans
+            </span>
+          </div>
+          <p className="text-gray-500">Ideas in motion. Keep every next step in view.</p>
+        </div>
         <button
           onClick={() => setCreateOpen(true)}
-          className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-700"
+          className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-700 shrink-0"
         >
           + New Planning
         </button>
       </div>
 
+      <div className="mb-4">
+        <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+      </div>
 
       <FilterInfo
         categories={categories}
@@ -208,23 +238,6 @@ export default function Planning() {
             />
           ))}
         </div>
-      )}
-
-      {createOpen && (
-        <PlanningFormModal
-          availableIdeas={availableIdeas}
-          onClose={() => setCreateOpen(false)}
-          onSubmit={handleCreate}
-        />
-      )}
-
-      {detailPlanning && (
-        <PlanningDetailModal
-          planning={detailPlanning}
-          onClose={() => setDetailPlanning(null)}
-          onUpdated={handleUpdated}
-          onDeleted={handleDeleted}
-        />
       )}
     </div>
   );

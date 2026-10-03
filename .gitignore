@@ -8,3 +8,7 @@ __pycache__
 
 .gitignore
 *.txt
+
+# postman files
+*.postman
+*postman*

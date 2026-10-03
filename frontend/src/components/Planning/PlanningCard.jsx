@@ -1,3 +1,5 @@
+import ProgressBar from "../Default/ProgressBar";
+
 const STATUS_STYLES = {
   "Not Started": "bg-gray-100 text-gray-600 border-gray-200",
   "Under Review": "bg-blue-50 text-blue-700 border-blue-200",
@@ -30,23 +32,12 @@ export default function PlanningCard({ planning, checklist, onOpen }) {
         </span>
       </div>
 
-
       {total > 0 && (
         <div className="mt-1">
-          <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-            <span>Checklist</span>
-            <span>
-              {done}/{total}
-            </span>
-          </div>
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-accent-600"
-              style={{ width: `${total ? (done / total) * 100 : 0}%` }}
-            />
-          </div>
+          <ProgressBar label="Checklist" current={done} total={total} />
         </div>
       )}
+
       <div className="pt-3 border-t border-gray-100 flex justify-between text-xs text-gray-500">
         <div>
           <span>Start: {planning.start_date || "--"}</span>

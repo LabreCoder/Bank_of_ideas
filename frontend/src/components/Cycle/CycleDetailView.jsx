@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import CycleProgressRing from "./CycleProgressRing";
 import { getPlanningGroup, PLANNING_GROUP_LEGEND } from "../../utils/cyclePlanningGroup";
 import { formatShortDate } from "../../utils/dateFormat";
+import ProgressBar from "../Default/ProgressBar";
 
 const CYCLE_STATUS_STYLES = {
   "Waiting Start": "bg-gray-100 text-gray-600 border-gray-200",
@@ -67,10 +68,13 @@ export default function CycleDetailView({ cycle, onEdit, onClose }) {
               / {cycle.total_plannings} completed
             </span>
           </p>
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mt-2">
-            <div
-              className="h-full bg-accent-600"
-              style={{ width: `${cycle.progress_percentage}%` }}
+          <div className="flex flex-col justify-center">
+            <ProgressBar
+              variant="large"
+              label="Planos de ação"
+              current={cycle.completed_plannings}
+              total={cycle.total_plannings}
+              percentage={cycle.progress_percentage}
             />
           </div>
         </div>
