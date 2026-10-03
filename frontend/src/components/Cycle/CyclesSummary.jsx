@@ -22,15 +22,15 @@ export default function CyclesSummary({ cycles }) {
 
   return (
     <div className="mb-6">
-      <h2 className="text-2xl font-semibold mb-1">Ciclos em andamento e concluídos</h2>
+      <h2 className="text-2xl font-semibold mb-1">Cycles Overview</h2>
       <p className="text-gray-500 mb-4">
-        Status, progresso e prazos dos seus planejamentos em um só lugar.
+        Status, progress, and deadlines of your plannings all in one place.
       </p>
 
       <div className="grid grid-cols-3 gap-4">
-        <StatCard title="Ativos" value={stats.activeCount} />
-        <StatCard title="Planejamentos" value={stats.totalPlannings} />
-        <StatCard title="Próximo prazo" value={formatShortDate(stats.nextDueDate)} />
+        <StatCard title="Actives" value={stats.activeCount} />
+        <StatCard title="Plannings" value={stats.totalPlannings} />
+        <StatCard title="Next Due Date" value={formatShortDate(stats.nextDueDate)} />
       </div>
     </div>
   );

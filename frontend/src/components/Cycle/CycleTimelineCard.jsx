@@ -3,7 +3,7 @@ import { formatShortDate } from "../../utils/dateFormat";
 const CYCLE_STATUS_STYLES = {
   "Waiting Start": "bg-gray-100 text-gray-600 border-gray-200",
   "In Progress": "bg-amber-50 text-amber-700 border-amber-200",
-  Finished: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  "Finished": "bg-emerald-50 text-emerald-700 border-emerald-200",
 };
 
 export default function CycleTimelineCard({ cycle, onClick }) {
@@ -30,7 +30,7 @@ export default function CycleTimelineCard({ cycle, onClick }) {
 
       <div className="mb-3">
         <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-          <span>Progresso</span>
+          <span>Progress</span>
           <span className="font-medium text-gray-700">{cycle.progress_percentage}%</span>
         </div>
         <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -43,10 +43,10 @@ export default function CycleTimelineCard({ cycle, onClick }) {
 
       <div className="pt-3 border-t border-gray-100 flex justify-between text-xs text-gray-500">
         <span>
-          {cycle.completed_plannings} / {cycle.total_plannings} planejamentos
+          {cycle.completed_plannings} / {cycle.total_plannings} plannings
         </span>
         <span>
-          {isFinished ? "Encerrado" : "Prazo"} {formatShortDate(cycle.due_date)}
+          {isFinished ? "Finished" : "Due"} {formatShortDate(cycle.due_date)}
         </span>
       </div>
     </div>
