@@ -77,7 +77,7 @@ export default function Cycles() {
           {title}
         </h3>
         <span className="text-xs text-gray-400">
-          {sectionCycles.length} {sectionCycles.length === 1 ? "ciclo" : "ciclos"}
+          {sectionCycles.length} {sectionCycles.length === 1 ? "cycle" : "cycles"}
         </span>
       </div>
 
@@ -125,12 +125,12 @@ export default function Cycles() {
         <>
           <CyclesSummary cycles={cycles} />
 
-          {renderTimelineSection("Em Andamento", activeCycles, "Nenhum ciclo em andamento.")}
+          {renderTimelineSection("On Course", activeCycles, "No cycles currently in progress.")}
 
-          {/* "Anteriores" some inteira quando não há nenhum cycle finalizado
-              ainda — não faz sentido mostrar um cabeçalho vazio. */}
+          {/* "Previous" section disappears entirely when there are no finished cycles
+              yet — it doesn't make sense to show an empty header. */}
           {finishedCycles.length > 0 &&
-            renderTimelineSection("Anteriores", finishedCycles, "")}
+            renderTimelineSection("Previous", finishedCycles, "")}
         </>
       )}
 
