@@ -14,6 +14,12 @@
   --color-ui-text-secondary: 203 213 225;
   --color-ui-text-muted: 148 163 184;
 
+  /* Card de destaque (ex.: "From spark to shipped" no Dashboard). No escuro
+     fica mais fundo que a página pra se destacar; no claro vira um navy. */
+  --color-ui-feature: 3 5 10;
+  --color-ui-feature-text: 241 245 249;
+  --color-ui-feature-muted: 148 163 184;
+
   --color-accent-50:  238 242 255;
   --color-accent-100: 224 231 255;
   --color-accent-200: 199 210 254;
@@ -34,6 +40,10 @@
   --color-ui-text-primary: 17 24 39;
   --color-ui-text-secondary: 75 85 99;
   --color-ui-text-muted: 107 114 128;
+
+  --color-ui-feature: 31 36 56;
+  --color-ui-feature-text: 248 250 252;
+  --color-ui-feature-muted: 161 168 190;
 }
 
 [data-theme="cyan"] {

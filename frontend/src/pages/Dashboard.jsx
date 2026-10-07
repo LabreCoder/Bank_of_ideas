@@ -3,11 +3,27 @@ import { useNavigate } from "react-router-dom";
 import { planningApi } from "../services/planning";
 import { ideasApi } from "../services/ideas";
 import { categoriesApi } from "../services/categories";
+import { cycleApi } from "../services/cycle";
 import CalendarGrid from "../components/Calendar/CalendarGrid";
 import CalendarLegend from "../components/Calendar/CalendarLegend";
 import DayIdeasModal from "../components/Dashboard/DayIdeasModal";
-import DashboardStats from "../components/Dashboard/DashboardStats";
-import { localDateToKey } from "../utils/calendar";
+import DashboardHeader from "../components/Dashboard/DashboardHeader";
+import KpiStrip from "../components/Dashboard/KpiStrip";
+import StageFunnelCard from "../components/Dashboard/StageFunnelCard";
+import CategoryBalanceCard from "../components/Dashboard/CategoryBalanceCard";
+import ProjectsTable from "../components/Dashboard/ProjectsTable";
+import NextDaysCard from "../components/Dashboard/NextDaysCard";
+import CollapsibleSection from "../components/Dashboard/CollapsibleSection";
+import { buildCategoryColorMap } from "../utils/categoryColors";
+import {
+  CYCLE_FILTER_ALL,
+  buildCategoryBalance,
+  buildFunnel,
+  buildKpis,
+  buildProjectRows,
+  filterByCycle,
+  getUpcomingDays,
+} from "../utils/dashboardMetrics";
 
 const CALENDAR_VIEW_STORAGE_KEY = "content-planner-dashboard-calendar-view";
 const CALENDAR_VIEWS = ["month", "week", "day"];
@@ -25,6 +41,8 @@ export default function Dashboard() {
   const [plannings, setPlannings] = useState([]);
   const [ideas, setIdeas] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [cycles, setCycles] = useState([]);
+  const [cycleFilter, setCycleFilter] = useState(CYCLE_FILTER_ALL);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
@@ -38,14 +56,16 @@ export default function Dashboard() {
       setLoading(true);
       setError(null);
       try {
-        const [planningsData, ideasData, categoriesData] = await Promise.all([
+        const [planningsData, ideasData, categoriesData, cyclesData] = await Promise.all([
           planningApi.list(),
           ideasApi.list(),
           categoriesApi.list(),
+          cycleApi.list(),
         ]);
         setPlannings(planningsData);
         setIdeas(ideasData);
         setCategories(categoriesData);
+        setCycles(cyclesData);
       } catch (err) {
         setError(err.message || "It was not possible to load the dashboard data.");
       } finally {
@@ -55,20 +75,41 @@ export default function Dashboard() {
     load();
   }, []);
 
+  // Cores calculadas a partir da lista completa de categorias, pra não
+  // mudarem quando o filtro de cycle reduz os dados exibidos.
+  const colorMap = useMemo(() => buildCategoryColorMap(categories), [categories]);
+  const ideaById = useMemo(() => new Map(ideas.map((idea) => [idea.id, idea])), [ideas]);
+
+  const scoped = useMemo(
+    () => filterByCycle(ideas, plannings, cycles, cycleFilter),
+    [ideas, plannings, cycles, cycleFilter]
+  );
+
+  const funnel = useMemo(() => buildFunnel(scoped.ideas, scoped.plannings), [scoped]);
+  const categoryRows = useMemo(
+    () => buildCategoryBalance(scoped.ideas, categories),
+    [scoped.ideas, categories]
+  );
+  const upcomingDays = useMemo(() => getUpcomingDays(scoped.plannings), [scoped.plannings]);
+  const kpis = useMemo(
+    () => buildKpis(funnel, scoped.plannings, categoryRows, upcomingDays),
+    [funnel, scoped.plannings, categoryRows, upcomingDays]
+  );
+  const projectRows = useMemo(
+    () => buildProjectRows(scoped.plannings, ideaById),
+    [scoped.plannings, ideaById]
+  );
+
   const dueMap = useMemo(() => {
     const map = new Map();
-    for (const planning of plannings) {
+    for (const planning of scoped.plannings) {
       if (!planning.due_date) continue;
       const key = planning.due_date;
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(planning);
     }
     return map;
-  }, [plannings]);
-
-  const handleAnchorDateChange = (nextAnchorDate) => {
-    setAnchorDate(nextAnchorDate);
-  };
+  }, [scoped.plannings]);
 
   const handleDayClick = (key, dayPlannings) => {
     if (calendarView === "day") return;
@@ -79,42 +120,74 @@ export default function Dashboard() {
     navigate(`/planning?planningId=${planningId}`);
   };
 
+  // Reaproveita o formulário de criação da página Ideas. "fromLabel" faz a
+  // página Ideas saber que deve voltar pra cá ao cancelar ou salvar.
+  const handleNewIdea = () => {
+    navigate("/ideas?new=1", { state: { fromLabel: "Dashboard" } });
+  };
+
   return (
-    <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold mb-1">Dashboard</h2>
-        <p className="text-gray-500">
-          Track the general indicators and expiration dates of "In Planning" ideas.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <DashboardHeader
+        cycles={cycles}
+        cycleFilter={cycleFilter}
+        onCycleFilterChange={setCycleFilter}
+        onNewIdea={handleNewIdea}
+      />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md p-3 mb-4">
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md p-3">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 h-96 flex items-center justify-center text-gray-400">
+        <div className="rounded-2xl border border-ui-border bg-ui-surface h-96 flex items-center justify-center text-ui-text-muted">
           Loading dashboard...
         </div>
       ) : (
         <>
-          <DashboardStats ideas={ideas} plannings={plannings} categories={categories} />
+          <KpiStrip kpis={kpis} />
 
-          <div className="mb-3">
-            <CalendarLegend view={calendarView} />
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <StageFunnelCard funnel={funnel} colorMap={colorMap} />
+            </div>
+            <CategoryBalanceCard rows={categoryRows} colorMap={colorMap} />
           </div>
-          <CalendarGrid
-            anchorDate={anchorDate}
-            view={calendarView}
-            onViewChange={setCalendarView}
-            plannings={plannings}
-            dueMap={dueMap}
-            onAnchorDateChange={handleAnchorDateChange}
-            onDayClick={handleDayClick}
-            onOpenPlanning={handleOpenPlanning}
-          />
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <ProjectsTable
+                rows={projectRows}
+                colorMap={colorMap}
+                onOpenPlanning={handleOpenPlanning}
+              />
+            </div>
+            <NextDaysCard
+              days={upcomingDays}
+              ideaById={ideaById}
+              colorMap={colorMap}
+              onDayClick={handleDayClick}
+              onOpenPlanning={handleOpenPlanning}
+            />
+          </div>
+
+          <CollapsibleSection title="Full calendar">
+            <div className="mb-3">
+              <CalendarLegend view={calendarView} />
+            </div>
+            <CalendarGrid
+              anchorDate={anchorDate}
+              view={calendarView}
+              onViewChange={setCalendarView}
+              plannings={scoped.plannings}
+              dueMap={dueMap}
+              onAnchorDateChange={setAnchorDate}
+              onDayClick={handleDayClick}
+              onOpenPlanning={handleOpenPlanning}
+            />
+          </CollapsibleSection>
         </>
       )}
 

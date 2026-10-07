@@ -1,29 +1,57 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ideasApi } from "../services/ideas";
 import { categoriesApi } from "../services/categories";
 import { ownersApi } from "../services/owners";
 import { planningApi } from "../services/planning";
 import IdeaCard from "../components/Ideas/IdeaCard";
-import IdeaFormModal from "../components/Ideas/IdeaFormModal";
-import IdeaDetailModal from "../components/Ideas/IdeaDetailModal";
-import FilterInfo from "../components/Filters/FilterInfo";
-import TabBar from "../components/Filters/TabBar";
+import IdeaFormPanel from "../components/Ideas/IdeaFormPanel";
+import IdeaDetailPanel from "../components/Ideas/IdeaDetailPanel";
 import ToggleSwitch from "../components/Filters/ToggleSwitch";
-import { useIdeaFilters } from "../hooks/useIdeaFilters";
 
 const EXECUTION_STATUS_OPTIONS = ["Free", "In Planning"];
 
 export default function Ideas() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Quando o formulário é aberto de outra página (ex.: Dashboard), guardamos
+  // o nome da origem uma única vez; cancelar ou salvar volta pra lá.
+  const [originLabel] = useState(() => location.state?.fromLabel ?? null);
+
   const [ideas, setIdeas] = useState([]);
   const [categories, setCategories] = useState([]);
   const [owners, setOwners] = useState([]);
   const [plannings, setPlannings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { filters, setFilters, resetFilters } = useIdeaFilters();
   const [error, setError] = useState(null);
-  const [createOpen, setCreateOpen] = useState(false);
+  
+  // Controle de Visualização da Tela: "list" | "create" | "detail"
+  const [currentView, setCurrentView] = useState(() =>
+    searchParams.get("new") === "1" ? "create" : "list"
+  );
   const [viewingIdea, setViewingIdea] = useState(null);
+
+  // Remove o ?new=1 da URL (sem criar nova entrada no histórico) pra que um
+  // refresh ou um retorno à lista não reabra o formulário.
+  useEffect(() => {
+    if (searchParams.get("new") !== "1") return;
+    const next = new URLSearchParams(searchParams);
+    next.delete("new");
+    setSearchParams(next, { replace: true, state: location.state });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const closeCreate = () => {
+    if (originLabel) navigate(-1);
+    else setCurrentView("list");
+  };
+
+  // Filtros Locais
   const [activeTab, setActiveTab] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [ownerId, setOwnerId] = useState("");
   const [showInactive, setShowInactive] = useState(false);
 
   const loadAll = async () => {
@@ -59,6 +87,7 @@ export default function Ideas() {
     return map;
   }, [plannings]);
 
+  // Contadores para as Tabs
   const tabCounts = useMemo(() => {
     const counts = { All: ideas.length };
     for (const status of EXECUTION_STATUS_OPTIONS) {
@@ -67,39 +96,21 @@ export default function Ideas() {
     return counts;
   }, [ideas]);
 
-  const tabs = useMemo(
-    () => [
-      { value: "All", label: "All", count: tabCounts.All },
-      ...EXECUTION_STATUS_OPTIONS.map((status) => ({
-        value: status,
-        label: status,
-        count: tabCounts[status],
-      })),
-    ],
-    [tabCounts]
-  );
-
   const filteredIdeas = useMemo(() => {
     return ideas.filter((idea) => {
       if (activeTab !== "All" && idea.execution_status !== activeTab) return false;
       if (!showInactive && !idea.is_active) return false;
-      if (filters.name && !idea.name.toLowerCase().includes(filters.name.toLowerCase())) {
-        return false;
-      }
-      if (filters.categoryId && idea.category?.id !== Number(filters.categoryId)) {
-        return false;
-      }
-      if (filters.ownerId && idea.owner?.id !== Number(filters.ownerId)) {
-        return false;
-      }
+      if (searchQuery && !idea.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (categoryId && idea.category?.id !== Number(categoryId)) return false;
+      if (ownerId && idea.owner?.id !== Number(ownerId)) return false;
       return true;
     });
-  }, [ideas, filters, activeTab, showInactive]);
+  }, [ideas, activeTab, showInactive, searchQuery, categoryId, ownerId]);
 
   const handleCreate = async (payload) => {
     const created = await ideasApi.create(payload);
     setIdeas((prev) => [created, ...prev]);
-    setCreateOpen(false);
+    closeCreate();
   };
 
   const handleIdeaUpdated = (updated) => {
@@ -121,29 +132,109 @@ export default function Ideas() {
     setPlannings((prev) => prev.map((p) => (p.id === updatedPlanning.id ? updatedPlanning : p)));
   };
 
+  const clearFilters = () => {
+    setSearchQuery("");
+    setCategoryId("");
+    setOwnerId("");
+  };
+
+  // ----------------------------------------------------
+  // RENDERIZAÇÃO CONDICIONAL DA TELA ATUAL
+  // ----------------------------------------------------
+
+  if (currentView === "create") {
+    return (
+      <IdeaFormPanel
+        categories={categories}
+        owners={owners}
+        backLabel={originLabel ?? "Ideas"}
+        onClose={closeCreate}
+        onSubmit={handleCreate}
+      />
+    );
+  }
+
+  if (currentView === "detail" && viewingIdea) {
+    return (
+      <IdeaDetailPanel
+        idea={viewingIdea}
+        planning={planningByIdeaId.get(viewingIdea.id) || null}
+        categories={categories}
+        owners={owners}
+        onClose={() => { setViewingIdea(null); setCurrentView("list"); }}
+        onUpdated={handleIdeaUpdated}
+        onToggleActive={handleToggleActive}
+        onPlanningUpdated={handlePlanningUpdated}
+      />
+    );
+  }
+
+  // Visualização Padrão: Lista de Ideias
   return (
-    <div>
-      <div className="mb-4 flex justify-between items-center">
-        <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+    <div className="animate-fade-in pb-10">
+      {/* Cabeçalho */}
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            Ideas <span className="text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2.5 py-0.5 rounded-full">{ideas.length} ideas</span>
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-2">A place for every idea. Room for what comes next.</p>
+        </div>
         <button
-          onClick={() => setCreateOpen(true)}
-          className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-700"
+          onClick={() => setCurrentView("create")}
+          className="bg-[#2D3350] hover:bg-[#1f243b] text-white text-sm font-medium px-4 py-2.5 rounded-md flex items-center gap-2 transition-colors"
         >
-          + New Idea
+          <span className="text-lg leading-none">+</span> New Idea
         </button>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-6 border-b border-gray-200 dark:border-gray-800 mb-6">
+        {["All", ...EXECUTION_STATUS_OPTIONS].map((status) => (
+          <button
+            key={status}
+            onClick={() => setActiveTab(status)}
+            className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === status
+                ? "border-gray-900 text-gray-900 dark:border-gray-100 dark:text-gray-100"
+                : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700"
+            }`}
+          >
+            {status} <span className="ml-1.5 text-xs text-gray-400">{tabCounts[status]}</span>
+          </button>
+        ))}
+      </div>
 
-      <FilterInfo
-        categories={categories}
-        owners={owners}
-        filters={filters}
-        onChange={setFilters}
-        onClear={resetFilters}
-        showActive={false}
-      />
+      {/* Filtros em linha */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="relative flex-1">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input
+            type="text"
+            placeholder="Searching by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md text-sm focus:outline-none focus:border-gray-300"
+          />
+        </div>
+        
+        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="w-full sm:w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md px-3 py-2.5 text-sm">
+          <option value="">All categories</option>
+          {categories.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
+        </select>
 
-      <div className="flex justify-end mb-4 -mt-2">
+        <select value={ownerId} onChange={(e) => setOwnerId(e.target.value)} className="w-full sm:w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md px-3 py-2.5 text-sm">
+          <option value="">All owners</option>
+          {owners.map((o) => (<option key={o.id} value={o.id}>{o.name}</option>))}
+        </select>
+
+        <button onClick={clearFilters} className="text-sm font-medium text-gray-500 hover:text-gray-700 px-2 hidden sm:block">
+          Clear Filters
+        </button>
+      </div>
+
+      {/* Toggle Inativos */}
+      <div className="flex justify-end mb-6">
         <ToggleSwitch checked={showInactive} onChange={setShowInactive} label="Show inactive" />
       </div>
 
@@ -153,43 +244,21 @@ export default function Ideas() {
         </div>
       )}
 
+      {/* Grid de Ideias */}
       {loading ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 h-96 flex items-center justify-center text-gray-400">
-          Loading ideas...
-        </div>
+        <div className="text-center text-gray-400 py-20">Loading ideas...</div>
       ) : filteredIdeas.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 h-96 flex items-center justify-center text-gray-400">
-          No ideas found with the current filters.
-        </div>
+        <div className="text-center text-gray-400 py-20">No ideas found with the current filters.</div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredIdeas.map((idea) => (
-            <IdeaCard key={idea.id} idea={idea} onOpen={setViewingIdea} />
+            <IdeaCard
+              key={idea.id}
+              idea={idea}
+              onOpen={(i) => { setViewingIdea(i); setCurrentView("detail"); }}
+            />
           ))}
         </div>
-      )}
-
-      {createOpen && (
-        <IdeaFormModal
-          idea={null}
-          categories={categories}
-          owners={owners}
-          onClose={() => setCreateOpen(false)}
-          onSubmit={handleCreate}
-        />
-      )}
-
-      {viewingIdea && (
-        <IdeaDetailModal
-          idea={viewingIdea}
-          planning={planningByIdeaId.get(viewingIdea.id) || null}
-          categories={categories}
-          owners={owners}
-          onClose={() => setViewingIdea(null)}
-          onUpdated={handleIdeaUpdated}
-          onToggleActive={handleToggleActive}
-          onPlanningUpdated={handlePlanningUpdated}
-        />
       )}
     </div>
   );
