@@ -5,6 +5,8 @@ import { useTheme } from "../context/ThemeContext";
 import SoundToggle from "./SoundToggle";
 import darkIcon from "../../public/icons/dark.png";
 import brightIcon from "../../public/icons/bright_2.png";
+import { Background } from "../components/Default/Background.jsx";
+
 
 export default function Topbar() {
   const [menuOpen, setMenuOpen] = useState(false);

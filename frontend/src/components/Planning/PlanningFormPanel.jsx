@@ -47,13 +47,21 @@ export default function PlanningFormPanel({ availableIdeas, onClose, onSubmit })
     setSaving(true);
     setError(null);
     try {
+      // Um item digitado mas ainda não adicionado com "Add" também entra.
+      const pendingItem = checklistItem.description.trim() ? [checklistItem] : [];
+      const items = [...checklistDraft, ...pendingItem];
+
       await onSubmit({
         idea_id: Number(form.idea_id),
         details: form.details.trim() || null,
         start_date: form.start_date || null,
         due_date: form.due_date || null,
         status: form.status,
-        checklist_items: checklistDraft,
+        checklist_items: items.map((item, index) => ({
+          description: item.description.trim(),
+          due_date: item.due_date || null,
+          position: index,
+        })),
       });
     } catch (err) {
       setError(err.message || "It was not possible to create the planning.");

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ideasApi } from "../../services/ideas";
-import { planningApi } from "../../services/planning";
+import { checklistApi } from "../../services/checklist";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 
 const IDEA_STATUS_STYLES = {
@@ -68,7 +68,7 @@ export default function IdeaDetail({
     if (!newItem.trim() || !planning) return;
     setError(null);
     try {
-      const updated = await planningApi.addChecklistItem(planning.id, newItem.trim());
+      const updated = await checklistApi.addChecklistItem(planning.id, newItem.trim());
       onPlanningUpdated(updated);
       setNewItem("");
     } catch (err) {
@@ -80,7 +80,7 @@ export default function IdeaDetail({
     if (!planning) return;
     setError(null);
     try {
-      const updated = await planningApi.toggleChecklistItem(planning.id, itemId);
+      const updated = await checklistApi.toggleChecklistItem(planning.id, itemId);
       onPlanningUpdated(updated);
     } catch (err) {
       setError(err.message || "It was not possible to update the item.");

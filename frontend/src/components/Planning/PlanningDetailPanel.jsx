@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { planningApi } from "../../services/planning";
 import { STATUS_OPTIONS } from "../../pages/Planning";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
@@ -23,8 +23,18 @@ function TrashIcon() {
   );
 }
 
-export default function PlanningDetailPanel({ planning, onClose, onUpdated, onDeleted }) {
+// Itens criados no cliente usam id string ("tmp-N") até o servidor devolver o id real.
+const isTempId = (id) => typeof id === "string";
+
+export default function PlanningDetailPanel({
+  planning,
+  backLabel = "Planning",
+  onClose,
+  onUpdated,
+  onDeleted,
+}) {
   const [checklistItems, setChecklistItems] = useState(planning.checklist_items || []);
+  const tempIdCounter = useRef(0);
 
   const [status, setStatus] = useState(planning.status);
   const [startDate, setStartDate] = useState(planning.start_date || "");
@@ -47,6 +57,21 @@ export default function PlanningDetailPanel({ planning, onClose, onUpdated, onDe
     setDetails(planning.details || "");
   }, [planning.id]);
 
+  const nextTempId = () => {
+    tempIdCounter.current += 1;
+    return `tmp-${tempIdCounter.current}`;
+  };
+
+  // Item digitado mas ainda não adicionado com "Add" também é salvo.
+  const getItemsToSave = () => {
+    const description = newItem.description.trim();
+    if (!description) return checklistItems;
+    return [
+      ...checklistItems,
+      { id: nextTempId(), description, due_date: newItem.due_date || null, is_done: false },
+    ];
+  };
+
   const hasChanges = () => {
     const currentDetails = details.trim() || null;
     const originalDetails = planning.details || null;
@@ -64,7 +89,10 @@ export default function PlanningDetailPanel({ planning, onClose, onUpdated, onDe
       return true;
     }
 
-    return JSON.stringify(checklistItems) !== JSON.stringify(planning.checklist_items || []);
+    return (
+      newItem.description.trim() !== "" ||
+      JSON.stringify(checklistItems) !== JSON.stringify(planning.checklist_items || [])
+    );
   };
 
   const handleSave = async () => {
@@ -83,10 +111,19 @@ export default function PlanningDetailPanel({ planning, onClose, onUpdated, onDe
         start_date: startDate || null,
         due_date: dueDate || null,
         details: details.trim() || null,
-        checklist_items: checklistItems,
+        checklist_items: getItemsToSave().map((item) => ({
+          // id temporário não vai pro servidor: o item é criado como novo.
+          ...(isTempId(item.id) ? {} : { id: item.id }),
+          description: item.description,
+          due_date: item.due_date || null,
+          is_done: !!item.is_done,
+        })),
       };
 
       const updated = await planningApi.update(planning.id, patch);
+      // Troca os ids temporários pelos reais devolvidos pelo servidor.
+      setChecklistItems(updated.checklist_items || []);
+      setNewItem({ description: "", due_date: "" });
       onUpdated(updated);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);
@@ -101,7 +138,7 @@ export default function PlanningDetailPanel({ planning, onClose, onUpdated, onDe
     if (!newItem.description.trim()) return;
 
     const itemToAdd = {
-      id: Date.now(),
+      id: nextTempId(),
       description: newItem.description.trim(),
       due_date: newItem.due_date || null,
       is_done: false,
@@ -173,7 +210,7 @@ export default function PlanningDetailPanel({ planning, onClose, onUpdated, onDe
         onClick={onClose}
         className="text-sm text-gray-500 hover:text-gray-700 mb-2"
       >
-        ← Planning
+        ← {backLabel}
       </button>
 
       <div className="flex items-start justify-between mb-1">

@@ -19,7 +19,7 @@ export default function CycleDetailView({ cycle, onEdit, onClose }) {
   // de Planning depois da troca de rota.
   const handleOpenPlanning = (planningId) => {
     onClose();
-    navigate(`/planning?planningId=${planningId}`);
+    navigate(`/planning?planningId=${planningId}`, { state: { fromLabel: "Cycles" } });
   };
 
   const handleOpenAllPlannings = () => {

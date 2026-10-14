@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ideasApi } from "../../services/ideas";
-import { planningApi } from "../../services/planning";
+import { checklistApi } from "../../services/checklist";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 import DetailModal from "../Default/DetailModal";
 
@@ -69,7 +69,7 @@ export default function IdeaDetailModal({
     if (!newItem.trim() || !planning) return;
     setError(null);
     try {
-      const updated = await planningApi.addChecklistItem(planning.id, newItem.trim());
+      const updated = await checklistApi.addChecklistItem(planning.id, newItem.trim());
       onPlanningUpdated(updated);
       setNewItem("");
     } catch (err) {
@@ -81,7 +81,7 @@ export default function IdeaDetailModal({
     if (!planning) return;
     setError(null);
     try {
-      const updated = await planningApi.toggleChecklistItem(planning.id, itemId);
+      const updated = await checklistApi.toggleChecklistItem(planning.id, itemId);
       onPlanningUpdated(updated);
     } catch (err) {
       setError(err.message || "It was not possible to update the item.");
@@ -92,7 +92,7 @@ export default function IdeaDetailModal({
     if (!planning) return;
     setError(null);
     try {
-      const updated = await planningApi.deleteChecklistItem(planning.id, itemId);
+      const updated = await checklistApi.deleteChecklistItem(planning.id, itemId);
       onPlanningUpdated(updated);
     } catch (err) {
       setError(err.message || "It was not possible to remove the item.");
