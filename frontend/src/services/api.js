@@ -14,7 +14,28 @@ async function request(path, options = {}) {
     } catch {
       // response wasn't JSON, keep statusText
     }
-    throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
+
+    // FastAPI manda 422 de validação como lista de { loc, msg }.
+    let message;
+    if (typeof detail === "string") {
+      message = detail;
+    } else if (Array.isArray(detail)) {
+      message = detail
+        .map((d) => {
+          const field = Array.isArray(d.loc) ? d.loc.filter((p) => p !== "body").join(".") : "";
+          return field ? `${field}: ${d.msg}` : d.msg;
+        })
+        .join("; ");
+    } else {
+      message = detail?.message || JSON.stringify(detail);
+    }
+
+    // status/detail ficam no erro pra quem precisa tratar 409/422 estruturados
+    // (ex.: confirmação de data e conflitos de due date nos Cycles).
+    const error = new Error(message);
+    error.status = res.status;
+    error.detail = detail;
+    throw error;
   }
 
   if (res.status === 204) return null;

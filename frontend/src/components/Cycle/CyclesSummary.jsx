@@ -21,12 +21,20 @@ export default function CyclesSummary({ cycles }) {
   }, [cycles]);
 
   return (
-    <div className="mb-6">
-      <h2 className="text-2xl font-semibold mb-1">Cycles Overview</h2>
-      <p className="text-gray-500 mb-4">
-        Status, progress, and deadlines of your plannings all in one place.
-      </p>
-
+    <div className="animate-fade-in pb-10">
+      {/* Cabeçalho */}
+      <div className="flex justify-between items-start mb-6">
+        <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="min-w-0">
+            <h2 className="mt-3 text-4xl font-semibold tracking-tight text-ui-text-primary md:text-5xl">
+              Cycles
+            </h2>
+            <p className="mt-3 text-lg text-ui-text-secondary italic">
+              Overview of all cycles. Track progress and upcoming deadlines.
+            </p>
+          </div>
+        </header>
+      </div>
       <div className="grid grid-cols-3 gap-4">
         <StatCard title="Actives" value={stats.activeCount} />
         <StatCard title="Plannings" value={stats.totalPlannings} />

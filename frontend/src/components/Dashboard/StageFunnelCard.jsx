@@ -12,13 +12,13 @@ function StageColumn({ stage, colorMap }) {
 
   return (
     <div className="min-w-0">
-      <p className="flex items-center gap-2 text-sm text-ui-feature-text">
+      <p className="flex items-center gap-2 text-base text-ui-feature-text">
         <span className="h-1.5 w-1.5 rounded-full bg-ui-feature-muted" />
         {stage.label}
       </p>
       <p className="mt-3 flex items-baseline gap-2">
         <span className="text-5xl font-light tabular-nums">{pad2(stage.count)}</span>
-        <span className="font-mono text-[11px] text-ui-feature-muted">{stage.pct.toFixed(1)}%</span>
+        <span className="font-mono text-base text-ui-feature-muted">{stage.pct.toFixed(1)}%</span>
       </p>
 
       <div className="mt-4 grid min-h-[3.5rem] grid-cols-6 content-start gap-1.5">
@@ -32,10 +32,10 @@ function StageColumn({ stage, colorMap }) {
         ))}
       </div>
       {hidden > 0 && (
-        <p className="mt-2 font-mono text-[11px] text-ui-feature-muted">+{hidden} more</p>
+        <p className="mt-2 font-mono text-sm text-ui-feature-muted">+{hidden} more</p>
       )}
 
-      <p className="mt-4 text-xs text-ui-feature-muted">{stage.hint}</p>
+      <p className="mt-4 text-sm text-ui-feature-muted">{stage.hint}</p>
     </div>
   );
 }
@@ -45,7 +45,7 @@ export default function StageFunnelCard({ funnel, colorMap }) {
     <section className="h-full rounded-2xl border border-white/5 bg-ui-feature p-6 text-ui-feature-text md:p-8">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ui-feature-muted">
+          <p className="font-mono text-sm uppercase tracking-[0.14em] text-ui-feature-muted">
             01 / The big picture
           </p>
           <h3 className="mt-3 text-2xl font-medium">From spark to shipped.</h3>
@@ -61,7 +61,7 @@ export default function StageFunnelCard({ funnel, colorMap }) {
         ))}
       </div>
 
-      <div className="mt-8 flex items-center justify-between gap-4 border-t border-white/10 pt-4 font-mono text-[10px] uppercase tracking-[0.1em] text-ui-feature-muted">
+      <div className="mt-8 flex items-center justify-between gap-4 border-t border-white/10 pt-4 font-mono text-sm uppercase tracking-[0.1em] text-ui-feature-muted">
         <span>One block = one idea &middot; current stage, not a conversion funnel</span>
         <span className="shrink-0">{funnel.total} total</span>
       </div>

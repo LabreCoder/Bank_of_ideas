@@ -13,7 +13,7 @@ export default function CollapsibleSection({ title, children, defaultOpen = fals
         aria-expanded={open}
         className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left"
       >
-        <span className="text-base font-medium text-ui-text-primary">{title}</span>
+        <span className="text-lg font-medium text-ui-text-primary">{title}</span>
         <svg
           viewBox="0 0 24 24"
           className={`h-4 w-4 text-ui-text-muted transition-transform ${open ? "rotate-180" : ""}`}

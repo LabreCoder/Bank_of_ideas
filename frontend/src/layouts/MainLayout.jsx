@@ -14,7 +14,7 @@ export default function MainLayout() {
           conteúdo (min-width: auto é o padrão do Flexbox). Grids largos,
           como o calendário do Dashboard, "empurram" a página inteira mais
           larga que a tela em vez de se ajustar ao espaço disponível. */}
-      <main className="mx-auto w-full max-w-[1400px] min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <main className="mx-auto w-full max-w-[1700px] min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         <Outlet />
       </main>
       <AmbientAudio />

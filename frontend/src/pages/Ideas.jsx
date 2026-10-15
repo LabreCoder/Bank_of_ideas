@@ -7,7 +7,9 @@ import { planningApi } from "../services/planning";
 import IdeaCard from "../components/Ideas/IdeaCard";
 import IdeaFormPanel from "../components/Ideas/IdeaFormPanel";
 import IdeaDetailPanel from "../components/Ideas/IdeaDetailPanel";
-import ToggleSwitch from "../components/Filters/ToggleSwitch";
+import IdeaFilterBar from "../components/Filters/IdeaFilterBar";
+import { useIdeaFilters } from "../hooks/useIdeaFilters";
+import { matchesIdeaFilters } from "../utils/ideaFilters";
 
 const EXECUTION_STATUS_OPTIONS = ["Free", "In Planning"];
 
@@ -47,12 +49,9 @@ export default function Ideas() {
     else setCurrentView("list");
   };
 
-  // Filtros Locais
+  // Filtros Locais (padrão: só ideias ativas)
   const [activeTab, setActiveTab] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [ownerId, setOwnerId] = useState("");
-  const [showInactive, setShowInactive] = useState(false);
+  const { filters, updateFilter, resetFilters, activeCount } = useIdeaFilters();
 
   const loadAll = async () => {
     setLoading(true);
@@ -87,25 +86,34 @@ export default function Ideas() {
     return map;
   }, [plannings]);
 
-  // Contadores para as Tabs
+  // Contadores para as Tabs (respeitam os demais filtros, exceto a própria aba)
   const tabCounts = useMemo(() => {
-    const counts = { All: ideas.length };
+    const base = ideas.filter((idea) => matchesIdeaFilters(idea, filters));
+    const counts = { All: base.length };
     for (const status of EXECUTION_STATUS_OPTIONS) {
-      counts[status] = ideas.filter((idea) => idea.execution_status === status).length;
+      counts[status] = base.filter((idea) => idea.execution_status === status).length;
     }
     return counts;
-  }, [ideas]);
+  }, [ideas, filters]);
+
+  const tabs = useMemo(
+    () => [
+      { value: "All", label: "All", count: tabCounts.All },
+      ...EXECUTION_STATUS_OPTIONS.map((status) => ({
+        value: status,
+        label: status,
+        count: tabCounts[status],
+      })),
+    ],
+    [tabCounts]
+  );
 
   const filteredIdeas = useMemo(() => {
     return ideas.filter((idea) => {
       if (activeTab !== "All" && idea.execution_status !== activeTab) return false;
-      if (!showInactive && !idea.is_active) return false;
-      if (searchQuery && !idea.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      if (categoryId && idea.category?.id !== Number(categoryId)) return false;
-      if (ownerId && idea.owner?.id !== Number(ownerId)) return false;
-      return true;
+      return matchesIdeaFilters(idea, filters);
     });
-  }, [ideas, activeTab, showInactive, searchQuery, categoryId, ownerId]);
+  }, [ideas, activeTab, filters]);
 
   const handleCreate = async (payload) => {
     const created = await ideasApi.create(payload);
@@ -130,12 +138,6 @@ export default function Ideas() {
 
   const handlePlanningUpdated = (updatedPlanning) => {
     setPlannings((prev) => prev.map((p) => (p.id === updatedPlanning.id ? updatedPlanning : p)));
-  };
-
-  const clearFilters = () => {
-    setSearchQuery("");
-    setCategoryId("");
-    setOwnerId("");
   };
 
   // ----------------------------------------------------
@@ -174,69 +176,34 @@ export default function Ideas() {
     <div className="animate-fade-in pb-10">
       {/* Cabeçalho */}
       <div className="flex justify-between items-start mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            Ideas <span className="text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2.5 py-0.5 rounded-full">{ideas.length} ideas</span>
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">A place for every idea. Room for what comes next.</p>
-        </div>
+        <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="min-w-0">
+            <h2 className="mt-3 text-4xl font-semibold tracking-tight text-ui-text-primary md:text-5xl">
+              Ideas
+            </h2>
+            <p className="mt-3 text-lg text-ui-text-secondary italic">
+              A place for every idea. Room for what comes next.
+            </p>
+          </div>
+        </header>
         <button
           onClick={() => setCurrentView("create")}
-          className="bg-[#2D3350] hover:bg-[#1f243b] text-white text-sm font-medium px-4 py-2.5 rounded-md flex items-center gap-2 transition-colors"
+          className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-800 shrink-0"
         >
-          <span className="text-lg leading-none">+</span> New Idea
+          + New Idea
         </button>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-6 border-b border-gray-200 dark:border-gray-800 mb-6">
-        {["All", ...EXECUTION_STATUS_OPTIONS].map((status) => (
-          <button
-            key={status}
-            onClick={() => setActiveTab(status)}
-            className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === status
-                ? "border-gray-900 text-gray-900 dark:border-gray-100 dark:text-gray-100"
-                : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700"
-            }`}
-          >
-            {status} <span className="ml-1.5 text-xs text-gray-400">{tabCounts[status]}</span>
-          </button>
-        ))}
-      </div>
 
-      {/* Filtros em linha */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input
-            type="text"
-            placeholder="Searching by name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md text-sm focus:outline-none focus:border-gray-300"
-          />
-        </div>
-        
-        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="w-full sm:w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md px-3 py-2.5 text-sm">
-          <option value="">All categories</option>
-          {categories.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
-        </select>
-
-        <select value={ownerId} onChange={(e) => setOwnerId(e.target.value)} className="w-full sm:w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md px-3 py-2.5 text-sm">
-          <option value="">All owners</option>
-          {owners.map((o) => (<option key={o.id} value={o.id}>{o.name}</option>))}
-        </select>
-
-        <button onClick={clearFilters} className="text-sm font-medium text-gray-500 hover:text-gray-700 px-2 hidden sm:block">
-          Clear Filters
-        </button>
-      </div>
-
-      {/* Toggle Inativos */}
-      <div className="flex justify-end mb-6">
-        <ToggleSwitch checked={showInactive} onChange={setShowInactive} label="Show inactive" />
-      </div>
+      <IdeaFilterBar
+        tabs={{ items: tabs, active: activeTab, onChange: setActiveTab }}
+        categories={categories}
+        owners={owners}
+        filters={filters}
+        onChange={updateFilter}
+        onClear={resetFilters}
+        activeCount={activeCount}
+      />
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md p-3 mb-4">

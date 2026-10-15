@@ -3,12 +3,12 @@ import { pad2 } from "../../utils/dashboardMetrics";
 function Kpi({ label, value, note, caption }) {
   return (
     <div className="py-6 lg:px-6 lg:first:pl-0 lg:last:pr-0">
-      <p className="text-sm text-ui-text-secondary">{label}</p>
+      <p className="text-base text-ui-text-secondary">{label}</p>
       <p className="mt-3 flex items-baseline gap-3">
         <span className="text-5xl font-light tabular-nums text-ui-text-primary">{value}</span>
-        {note && <span className="font-mono text-xs text-ui-text-muted">{note}</span>}
+        {note && <span className="font-mono text-lg text-ui-text-muted">{note}</span>}
       </p>
-      <p className="mt-2 text-xs text-ui-text-muted">{caption}</p>
+      <p className="mt-2 text-base text-ui-text-muted">{caption}</p>
     </div>
   );
 }

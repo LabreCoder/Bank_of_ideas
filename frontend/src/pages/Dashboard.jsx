@@ -116,8 +116,9 @@ export default function Dashboard() {
     setSelectedDay({ key, plannings: dayPlannings });
   };
 
+  // "fromLabel" faz a página Planning saber pra onde voltar ao fechar o detalhe.
   const handleOpenPlanning = (planningId) => {
-    navigate(`/planning?planningId=${planningId}`);
+    navigate(`/planning?planningId=${planningId}`, { state: { fromLabel: "Dashboard" } });
   };
 
   // Reaproveita o formulário de criação da página Ideas. "fromLabel" faz a
