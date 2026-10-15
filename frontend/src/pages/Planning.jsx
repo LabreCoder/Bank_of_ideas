@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { planningApi } from "../services/planning";
 import { ideasApi } from "../services/ideas";
 import { categoriesApi } from "../services/categories";
@@ -7,9 +7,9 @@ import { ownersApi } from "../services/owners";
 import PlanningCard from "../components/Planning/PlanningCard";
 import PlanningFormPanel from "../components/Planning/PlanningFormPanel";
 import PlanningDetailPanel from "../components/Planning/PlanningDetailPanel";
-import FilterInfo from "../components/Filters/FilterInfo";
-import TabBar from "../components/Filters/TabBar";
+import IdeaFilterBar from "../components/Filters/IdeaFilterBar";
 import { useIdeaFilters } from "../hooks/useIdeaFilters";
+import { matchesIdeaFilters } from "../utils/ideaFilters";
 
 export const STATUS_OPTIONS = [
   "Not Started",
@@ -22,6 +22,13 @@ export const STATUS_OPTIONS = [
 
 export default function Planning() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Quando um planning é aberto a partir de outra página (Dashboard, Cycles...),
+  // a origem chega em location.state.fromLabel. Fechar o detalhe volta pra lá.
+  const [originLabel] = useState(() => location.state?.fromLabel ?? null);
+  const [openedFromOrigin, setOpenedFromOrigin] = useState(false);
   const [plannings, setPlannings] = useState([]);
   const [ideas, setIdeas] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -31,7 +38,7 @@ export default function Planning() {
   const [createOpen, setCreateOpen] = useState(false);
   const [detailPlanning, setDetailPlanning] = useState(null);
   const [activeTab, setActiveTab] = useState("All");
-  const { filters, setFilters, resetFilters } = useIdeaFilters();
+  const { filters, updateFilter, resetFilters, activeCount } = useIdeaFilters();
 
   const loadAll = async () => {
     setLoading(true);
@@ -69,20 +76,27 @@ export default function Planning() {
     if (!targetPlanning) return;
 
     setDetailPlanning(targetPlanning);
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.delete("planningId");
-      return next;
-    });
-  }, [searchParams, plannings, setSearchParams]);
+    setOpenedFromOrigin(true);
+    // replace: remove ?planningId sem criar entrada no histórico, senão o
+    // "voltar" cairia de novo em /planning?planningId=... e reabriria o detalhe.
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("planningId");
+        return next;
+      },
+      { replace: true, state: location.state }
+    );
+  }, [searchParams, plannings, setSearchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const tabCounts = useMemo(() => {
-    const counts = { All: plannings.length };
+    const base = plannings.filter((p) => matchesIdeaFilters(p.idea || {}, filters));
+    const counts = { All: base.length };
     for (const status of STATUS_OPTIONS) {
-      counts[status] = plannings.filter((p) => p.status === status).length;
+      counts[status] = base.filter((p) => p.status === status).length;
     }
     return counts;
-  }, [plannings]);
+  }, [plannings, filters]);
 
   const tabs = useMemo(
     () => [
@@ -103,26 +117,7 @@ export default function Planning() {
       if (activeTab !== "All" && planning.status !== activeTab) {
         return false;
       }
-
-      const idea = planning.idea || {};
-
-      if (filters.name && !idea.name?.toLowerCase().includes(filters.name.toLowerCase())) {
-        return false;
-      }
-      if (filters.categoryId && idea.category?.id !== Number(filters.categoryId)) {
-        return false;
-      }
-      if (filters.ownerId && idea.owner?.id !== Number(filters.ownerId)) {
-        return false;
-      }
-      if (filters.active === "true" && !idea.is_active) {
-        return false;
-      }
-      if (filters.active === "false" && idea.is_active) {
-        return false;
-      }
-
-      return true;
+      return matchesIdeaFilters(planning.idea || {}, filters);
     });
   }, [plannings, filters, activeTab]);
 
@@ -147,6 +142,13 @@ export default function Planning() {
     setDetailPlanning(updated);
   };
 
+  const goBackToOrigin = () => navigate(-1);
+
+  const handleCloseDetail = () => {
+    if (openedFromOrigin && originLabel) goBackToOrigin();
+    else setDetailPlanning(null);
+  };
+
   const handleDeleted = (planningId) => {
     const removed = plannings.find((p) => p.id === planningId);
     setPlannings((prev) => prev.filter((p) => p.id !== planningId));
@@ -157,14 +159,15 @@ export default function Planning() {
         )
       );
     }
-    setDetailPlanning(null);
+    handleCloseDetail();
   };
 
   if (detailPlanning) {
     return (
       <PlanningDetailPanel
         planning={detailPlanning}
-        onClose={() => setDetailPlanning(null)}
+        backLabel={openedFromOrigin && originLabel ? originLabel : "Planning"}
+        onClose={handleCloseDetail}
         onUpdated={handleUpdated}
         onDeleted={handleDeleted}
       />
@@ -182,35 +185,35 @@ export default function Planning() {
   }
 
   return (
-    <div>
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-3xl font-bold text-gray-900">Planning</h1>
-            <span className="text-xs font-medium text-gray-500 bg-gray-100 rounded-full px-2.5 py-1">
-              {plannings.length} plans
-            </span>
+    <div className="animate-fade-in pb-10">
+      {/* Cabeçalho */}
+      <div className="flex justify-between items-start mb-6">
+        <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="min-w-0">
+            <h2 className="mt-3 text-4xl font-semibold tracking-tight text-ui-text-primary md:text-5xl">
+              Planning
+            </h2>
+            <p className="mt-3 text-lg text-ui-text-secondary italic">
+             Ideas in motion. Keep every next step in view.
+            </p>
           </div>
-          <p className="text-gray-500">Ideas in motion. Keep every next step in view.</p>
-        </div>
+        </header>
         <button
           onClick={() => setCreateOpen(true)}
-          className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-700 shrink-0"
+          className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-800 shrink-0"
         >
           + New Planning
         </button>
       </div>
 
-      <div className="mb-4">
-        <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
-      </div>
-
-      <FilterInfo
+      <IdeaFilterBar
+        tabs={{ items: tabs, active: activeTab, onChange: setActiveTab }}
         categories={categories}
         owners={owners}
         filters={filters}
-        onChange={setFilters}
+        onChange={updateFilter}
         onClear={resetFilters}
+        activeCount={activeCount}
       />
 
       {error && (
