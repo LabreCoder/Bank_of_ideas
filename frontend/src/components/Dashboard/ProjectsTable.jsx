@@ -18,12 +18,12 @@ export default function ProjectsTable({ rows, colorMap, onOpenPlanning }) {
     <section className="h-full rounded-2xl border border-ui-border bg-ui-surface p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ui-text-muted">
+          <p className="font-mono text-sm uppercase tracking-[0.14em] text-ui-text-muted">
             03 / Make the next move
           </p>
           <h3 className="mt-3 text-xl font-medium text-ui-text-primary">Projects that need you</h3>
         </div>
-        <Link to="/planning" className="shrink-0 text-xs text-accent-500 hover:text-accent-600">
+        <Link to="/planning" className="shrink-0 text-sm text-accent-500 hover:text-accent-600">
           All {rows.length} active plans &rarr;
         </Link>
       </div>
@@ -33,7 +33,7 @@ export default function ProjectsTable({ rows, colorMap, onOpenPlanning }) {
       ) : (
         <div className="mt-6">
           <div
-            className={`hidden gap-4 border-b border-ui-border pb-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ui-text-muted md:grid ${GRID_COLUMNS}`}
+            className={`hidden gap-4 border-b border-ui-border pb-2 font-mono text-sm uppercase tracking-[0.1em] text-ui-text-muted md:grid ${GRID_COLUMNS}`}
           >
             <span>Project / next step</span>
             <span>Checklist</span>
@@ -53,15 +53,15 @@ export default function ProjectsTable({ rows, colorMap, onOpenPlanning }) {
                     className={`grid w-full grid-cols-2 items-center gap-x-4 gap-y-3 py-4 text-left transition-colors hover:bg-ui-surface-2/60 ${GRID_COLUMNS}`}
                   >
                     <div className="col-span-2 min-w-0 md:col-span-1">
-                      <p className="flex items-center gap-2 text-sm font-medium text-ui-text-primary">
+                      <p className="flex items-center gap-2 text-base font-medium text-ui-text-primary">
                         <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
                         <span className="truncate">{row.planning.idea.name}</span>
                       </p>
-                      <p className="mt-1 truncate pl-3.5 text-xs text-ui-text-muted">{nextStepLabel(row)}</p>
+                      <p className="mt-1 truncate pl-3.5 text-sm text-ui-text-muted">{nextStepLabel(row)}</p>
                     </div>
 
                     <div>
-                      <div className="flex justify-between font-mono text-[11px] text-ui-text-muted">
+                      <div className="flex justify-between font-mono text-sm text-ui-text-muted">
                         <span>{row.done}/{row.total}</span>
                         <span>{row.pct}%</span>
                       </div>
@@ -77,7 +77,7 @@ export default function ProjectsTable({ rows, colorMap, onOpenPlanning }) {
                     </span>
 
                     <span
-                      className={`w-fit rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                      className={`w-fit rounded-full border px-2.5 py-0.5 text-sm font-medium ${
                         PLANNING_STATUS_STYLES[row.planning.status] ?? PLANNING_STATUS_STYLES["Not Started"]
                       }`}
                     >

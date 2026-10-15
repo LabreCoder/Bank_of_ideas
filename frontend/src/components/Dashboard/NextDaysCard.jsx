@@ -17,7 +17,7 @@ export default function NextDaysCard({ days, ideaById, colorMap, onDayClick, onO
     <section className="h-full rounded-2xl border border-ui-border bg-ui-surface p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ui-text-muted">
+          <p className="font-mono text-sm uppercase tracking-[0.14em] text-ui-text-muted">
             04 / On the horizon
           </p>
           <h3 className="mt-3 text-xl font-medium text-ui-text-primary">The next 7 days</h3>

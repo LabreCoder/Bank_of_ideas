@@ -41,7 +41,7 @@ function MonthPlanningCard({ planning, dateKey, onOpenPlanning }) {
         </span>
       </div>
 
-      <div className="text-xs text-gray-600 mb-3">
+      <div className="text-base text-gray-600 mb-3">
         <p>
           Checklist progress: <span className="font-semibold">{done}/{total}</span>
         </p>
@@ -76,7 +76,7 @@ function WeekPlanningCard({ planning, dateKey, onOpenPlanning }) {
         </span>
       </div>
 
-      <div className="text-xs text-gray-600 mb-2">
+      <div className="text-base text-gray-600 mb-2">
         <p>
           Full checklist progress: <span className="font-semibold">{done}/{total}</span>
         </p>
@@ -117,7 +117,7 @@ function DayPlanningCard({ planning, dateKey, onOpenPlanning }) {
   return (
     <li className="bg-gray-50 rounded-md p-3 border border-gray-200 min-w-0">
       <div className="flex items-start justify-between gap-3 mb-2">
-        <span className="text-sm font-medium text-gray-800 truncate">{planning.idea?.name || "Untitled"}</span>
+        <span className="text-lg font-medium text-gray-800 truncate">{planning.idea?.name || "Untitled"}</span>
         <span
           className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full border ${
             PLANNING_STATUS_STYLES[planning.status] || "bg-gray-100 text-gray-600 border-gray-200"
@@ -128,7 +128,7 @@ function DayPlanningCard({ planning, dateKey, onOpenPlanning }) {
       </div>
 
       <div className="mb-2">
-        <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+        <div className="flex items-center justify-between text-base text-gray-600 mb-1">
           <span>Checklist progress</span>
           <span className="font-semibold">{done}/{total}</span>
         </div>
