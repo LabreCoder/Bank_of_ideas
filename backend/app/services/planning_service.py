@@ -92,31 +92,39 @@ def update_planning(
 
     if checklist_payload is not None:
         existing_items = {item.id: item for item in planning.checklist_items}
-        updated_item_ids = set()
+        kept_item_ids = set()
+        position = 0
 
-        for position, item_data in enumerate(checklist_payload):
+        for item_data in checklist_payload:
+            description = (item_data.get("description") or "").strip()
             item_id = item_data.get("id")
+            existing = existing_items.get(item_id) if isinstance(item_id, int) else None
 
-            if item_id and isinstance(item_id, int) and item_id in existing_items:
-                item = existing_items[item_id]
-                item.description = item_data.get("description", item.description)
-                item.due_date = item_data.get("due_date", item.due_date)
-                item.is_done = item_data.get("is_done", item.is_done)
-                item.position = position
-                updated_item_ids.add(item_id)
-            else:
-                new_item = PlanningChecklistItem(
-                    planning_id=planning.id,
-                    description=item_data.get("description", ""),
-                    due_date=item_data.get("due_date"),
-                    is_done=item_data.get("is_done", False),
-                    position=position,
+            if existing is not None:
+                if description:
+                    existing.description = description
+                if "due_date" in item_data:
+                    existing.due_date = item_data["due_date"]
+                if item_data.get("is_done") is not None:
+                    existing.is_done = item_data["is_done"]
+                existing.position = position
+                kept_item_ids.add(existing.id)
+                position += 1
+            elif description:
+                # id ausente ou temporário (criado no cliente): item novo.
+                planning.checklist_items.append(
+                    PlanningChecklistItem(
+                        description=description,
+                        due_date=item_data.get("due_date"),
+                        is_done=bool(item_data.get("is_done", False)),
+                        position=position,
+                    )
                 )
-                db.add(new_item)
+                position += 1
 
         for item_id, item in existing_items.items():
-            if item_id not in updated_item_ids:
-                db.delete(item)
+            if item_id not in kept_item_ids:
+                planning.checklist_items.remove(item)  # delete-orphan apaga a linha
 
     db.commit()
     db.refresh(planning)

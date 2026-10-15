@@ -79,7 +79,11 @@ def update_idea(db: Session, idea_id: int, payload: IdeaUpdate) -> IdeaResponse:
     for field, value in updates.items():
         setattr(idea, field, value)
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid category_id or owner_id")
     db.refresh(idea)
     return _serialize_idea(idea)
 

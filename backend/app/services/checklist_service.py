@@ -64,8 +64,8 @@ def update_checklist_item(
     if payload.description is not None:
         item.description = payload.description
 
-    item.due_date = payload.due_date
-
+    if "due_date" in payload.model_fields_set:
+        item.due_date = payload.due_date
     if payload.is_done is not None:
         item.is_done = payload.is_done
 

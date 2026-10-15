@@ -1,14 +1,16 @@
 from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.category import CategoryResponse
 from schemas.owner import OwnerResponse
 
 
 # Fields the client sends when registering a new idea.
+# description is VARCHAR(200) in the DB, so validate here (422) instead of
+# letting the insert blow up with a 500.
 class IdeaCreate(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: Optional[str] = Field(default=None, max_length=200)
     category_id: Optional[int] = None
     owner_id: int
 
@@ -18,7 +20,7 @@ class IdeaCreate(BaseModel):
 # without needing to resend the whole object.
 class IdeaUpdate(BaseModel):
     name: Optional[str] = None
-    description: Optional[str] = None
+    description: Optional[str] = Field(default=None, max_length=200)
     category_id: Optional[int] = None
     owner_id: Optional[int] = None
 
