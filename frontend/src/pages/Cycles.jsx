@@ -5,6 +5,9 @@ import CyclesSummary from "../components/Cycle/CyclesSummary";
 import CycleTimelineCard from "../components/Cycle/CycleTimelineCard";
 import CycleFormModal from "../components/Cycle/CycleFormModal";
 import CycleDetailModal from "../components/Cycle/CycleDetailModal";
+import CycleFilterBar from "../components/Cycle/Filters/CycleFilterBar";
+import { useCycleFilters } from "../hooks/useCycleFilters";
+import { applyCycleFilters } from "../utils/cycleFilters";
 
 export default function Cycles() {
   const [cycles, setCycles] = useState([]);
@@ -14,6 +17,8 @@ export default function Cycles() {
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedCycle, setSelectedCycle] = useState(null);
+
+  const { filters, updateFilter, resetFilters } = useCycleFilters();
 
   const fetchData = async () => {
     setLoading(true);
@@ -35,23 +40,23 @@ export default function Cycles() {
     fetchData();
   }, []);
 
-  // Ordenados por start_date ascendente — é o que dá o efeito de "linha do
-  // tempo" (mais antigo primeiro). Anteriores fica separado de Em Andamento
-  // pra não misturar cycles finalizados com os que ainda estão rolando.
+  // Filtro e ordenação (padrão: start_date ascendente, efeito de "linha do
+  // tempo") são aplicados antes do split. Anteriores fica separado de Em
+  // Andamento pra não misturar cycles finalizados com os que ainda rolam;
+  // o split preserva a ordem recebida.
+  const visibleCycles = useMemo(
+    () => applyCycleFilters(cycles, filters),
+    [cycles, filters]
+  );
+
   const activeCycles = useMemo(
-    () =>
-      cycles
-        .filter((c) => c.status !== "Finished")
-        .sort((a, b) => a.start_date.localeCompare(b.start_date)),
-    [cycles]
+    () => visibleCycles.filter((c) => c.status !== "Finished"),
+    [visibleCycles]
   );
 
   const finishedCycles = useMemo(
-    () =>
-      cycles
-        .filter((c) => c.status === "Finished")
-        .sort((a, b) => a.start_date.localeCompare(b.start_date)),
-    [cycles]
+    () => visibleCycles.filter((c) => c.status === "Finished"),
+    [visibleCycles]
   );
 
   const handleCreated = (newCycle) => {
@@ -125,12 +130,36 @@ export default function Cycles() {
         <>
           <CyclesSummary cycles={cycles} />
 
-          {renderTimelineSection("On Course", activeCycles, "No cycles currently in progress.")}
+          <CycleFilterBar
+            cycles={cycles}
+            filters={filters}
+            onChange={updateFilter}
+            onReset={resetFilters}
+          />
 
-          {/* "Previous" section disappears entirely when there are no finished cycles
-              yet — it doesn't make sense to show an empty header. */}
-          {finishedCycles.length > 0 &&
-            renderTimelineSection("Previous", finishedCycles, "")}
+          {visibleCycles.length === 0 ? (
+            <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+              <p className="text-sm text-gray-500 mb-3">
+                No cycles match your filters.
+              </p>
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="text-sm font-medium text-accent-600 hover:text-accent-700"
+              >
+                Clear filters
+              </button>
+            </div>
+          ) : (
+            <>
+              {renderTimelineSection("On Course", activeCycles, "No cycles currently in progress.")}
+
+              {/* "Previous" section disappears entirely when there are no finished cycles
+                  yet — it doesn't make sense to show an empty header. */}
+              {finishedCycles.length > 0 &&
+                renderTimelineSection("Previous", finishedCycles, "")}
+            </>
+          )}
         </>
       )}
 

@@ -3,9 +3,9 @@ import {
   DEADLINE_OPTIONS,
   SORT_OPTIONS,
 } from "../../../utils/cycleFilters";
+import { FILTER_FIELD_CLASS } from "../../Filters/filterStyles";
 
-const FIELD_CLASS =
-  "w-full text-sm border border-gray-200 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-accent-600";
+const FIELD_CLASS = `w-full ${FILTER_FIELD_CLASS}`;
 const LABEL_CLASS =
   "block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1";
 
@@ -130,7 +130,7 @@ export default function CycleFilterPopover({ filters, onChange, onClose, anchorR
               filters.sortDir === "asc" ? "Ascending order" : "Descending order"
             }
             title={filters.sortDir === "asc" ? "Ascending" : "Descending"}
-            className="shrink-0 rounded-md border border-gray-200 px-3 text-sm text-gray-600 hover:bg-gray-50"
+            className="shrink-0 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-600 hover:bg-gray-50"
           >
             {filters.sortDir === "asc" ? "↑" : "↓"}
           </button>
