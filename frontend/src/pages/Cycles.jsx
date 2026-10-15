@@ -105,13 +105,26 @@ export default function Cycles() {
 
   return (
     <div>
-      <div className="mb-4 flex justify-end">
-        <button
-          onClick={() => setIsCreateOpen(true)}
-          className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-700"
-        >
-          + New Cycle
-        </button>
+      {/* <CyclesSummary cycles={cycles} /> */}
+      <div className="flex justify-between items-start mb-6">
+        <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="min-w-0">
+            <h2 className="mt-3 text-4xl font-semibold tracking-tight text-ui-text-primary md:text-5xl">
+              Cycles
+            </h2>
+            <p className="mt-3 text-lg text-ui-text-secondary italic">
+              Overview of all cycles. Track progress and upcoming deadlines.
+            </p>
+          </div>
+        </header>
+        <div className="mb-4 flex justify-end">
+          <button
+            onClick={() => setIsCreateOpen(true)}
+            className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-800 shrink-0"
+          >
+            + New Cycle
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -128,7 +141,6 @@ export default function Cycles() {
         </div>
       ) : (
         <>
-          <CyclesSummary cycles={cycles} />
 
           <CycleFilterBar
             cycles={cycles}
