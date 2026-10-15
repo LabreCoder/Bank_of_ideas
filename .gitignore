@@ -12,3 +12,6 @@ __pycache__
 # postman files
 *.postman
 *postman*
+
+# .github files
+.github
