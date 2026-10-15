@@ -1,16 +1,19 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { DEFAULT_IDEA_FILTERS, countActiveIdeaFilters } from "../utils/ideaFilters";
 
-const DEFAULT_FILTERS = {
-  name: "",
-  categoryId: "",
-  ownerId: "",
-  active: "",
-};
+// `initial` sobrescreve o padrão da página (ex.: Ideas começa com { active: "true" }).
+// Limpar os filtros volta a esse padrão, não ao padrão global.
+export function useIdeaFilters(initial = {}) {
+  const defaultsRef = useRef({ ...DEFAULT_IDEA_FILTERS, ...initial });
+  const [filters, setFilters] = useState(defaultsRef.current);
 
-export function useIdeaFilters() {
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const updateFilter = useCallback((field, value) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
-  const resetFilters = useCallback(() => setFilters(DEFAULT_FILTERS), []);
+  const resetFilters = useCallback(() => setFilters(defaultsRef.current), []);
 
-  return { filters, setFilters, resetFilters };
+  const activeCount = countActiveIdeaFilters(filters, defaultsRef.current);
+
+  return { filters, setFilters, updateFilter, resetFilters, activeCount };
 }
