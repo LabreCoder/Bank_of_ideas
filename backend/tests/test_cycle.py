@@ -32,11 +32,16 @@ def test_bind_planning_with_due_date(client, make_cycle, make_planning):
     assert [p["id"] for p in r.json()["plannings"]] == [planning["id"]]
 
 
-def test_bind_planning_outside_cycle_range_is_400(client, make_cycle, make_planning):
+def test_bind_planning_outside_cycle_range_is_409(client, make_cycle, make_planning):
     cycle = make_cycle(start_date="2026-01-01", due_date="2026-03-31")
     planning = make_planning(due_date="2026-05-01")
     r = client.post(f"/cycle/{cycle['id']}/bind", json={"planning_id": planning["id"]})
-    assert r.status_code == 400, r.text
+    # X01: antes 400 com texto; agora 409 com a mesma estrutura de conflicts.
+    assert r.status_code == 409, r.text
+    conflicts = r.json()["detail"]["conflicts"]
+    assert [(c["planning_id"], c["origin"], c["candidate_due_date"]) for c in conflicts] == [
+        (planning["id"], "planning", "2026-05-01")
+    ]
 
 
 def test_bind_planning_without_due_date_requires_confirmation(client, make_cycle, make_planning):

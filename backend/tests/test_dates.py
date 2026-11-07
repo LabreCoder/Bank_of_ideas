@@ -92,7 +92,8 @@ def test_bind_without_cycle_due_rejects_planning_before_start(client, make_cycle
     cycle = make_cycle(start_date="2026-02-01")
     planning = make_planning(due_date="2026-01-15")
     r = _bind(client, cycle["id"], planning["id"])
-    assert r.status_code == 400, r.text
+    assert r.status_code == 409, r.text  # X01
+    assert r.json()["detail"]["conflicts"][0]["planning_id"] == planning["id"]
 
 
 def test_bind_without_cycle_due_accepts_valid_or_undated(client, make_cycle, make_planning):
