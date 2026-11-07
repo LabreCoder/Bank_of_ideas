@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { NAV_ITEMS } from "../router/navigationItems";
 import { useTheme } from "../context/ThemeContext";
 import SoundToggle from "./SoundToggle";
@@ -24,14 +24,11 @@ export default function Topbar() {
   return (
     <header className="sticky top-0 z-30 border-b border-ui-border bg-ui-surface/90 backdrop-blur">
       <div className="mx-auto flex w-full items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <button
-          type="button"
-          onClick={() => window.location.href = "/dashboard"}
-        >
+        <Link to="/dashboard">
           <h1 className="text-sm font-semibold uppercase tracking-[0.16em] text-ui-text-primary sm:text-base">
             Bank of Ideas
           </h1>
-        </button>
+        </Link>
 
         <nav className="hidden items-center md:flex ml-auto">
           {NAV_ITEMS.map((item) => (
