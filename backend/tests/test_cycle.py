@@ -1,5 +1,4 @@
 """Ciclos — comportamento atual (baseline antes das correções da Fase 1)."""
-import pytest
 
 
 def test_update_cycle_due_date_without_conflict(client, make_cycle, make_planning):
@@ -80,15 +79,7 @@ def test_bind_same_planning_twice_is_400(client, make_cycle, make_planning):
     assert client.post(f"/cycle/{cycle['id']}/bind", json={"planning_id": planning["id"]}).status_code == 400
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=TypeError,
-    reason=(
-        "Achado novo (RELATORIO-001): update_cycle_due_date monta o 409 com "
-        "model_dump() sem mode='json'; datetime.date não é serializável e a "
-        "resposta vira 500. Remover este xfail quando for corrigido (B03)."
-    ),
-)
+# Antes da B03 este caso respondia 500 (date não serializável no detail do 409).
 def test_update_cycle_due_date_with_conflict_is_409(client, make_cycle, make_planning):
     cycle = make_cycle(start_date="2026-01-01", due_date="2026-03-31")
     planning = make_planning(due_date="2026-03-15")

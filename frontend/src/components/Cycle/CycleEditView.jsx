@@ -106,7 +106,7 @@ export default function CycleEditView({
 
           {conflictPrompt && (
             <div className="mt-3 bg-amber-50 border border-amber-200 rounded-md p-3 text-sm text-amber-800">
-              <p className="font-semibold mb-1">This due date conflicts with bound plannings:</p>
+              <p className="font-semibold mb-1">These cycle dates conflict with bound plannings:</p>
               <ul className="list-disc pl-5 mb-2 text-xs">
                 {conflictPrompt.map((c) => (
                   <li key={c.planning_id}>
@@ -115,8 +115,8 @@ export default function CycleEditView({
                 ))}
               </ul>
               <p className="text-xs mb-2">
-                Fix this by editing the conflicting planning's due date, or pick a different
-                cycle due date.
+                Fix this by editing the conflicting planning's due date, or pick different
+                cycle dates.
               </p>
               <button
                 type="button"
