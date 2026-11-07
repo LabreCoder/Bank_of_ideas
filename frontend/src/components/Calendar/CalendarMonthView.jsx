@@ -12,7 +12,7 @@ export default function CalendarMonthView({ weeks, anchorDate, dueMap, onDayClic
     <>
       <div className="grid grid-cols-7 gap-1 mb-1">
         {WEEKDAY_LABELS.map((label) => (
-          <div key={label} className="text-xs font-medium text-gray-400 text-center py-1">
+          <div key={label} className="text-xs font-medium text-ui-text-muted text-center py-1">
             {label}
           </div>
         ))}
@@ -31,7 +31,7 @@ export default function CalendarMonthView({ weeks, anchorDate, dueMap, onDayClic
               onClick={() => dayPlannings.length > 0 && onDayClick(key, dayPlannings)}
               disabled={dayPlannings.length === 0}
               className={`h-14 md:h-16 rounded-md p-1 md:p-1.5 flex flex-col items-start justify-between text-left transition-colors
-                ${inCurrentMonth ? "text-gray-700" : "text-gray-300"}
+                ${inCurrentMonth ? "text-ui-text-secondary" : "text-ui-text-muted/70"}
                 ${today ? "ring-2 ring-accent-600" : ""}
                 ${dayPlannings.length > 0 ? "cursor-pointer hover:opacity-80" : "cursor-default"}
                 ${intensityClass(dayPlannings.length)}`}

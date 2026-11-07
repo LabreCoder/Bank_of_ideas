@@ -221,17 +221,17 @@ export default function Planning() {
       />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md p-3 mb-4">
+        <div className="bg-status-red-bg border border-status-red-border text-status-red-fg text-sm rounded-md p-3 mb-4">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 h-96 flex items-center justify-center text-gray-400">
+        <div className="bg-ui-surface rounded-lg border border-ui-border p-4 h-96 flex items-center justify-center text-ui-text-muted">
           Loading plannings...
         </div>
       ) : filteredPlannings.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 h-96 flex items-center justify-center text-gray-400">
+        <div className="bg-ui-surface rounded-lg border border-ui-border p-4 h-96 flex items-center justify-center text-ui-text-muted">
           No planning found with the current filters.
         </div>
       ) : (

@@ -61,7 +61,7 @@ export default function DetailModal({
         aria-label={labelledBy ? undefined : ariaLabel}
         tabIndex={-1}
         onKeyDown={handleKeyDown}
-        className={`bg-white rounded-lg border border-gray-200 w-full ${
+        className={`bg-ui-surface rounded-lg border border-ui-border w-full ${
           SIZE_CLASSES[size] || SIZE_CLASSES.lg
         } p-8 max-h-[90vh] overflow-y-auto focus:outline-none`}
       >

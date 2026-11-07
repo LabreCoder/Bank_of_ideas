@@ -39,7 +39,7 @@ export default function CalendarGrid({
   const periodLabel = getPeriodLabel(anchorDate, view);
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
+    <div className="bg-ui-surface rounded-lg border border-ui-border p-4">
       <TabBar tabs={viewTabs} active={view} onChange={onViewChange} />
 
       <div className="flex items-center justify-between mb-4">
@@ -47,19 +47,19 @@ export default function CalendarGrid({
         <div className="flex items-center gap-2">
           <button
             onClick={goPrev}
-            className="text-sm px-2 py-1 rounded-md border border-gray-200 hover:bg-gray-50"
+            className="text-sm px-2 py-1 rounded-md border border-ui-border hover:bg-ui-surface-2"
           >
             ‹
           </button>
           <button
             onClick={goToToday}
-            className="text-sm px-3 py-1 rounded-md border border-gray-200 hover:bg-gray-50"
+            className="text-sm px-3 py-1 rounded-md border border-ui-border hover:bg-ui-surface-2"
           >
             Today
           </button>
           <button
             onClick={goNext}
-            className="text-sm px-2 py-1 rounded-md border border-gray-200 hover:bg-gray-50"
+            className="text-sm px-2 py-1 rounded-md border border-ui-border hover:bg-ui-surface-2"
           >
             ›
           </button>

@@ -23,13 +23,13 @@ export default function CalendarWeekView({ weekDates, plannings, onDayClick }) {
           <button
             key={key}
             onClick={() => onDayClick(key, dayPlannings)}
-            className="border border-gray-200 rounded-md p-3 text-left bg-gray-50 hover:bg-gray-100 transition-colors justify-between flex flex-col"
+            className="border border-ui-border rounded-md p-3 text-left bg-ui-surface-2 hover:bg-ui-surface-2 transition-colors justify-between flex flex-col"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-gray-700">{WEEKDAY_LABELS[date.getDay()]}</span>
-              <span className="text-xs text-gray-500">{date.getDate()}</span>
+              <span className="text-sm font-semibold text-ui-text-secondary">{WEEKDAY_LABELS[date.getDay()]}</span>
+              <span className="text-xs text-ui-text-muted">{date.getDate()}</span>
             </div>
-            <div className="text-xs text-gray-600 space-y-1 mb-auto">
+            <div className="text-xs text-ui-text-secondary space-y-1 mb-auto">
               <p>
                 <span className="font-semibold">Plannings:</span> {dayPlannings.length}
               </p>
@@ -39,13 +39,13 @@ export default function CalendarWeekView({ weekDates, plannings, onDayClick }) {
             </div>
 
             {dayPlannings.length > 0 && (
-              <div className="flex flex-col mt-2 space-y-3 border-t border-gray-200 pt-4">
+              <div className="flex flex-col mt-2 space-y-3 border-t border-ui-border pt-4">
                 {dayPlannings.slice(0, 2).map((planning) => (
-                  <div key={planning.id} className="rounded border border-gray-200 bg-white p-2 mt-auto">
-                    <p className="text-[11px] font-semibold text-gray-700 truncate">{planning.idea?.name}</p>
+                  <div key={planning.id} className="rounded border border-ui-border bg-ui-surface p-2 mt-auto">
+                    <p className="text-[11px] font-semibold text-ui-text-secondary truncate">{planning.idea?.name}</p>
                     <ul className="mt-1 space-y-0.5">
                       {planning.dayChecklistItems.slice(0, 2).map((item) => (
-                        <li key={item.id} className="text-[10px] text-gray-500 truncate">
+                        <li key={item.id} className="text-[10px] text-ui-text-muted truncate">
                           {item.description}
                         </li>
                       ))}
@@ -53,7 +53,7 @@ export default function CalendarWeekView({ weekDates, plannings, onDayClick }) {
                   </div>
                 ))}
                 {dayPlannings.length > 2 && (
-                  <p className="text-[10px] text-gray-500">+{dayPlannings.length - 2} more planning(s)</p>
+                  <p className="text-[10px] text-ui-text-muted">+{dayPlannings.length - 2} more planning(s)</p>
                 )}
               </div>
             )}

@@ -8,10 +8,10 @@ export default function StatCard({
   valueClassName = "",
 }) {
   const variantClasses = {
-    primary: "bg-white border-accent-200 shadow-sm",
-    secondary: "bg-white border-gray-200",
-    chart: "bg-white border-gray-200",
-    operational: "bg-white border-gray-200",
+    primary: "bg-ui-surface border-accent-200 shadow-sm",
+    secondary: "bg-ui-surface border-ui-border",
+    chart: "bg-ui-surface border-ui-border",
+    operational: "bg-ui-surface border-ui-border",
   };
 
   const valueClasses = {

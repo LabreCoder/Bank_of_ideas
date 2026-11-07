@@ -4,9 +4,9 @@ export default function SoundPanel() {
   const { sound, setSound, playing, togglePlaying } = useSound();
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
+    <div className="bg-ui-surface rounded-lg border border-ui-border p-4">
       <h3 className="text-lg font-semibold mb-2">Ambient Sound</h3>
-      <p className="text-gray-500 text-sm mb-4">
+      <p className="text-ui-text-muted text-sm mb-4">
         Background sound while you work. This lives here temporarily for testing —
         it'll move to a topbar icon later.
       </p>
@@ -20,7 +20,7 @@ export default function SoundPanel() {
             className={`px-3 py-2 rounded-md text-sm border transition-colors ${
               sound === s.id
                 ? "border-accent-600 bg-accent-50 text-accent-700"
-                : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                : "border-ui-border text-ui-text-secondary hover:bg-ui-surface-2"
             }`}
           >
             {s.label}
