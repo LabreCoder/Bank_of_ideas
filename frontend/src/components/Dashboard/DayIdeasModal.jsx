@@ -1,3 +1,4 @@
+import { useId } from "react";
 import DetailModal from "../Default/DetailModal";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 
@@ -162,6 +163,7 @@ function DayPlanningCard({ planning, dateKey, onOpenPlanning }) {
 }
 
 export default function DayIdeasModal({ dateKey, plannings, view, onOpenPlanning, onClose }) {
+  const titleId = useId();
   const viewTitle =
     view === "day" ? "Day details" : view === "week" ? "Week day details" : "Month day details";
 
@@ -234,11 +236,11 @@ export default function DayIdeasModal({ dateKey, plannings, view, onOpenPlanning
   };
 
   return (
-    <DetailModal onClose={onClose} size="xl">
+    <DetailModal onClose={onClose} size="xl" labelledBy={titleId}>
         <div className="flex items-start justify-between mb-4">
           <div>
             <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">{viewTitle}</p>
-            <h3 className="text-lg font-semibold capitalize">{formatDateLabel(dateKey)}</h3>
+            <h3 id={titleId} className="text-lg font-semibold capitalize">{formatDateLabel(dateKey)}</h3>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm">
             Close

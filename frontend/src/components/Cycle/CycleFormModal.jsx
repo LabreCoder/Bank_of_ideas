@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { cycleApi } from "../../services/cycle";
 import DetailModal from "../Default/DetailModal";
 
@@ -11,6 +11,9 @@ export default function CycleFormModal({ onClose, onCreated }) {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const titleId = useId();
+  // D03: fechar com algo preenchido pede confirmação.
+  const dirty = Object.values(form).some((value) => String(value).trim() !== "");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,8 +42,8 @@ export default function CycleFormModal({ onClose, onCreated }) {
   };
 
   return (
-    <DetailModal onClose={onClose}>
-        <h3 className="text-lg font-semibold mb-4">New Cycle</h3>
+    <DetailModal onClose={onClose} labelledBy={titleId} dirty={dirty}>
+        <h3 id={titleId} className="text-lg font-semibold mb-4">New Cycle</h3>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>

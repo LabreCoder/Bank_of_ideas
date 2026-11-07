@@ -4,6 +4,7 @@ import { checklistApi } from "../../services/checklist";
 import { useUnsavedChangesGuard } from "../../hooks/useUnsavedChangesGuard";
 import { PLANNING_STATUS_OPTIONS, PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 import ProgressBar from "../Default/ProgressBar";
+import ConfirmDialog from "../Default/ConfirmDialog";
 
 function PencilIcon() {
   return (
@@ -81,7 +82,7 @@ export default function PlanningDetailPanel({
   const dirty = fieldsDirty || pendingNewItem;
 
   // Voltar/fechar navegam (D02); a confirmação com alterações pendentes vem do guard.
-  const { allowNextNavigation } = useUnsavedChangesGuard(dirty);
+  const { allowNextNavigation, leaveDialog } = useUnsavedChangesGuard(dirty);
   const handleClose = onClose;
 
   // Executa uma ação do checklist: aplica o estado otimista, chama a API e
@@ -165,6 +166,9 @@ export default function PlanningDetailPanel({
     );
   };
 
+  // Exclusões passam por um ConfirmDialog (D03): { type: "item", item } | { type: "planning" }.
+  const [pendingDelete, setPendingDelete] = useState(null);
+
   const handleDeleteItem = (itemId) => {
     if (isTempId(itemId)) return;
     runChecklistOp(
@@ -198,17 +202,27 @@ export default function PlanningDetailPanel({
   };
 
   const handleDeletePlanning = async () => {
-    if (!confirm("Remove this plan? The idea will become available again.")) return;
     setSaving(true);
     setError(null);
     try {
       await planningApi.delete(planning.id);
       // O planning não existe mais: alterações pendentes não fazem sentido.
       allowNextNavigation();
+      setPendingDelete(null);
       onDeleted(planning.id);
     } catch (err) {
       setError(err.message || "It was not possible to remove the plan.");
+      setPendingDelete(null);
       setSaving(false);
+    }
+  };
+
+  const confirmPendingDelete = () => {
+    if (pendingDelete?.type === "planning") {
+      handleDeletePlanning();
+    } else if (pendingDelete?.type === "item") {
+      handleDeleteItem(pendingDelete.item.id);
+      setPendingDelete(null);
     }
   };
 
@@ -427,7 +441,7 @@ export default function PlanningDetailPanel({
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDeleteItem(item.id)}
+                            onClick={() => setPendingDelete({ type: "item", item })}
                             title="Remove"
                             className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                           >
@@ -457,7 +471,7 @@ export default function PlanningDetailPanel({
         <div className="flex justify-between items-center pt-6 mt-6 border-t border-gray-100">
           <button
             type="button"
-            onClick={handleDeletePlanning}
+            onClick={() => setPendingDelete({ type: "planning" })}
             disabled={saving}
             className="text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
           >
@@ -480,6 +494,44 @@ export default function PlanningDetailPanel({
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete?.type === "planning"}
+        title="Delete this planning?"
+        message={
+          <>
+            The planning for <strong>{planning.idea.name}</strong> and its checklist will be
+            deleted. The idea will become free again and the planning will leave any cycle it
+            belongs to. This cannot be undone.
+          </>
+        }
+        confirmLabel="Delete planning"
+        busy={saving}
+        onConfirm={confirmPendingDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
+      <ConfirmDialog
+        open={pendingDelete?.type === "item"}
+        title="Remove checklist item?"
+        message={
+          <>
+            <strong>{pendingDelete?.item?.description}</strong> will be removed from the
+            checklist. This cannot be undone.
+          </>
+        }
+        confirmLabel="Remove item"
+        onConfirm={confirmPendingDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
+      <ConfirmDialog
+        open={leaveDialog.open}
+        title="Leave without saving?"
+        message="Your changes to status, dates or details (and any item typed but not added) will be lost."
+        confirmLabel="Leave"
+        cancelLabel="Stay"
+        onConfirm={leaveDialog.onConfirm}
+        onCancel={leaveDialog.onCancel}
+      />
     </div>
   );
 }

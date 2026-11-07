@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ConfirmDialog from "../Default/ConfirmDialog";
 import { ownersApi } from "../../services/owners";
 
 const EMPTY_DRAFT = { name: "" };
@@ -91,6 +92,9 @@ export default function OwnersPanel() {
     }
   };
 
+  // D03: exclusão só depois de confirmar no ConfirmDialog.
+  const [pendingDelete, setPendingDelete] = useState(null);
+
   const handleDelete = async (id) => {
     setError(null);
     try {
@@ -179,7 +183,7 @@ export default function OwnersPanel() {
                       <PencilIcon />
                     </button>
                     <button
-                      onClick={() => handleDelete(c.id)}
+                      onClick={() => setPendingDelete(c)}
                       title="Remove"
                       className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                     >
@@ -192,6 +196,24 @@ export default function OwnersPanel() {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        title="Delete this owner?"
+        message={
+          <>
+            <strong>{pendingDelete?.name}</strong> will be deleted. Owners still assigned to an idea cannot be deleted — reassign those ideas first. This cannot be
+            undone.
+          </>
+        }
+        confirmLabel="Delete owner"
+        onConfirm={() => {
+          const id = pendingDelete.id;
+          setPendingDelete(null);
+          handleDelete(id);
+        }}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

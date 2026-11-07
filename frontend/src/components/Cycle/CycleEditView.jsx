@@ -1,4 +1,5 @@
 export default function CycleEditView({
+  titleId,
   currentCycle,
   name,
   setName,
@@ -39,6 +40,10 @@ export default function CycleEditView({
           Close
         </button>
       </div>
+
+      <h2 id={titleId} className="text-xl font-semibold text-gray-900 mb-4">
+        Edit cycle
+      </h2>
 
       <div className="flex flex-col gap-5">
         <div className="grid grid-cols-2 gap-4">

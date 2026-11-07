@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId } from "react";
 import { cycleApi } from "../../services/cycle";
 import DetailModal from "../Default/DetailModal";
+import ConfirmDialog from "../Default/ConfirmDialog";
 import CycleDetailView from "./CycleDetailView";
 import CycleEditView from "./CycleEditView";
 
@@ -24,6 +25,10 @@ export default function CycleDetailModal({
 
   const [confirmationPrompt, setConfirmationPrompt] = useState(null);
   const [conflictPrompt, setConflictPrompt] = useState(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  // Ação (fechar / voltar à visão geral) aguardando "descartar alterações?".
+  const [pendingDiscard, setPendingDiscard] = useState(null);
+  const titleId = useId();
 
   useEffect(() => {
     setCurrentCycle(cycle);
@@ -119,26 +124,62 @@ export default function CycleDetailModal({
   };
 
   const handleDeleteCycle = async () => {
-    if (!confirm("Remove this cycle? Bound plannings will remain intact.")) return;
     setSaving(true);
     try {
       await cycleApi.delete(currentCycle.id);
+      setConfirmingDelete(false);
       onDeleted(currentCycle.id);
     } catch (err) {
       setError(err.message || "Failed to delete cycle.");
+      setConfirmingDelete(false);
       setSaving(false);
     }
+  };
+
+  // D03: alterações não salvas no modo edição pedem confirmação antes de
+  // fechar o modal ou voltar para a visão geral (Esc/clique fora via DetailModal).
+  const editDirty =
+    mode === "edit" &&
+    (name.trim() !== currentCycle.name ||
+      description.trim() !== (currentCycle.description || "") ||
+      startDate !== (currentCycle.start_date || "") ||
+      (dueDate || "") !== (currentCycle.due_date || ""));
+
+  const resetEditFields = () => {
+    setName(currentCycle.name);
+    setDescription(currentCycle.description || "");
+    setStartDate(currentCycle.start_date || "");
+    setDueDate(currentCycle.due_date || "");
+    setConflictPrompt(null);
+    setConfirmationPrompt(null);
+    setError(null);
+  };
+
+  const guard = (action) => () => {
+    if (editDirty) setPendingDiscard(() => action);
+    else action();
+  };
+
+  const backToOverview = () => {
+    resetEditFields();
+    setMode("view");
   };
 
   const boundIds = new Set((currentCycle.plannings || []).map((p) => p.id));
   const unassignedPlannings = availablePlannings.filter((p) => !boundIds.has(p.id));
 
   return (
-    <DetailModal onClose={onClose} size="lg">
+    <DetailModal onClose={onClose} size="lg" labelledBy={titleId} dirty={editDirty}>
       {mode === "view" ? (
-        <CycleDetailView cycle={currentCycle} onEdit={() => setMode("edit")} onClose={onClose} />
+        <CycleDetailView
+          cycle={currentCycle}
+          titleId={titleId}
+          onEdit={() => setMode("edit")}
+          onClose={onClose}
+        />
       ) : (
         <CycleEditView
+          titleId={titleId}
           currentCycle={currentCycle}
           name={name}
           setName={setName}
@@ -161,11 +202,39 @@ export default function CycleDetailModal({
           onUpdateDueDate={handleUpdateDueDate}
           onBindPlanning={handleBindPlanning}
           onUnbindPlanning={handleUnbindPlanning}
-          onDeleteCycle={handleDeleteCycle}
-          onDone={() => setMode("view")}
-          onClose={onClose}
+          onDeleteCycle={() => setConfirmingDelete(true)}
+          onDone={guard(backToOverview)}
+          onClose={guard(onClose)}
         />
       )}
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Delete this cycle?"
+        message={
+          <>
+            The cycle <strong>{currentCycle.name}</strong> will be deleted. Its bound plannings
+            will <strong>not</strong> be deleted — they just leave this cycle. This cannot be undone.
+          </>
+        }
+        confirmLabel="Delete cycle"
+        busy={saving}
+        onConfirm={handleDeleteCycle}
+        onCancel={() => setConfirmingDelete(false)}
+      />
+      <ConfirmDialog
+        open={Boolean(pendingDiscard)}
+        title="Discard changes?"
+        message="Your unsaved changes to this cycle will be lost."
+        confirmLabel="Discard"
+        cancelLabel="Keep editing"
+        onConfirm={() => {
+          const action = pendingDiscard;
+          setPendingDiscard(null);
+          action();
+        }}
+        onCancel={() => setPendingDiscard(null)}
+      />
     </DetailModal>
   );
 }
