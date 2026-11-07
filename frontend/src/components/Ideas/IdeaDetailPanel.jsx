@@ -1,4 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+export const IDEA_DESCRIPTION_MAX = 200; // VARCHAR(200) no banco
+
+const SAVE_STATE_LABELS = {
+  saving: { text: "Saving…", className: "text-ui-text-muted" },
+  saved: { text: "Saved", className: "text-status-emerald-fg" },
+  error: { text: "Not saved", className: "text-status-red-fg" },
+};
 import { ideasApi } from "../../services/ideas";
 import { checklistApi } from "../../services/checklist";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
@@ -25,6 +33,10 @@ export default function IdeaDetail({
   const [ownerId, setOwnerId] = useState(idea.owner.id);
   const [newItem, setNewItem] = useState("");
   const [error, setError] = useState(null);
+  // D06: feedback do autosave — "idle" | "saving" | "saved" | "error".
+  const [saveState, setSaveState] = useState("idle");
+  const savedTimer = useRef(null);
+  const pendingSaves = useRef(0);
 
   useEffect(() => {
     setName(idea.name);
@@ -33,12 +45,26 @@ export default function IdeaDetail({
     setOwnerId(idea.owner.id);
   }, [idea]);
 
-  const saveField = async (patch) => {
+  useEffect(() => () => clearTimeout(savedTimer.current), []);
+
+  // Salva um campo; em erro, `revert` devolve o campo ao valor gravado.
+  const saveField = async (patch, revert) => {
     setError(null);
+    clearTimeout(savedTimer.current);
+    pendingSaves.current += 1;
+    setSaveState("saving");
     try {
       const updated = await ideasApi.update(idea.id, patch);
       onUpdated(updated);
+      pendingSaves.current -= 1;
+      if (pendingSaves.current === 0) {
+        setSaveState("saved");
+        savedTimer.current = setTimeout(() => setSaveState("idle"), 2500);
+      }
     } catch (err) {
+      pendingSaves.current -= 1;
+      setSaveState("error");
+      revert?.();
       setError(err.message || "It was not possible to update the idea.");
     }
   };
@@ -47,22 +73,34 @@ export default function IdeaDetail({
 
   const handleNameBlur = () => {
     const trimmed = name.trim();
-    if (trimmed && trimmed !== idea.name) saveField({ name: trimmed });
+    if (!trimmed) {
+      // Nome não pode ficar vazio: volta ao valor salvo em vez de deixar o
+      // campo em branco na tela sem gravar nada.
+      setName(idea.name);
+      setError("The name can't be empty — the previous name was restored.");
+      return;
+    }
+    if (trimmed !== idea.name) saveField({ name: trimmed }, () => setName(idea.name));
+    else if (trimmed !== name) setName(trimmed);
   };
 
   const handleDescriptionBlur = () => {
     const trimmed = description.trim() || null;
-    if (trimmed !== (idea.description || null)) saveField({ description: trimmed });
+    if (trimmed !== (idea.description || null)) {
+      saveField({ description: trimmed }, () => setDescription(idea.description || ""));
+    }
   };
 
   const handleCategoryChange = (value) => {
     setCategoryId(value);
-    saveField({ category_id: value ? Number(value) : null });
+    saveField({ category_id: value ? Number(value) : null }, () =>
+      setCategoryId(idea.category?.id ?? "")
+    );
   };
 
   const handleOwnerChange = (value) => {
     setOwnerId(value);
-    saveField({ owner_id: Number(value) });
+    saveField({ owner_id: Number(value) }, () => setOwnerId(idea.owner.id));
   };
   
   const handleAddItem = async () => {
@@ -117,11 +155,28 @@ export default function IdeaDetail({
         {/* Left Column: Idea Details */}
         <div className="flex-1 flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-semibold text-ui-text-primary">Idea</h2>
+            <div className="flex items-baseline gap-3">
+              <h2 className="text-lg font-semibold text-ui-text-primary">Idea</h2>
+              {/* aria-live: leitores de tela anunciam "Saving…/Saved" */}
+              <span
+                role="status"
+                aria-live="polite"
+                className={`text-xs ${SAVE_STATE_LABELS[saveState]?.className ?? ""}`}
+              >
+                {SAVE_STATE_LABELS[saveState]?.text ?? ""}
+              </span>
+            </div>
             <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${statusClass}`}>
               {idea.execution_status}
             </span>
           </div>
+          <p className="text-xs text-ui-text-muted -mt-4 mb-4">Changes are saved automatically.</p>
+
+          {error && (
+            <p role="alert" className="text-sm text-status-red-fg mb-4">
+              {error}
+            </p>
+          )}
 
           <div className="flex flex-col gap-4 flex-grow">
             <div>
@@ -135,11 +190,21 @@ export default function IdeaDetail({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Description</label>
+              <div className="flex items-baseline justify-between mb-1">
+                <label className="block text-sm font-medium text-ui-text-secondary">Description</label>
+                <span
+                  className={`text-xs tabular-nums ${
+                    description.length >= IDEA_DESCRIPTION_MAX ? "text-status-amber-fg" : "text-ui-text-muted"
+                  }`}
+                >
+                  {description.length}/{IDEA_DESCRIPTION_MAX}
+                </span>
+              </div>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onBlur={handleDescriptionBlur}
+                maxLength={IDEA_DESCRIPTION_MAX}
                 rows={8}
                 className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 resize-none"
               />

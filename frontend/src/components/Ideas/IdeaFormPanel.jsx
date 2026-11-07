@@ -1,3 +1,4 @@
+import { IDEA_DESCRIPTION_MAX } from "./IdeaDetailPanel";
 import { useEffect, useState } from "react";
 
 const EMPTY_FORM = { name: "", description: "", category_id: "", owner_id: "" };
@@ -79,10 +80,22 @@ export default function IdeaForm({ categories, owners, onClose, onSubmit, backLa
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Description</label>
+              <div className="flex items-baseline justify-between mb-1">
+                <label className="block text-sm font-medium text-ui-text-secondary">Description</label>
+                <span
+                  className={`text-xs tabular-nums ${
+                    form.description.length >= IDEA_DESCRIPTION_MAX
+                      ? "text-status-amber-fg"
+                      : "text-ui-text-muted"
+                  }`}
+                >
+                  {form.description.length}/{IDEA_DESCRIPTION_MAX}
+                </span>
+              </div>
               <textarea
                 value={form.description}
                 onChange={(e) => update("description", e.target.value)}
+                maxLength={IDEA_DESCRIPTION_MAX}
                 rows={8}
                 className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 focus:border-accent-600 resize-none"
               />
