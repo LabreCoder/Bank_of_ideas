@@ -126,8 +126,11 @@ Once everything is up:
 | Service | URL | Purpose |
 |---|---|---|
 | Frontend | http://localhost:5173 | The actual web app UI |
-| API | http://localhost:8000 | Backend REST API |
+| API (via frontend proxy) | http://localhost:5173/api/... | What the browser calls (no fixed API URL, no CORS needed) |
+| API (direct) | http://localhost:8000 | Backend REST API |
 | API Docs | http://localhost:8000/docs | Interactive Swagger UI |
+
+All ports are published on **127.0.0.1 only** (database, API and frontend): the API has no authentication yet, so it is not reachable from other machines on the network. The frontend's Vite dev server proxies `/api/*` to the `api` service (see `frontend/vite.config.js`). Extra CORS origins for direct API calls can be set with `CORS_ORIGINS` (comma-separated) in `.env`.
 
 ### Running the backend tests
 

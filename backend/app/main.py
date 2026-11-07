@@ -1,3 +1,5 @@
+import os
+
 import models  # registra todos os ORM models no Base antes de qualquer query
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,10 +13,18 @@ from routes.cycle import router as cycle_router
 
 app = FastAPI()
 
+# E01: origens permitidas vindas do ambiente (lista separada por vírgula).
+# Com o proxy /api do frontend, o navegador nem precisa de CORS; isto só vale
+# para quem chamar a API direto de outra origem.
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
+    if origin.strip()
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
