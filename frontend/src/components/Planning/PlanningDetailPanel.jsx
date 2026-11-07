@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { planningApi } from "../../services/planning";
+import { checklistApi } from "../../services/checklist";
+import { useUnsavedChangesGuard } from "../../hooks/useUnsavedChangesGuard";
 import { PLANNING_STATUS_OPTIONS, PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 import ProgressBar from "../Default/ProgressBar";
 
@@ -25,6 +27,9 @@ function TrashIcon() {
 // Itens criados no cliente usam id string ("tmp-N") até o servidor devolver o id real.
 const isTempId = (id) => typeof id === "string";
 
+// D01: o checklist grava na hora (como no detalhe da ideia), com atualização
+// otimista e reversão em caso de erro. Só os campos do planning (status,
+// datas, detalhes) dependem do botão Save.
 export default function PlanningDetailPanel({
   planning,
   backLabel = "Planning",
@@ -34,6 +39,9 @@ export default function PlanningDetailPanel({
 }) {
   const [checklistItems, setChecklistItems] = useState(planning.checklist_items || []);
   const tempIdCounter = useRef(0);
+  // Só a resposta da operação mais recente substitui a lista local; respostas
+  // atrasadas de cliques anteriores não "desfazem" um clique mais novo.
+  const checklistOpSeq = useRef(0);
 
   const [status, setStatus] = useState(planning.status);
   const [startDate, setStartDate] = useState(planning.start_date || "");
@@ -61,69 +69,66 @@ export default function PlanningDetailPanel({
     return `tmp-${tempIdCounter.current}`;
   };
 
-  // Item digitado mas ainda não adicionado com "Add" também é salvo.
-  const getItemsToSave = () => {
-    const description = newItem.description.trim();
-    if (!description) return checklistItems;
-    return [
-      ...checklistItems,
-      { id: nextTempId(), description, due_date: newItem.due_date || null, is_done: false },
-    ];
+  // Campos do planning diferentes do que está salvo (o checklist não entra:
+  // ele já é gravado a cada ação). Texto digitado no "New item" e não
+  // adicionado também conta, para não ser perdido sem aviso.
+  const fieldsDirty =
+    status !== planning.status ||
+    (details.trim() || null) !== (planning.details || null) ||
+    (startDate || null) !== (planning.start_date || null) ||
+    (dueDate || null) !== (planning.due_date || null);
+  const pendingNewItem = newItem.description.trim() !== "";
+  const dirty = fieldsDirty || pendingNewItem;
+
+  useUnsavedChangesGuard(dirty);
+
+  const confirmDiscard = () =>
+    !dirty || window.confirm("You have unsaved changes. Leave without saving?");
+
+  const handleClose = () => {
+    if (confirmDiscard()) onClose();
   };
 
-  const hasChanges = () => {
-    const currentDetails = details.trim() || null;
-    const originalDetails = planning.details || null;
-    const currentStart = startDate || null;
-    const originalStart = planning.start_date || null;
-    const currentDue = dueDate || null;
-    const originalDue = planning.due_date || null;
-
-    if (
-      status !== planning.status ||
-      currentDetails !== originalDetails ||
-      currentStart !== originalStart ||
-      currentDue !== originalDue
-    ) {
+  // Executa uma ação do checklist: aplica o estado otimista, chama a API e
+  // usa a resposta (planning completo) como verdade; em erro, volta ao anterior.
+  const runChecklistOp = async (optimisticUpdate, request, errorMessage) => {
+    const previous = checklistItems;
+    const seq = ++checklistOpSeq.current;
+    setError(null);
+    setChecklistItems(optimisticUpdate(previous));
+    try {
+      const updated = await request();
+      if (seq === checklistOpSeq.current) setChecklistItems(updated.checklist_items || []);
+      onUpdated(updated);
       return true;
+    } catch (err) {
+      if (seq === checklistOpSeq.current) setChecklistItems(previous);
+      setError(err.message || errorMessage);
+      return false;
     }
-
-    return (
-      newItem.description.trim() !== "" ||
-      JSON.stringify(checklistItems) !== JSON.stringify(planning.checklist_items || [])
-    );
   };
 
   const handleSave = async () => {
     setError(null);
     setSavedSuccess(false);
-
-    if (!hasChanges()) {
-      setError("No changes detected to save.");
-      return;
-    }
+    if (!dirty) return;
 
     setSaving(true);
     try {
-      const patch = {
-        status,
-        start_date: startDate || null,
-        due_date: dueDate || null,
-        details: details.trim() || null,
-        checklist_items: getItemsToSave().map((item) => ({
-          // id temporário não vai pro servidor: o item é criado como novo.
-          ...(isTempId(item.id) ? {} : { id: item.id }),
-          description: item.description,
-          due_date: item.due_date || null,
-          is_done: !!item.is_done,
-        })),
-      };
-
-      const updated = await planningApi.update(planning.id, patch);
-      // Troca os ids temporários pelos reais devolvidos pelo servidor.
-      setChecklistItems(updated.checklist_items || []);
-      setNewItem({ description: "", due_date: "" });
-      onUpdated(updated);
+      if (fieldsDirty) {
+        const updated = await planningApi.update(planning.id, {
+          status,
+          start_date: startDate || null,
+          due_date: dueDate || null,
+          details: details.trim() || null,
+        });
+        onUpdated(updated);
+      }
+      // Item digitado mas não adicionado com "Add" também é gravado no Save.
+      if (pendingNewItem) {
+        const ok = await handleAddItem();
+        if (!ok) return;
+      }
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);
     } catch (err) {
@@ -133,28 +138,45 @@ export default function PlanningDetailPanel({
     }
   };
 
-  const handleAddItem = () => {
-    if (!newItem.description.trim()) return;
-
-    const itemToAdd = {
+  const handleAddItem = async () => {
+    const description = newItem.description.trim();
+    if (!description) return false;
+    const due_date = newItem.due_date || null;
+    const tempItem = {
       id: nextTempId(),
-      description: newItem.description.trim(),
-      due_date: newItem.due_date || null,
+      description,
+      due_date,
       is_done: false,
+      position: checklistItems.length,
     };
 
-    setChecklistItems((prev) => [...prev, itemToAdd]);
     setNewItem({ description: "", due_date: "" });
+    const ok = await runChecklistOp(
+      (items) => [...items, tempItem],
+      () => checklistApi.addChecklistItem(planning.id, { description, due_date }),
+      "It was not possible to add the item."
+    );
+    // Em erro, devolve o texto ao campo para o usuário não perder o que digitou.
+    if (!ok) setNewItem({ description, due_date: due_date || "" });
+    return ok;
   };
 
   const handleToggleItem = (itemId) => {
-    setChecklistItems((prev) =>
-      prev.map((item) => (item.id === itemId ? { ...item, is_done: !item.is_done } : item))
+    if (isTempId(itemId)) return;
+    runChecklistOp(
+      (items) => items.map((item) => (item.id === itemId ? { ...item, is_done: !item.is_done } : item)),
+      () => checklistApi.toggleChecklistItem(planning.id, itemId),
+      "It was not possible to update the item."
     );
   };
 
   const handleDeleteItem = (itemId) => {
-    setChecklistItems((prev) => prev.filter((item) => item.id !== itemId));
+    if (isTempId(itemId)) return;
+    runChecklistOp(
+      (items) => items.filter((item) => item.id !== itemId),
+      () => checklistApi.deleteChecklistItem(planning.id, itemId),
+      "It was not possible to remove the item."
+    );
   };
 
   const startEditingItem = (item) => {
@@ -168,20 +190,16 @@ export default function PlanningDetailPanel({
   };
 
   const handleSaveEditItem = (itemId) => {
-    if (!editItem.description.trim()) return;
+    const description = editItem.description.trim();
+    if (!description || isTempId(itemId)) return;
+    const due_date = editItem.due_date || null;
 
-    setChecklistItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId
-          ? {
-              ...item,
-              description: editItem.description.trim(),
-              due_date: editItem.due_date ? editItem.due_date : null,
-            }
-          : item
-      )
-    );
     cancelEditingItem();
+    runChecklistOp(
+      (items) => items.map((item) => (item.id === itemId ? { ...item, description, due_date } : item)),
+      () => checklistApi.updateChecklistItem(planning.id, itemId, { description, due_date }),
+      "It was not possible to update the item."
+    );
   };
 
   const handleDeletePlanning = async () => {
@@ -206,7 +224,7 @@ export default function PlanningDetailPanel({
     <div>
       <button
         type="button"
-        onClick={onClose}
+        onClick={handleClose}
         className="text-sm text-gray-500 hover:text-gray-700 mb-2"
       >
         ← {backLabel}
@@ -216,7 +234,7 @@ export default function PlanningDetailPanel({
         <h1 className="text-3xl font-bold text-gray-900">{planning.idea.name}</h1>
         <button
           type="button"
-          onClick={onClose}
+          onClick={handleClose}
           className="text-gray-400 hover:text-gray-600 text-sm"
         >
           Close
@@ -290,6 +308,7 @@ export default function PlanningDetailPanel({
           <div className="border-l border-gray-100 pl-8">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-lg font-semibold text-gray-900">Checklist</h3>
+              <span className="text-xs text-gray-400">Saved automatically</span>
             </div>
 
             {total > 0 && (
@@ -391,6 +410,7 @@ export default function PlanningDetailPanel({
                           type="checkbox"
                           checked={item.is_done}
                           onChange={() => handleToggleItem(item.id)}
+                          disabled={isTempId(item.id)}
                           className="accent-accent-600"
                         />
                         <span className={`flex-1 ${item.is_done ? "line-through text-gray-400" : ""}`}>
@@ -426,8 +446,16 @@ export default function PlanningDetailPanel({
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-600 mt-6">{error}</p>}
-        {savedSuccess && <p className="text-sm text-green-600 mt-6">Changes saved successfully!</p>}
+        {error && (
+          <p role="alert" className="text-sm text-red-600 mt-6">
+            {error}
+          </p>
+        )}
+        {savedSuccess && !dirty && (
+          <p role="status" className="text-sm text-green-600 mt-6">
+            Changes saved successfully!
+          </p>
+        )}
 
         <div className="flex justify-between items-center pt-6 mt-6 border-t border-gray-100">
           <button
@@ -438,14 +466,21 @@ export default function PlanningDetailPanel({
           >
             Delete planning
           </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-accent-600 hover:bg-accent-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-md"
-          >
-            {saving ? "Saving..." : "Save"}
-          </button>
+          <div className="flex items-center gap-3">
+            {dirty && (
+              <span role="status" className="text-xs font-medium text-amber-600">
+                Unsaved changes
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving || !dirty}
+              className="bg-accent-600 hover:bg-accent-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-4 py-2 rounded-md"
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
