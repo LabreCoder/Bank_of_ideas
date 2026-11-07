@@ -1,3 +1,5 @@
+import { friendlyValidationMessage } from "../utils/validationMessages.js";
+
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 async function request(path, options = {}) {
@@ -18,14 +20,9 @@ async function request(path, options = {}) {
     // FastAPI manda 422 de validação como lista de { loc, msg }.
     let message;
     if (typeof detail === "string") {
-      message = detail;
+      message = detail.replace(/^Value error, /, "");
     } else if (Array.isArray(detail)) {
-      message = detail
-        .map((d) => {
-          const field = Array.isArray(d.loc) ? d.loc.filter((p) => p !== "body").join(".") : "";
-          return field ? `${field}: ${d.msg}` : d.msg;
-        })
-        .join("; ");
+      message = detail.map(friendlyValidationMessage).join(" ");
     } else {
       message = detail?.message || JSON.stringify(detail);
     }
