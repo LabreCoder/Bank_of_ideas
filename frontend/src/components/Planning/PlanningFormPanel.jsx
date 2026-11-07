@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { STATUS_OPTIONS } from "../../pages/Planning";
+import { PLANNING_STATUS_OPTIONS } from "../../utils/planningStatus";
 
 function ChecklistEmptyIcon() {
   return (
@@ -158,7 +158,7 @@ export default function PlanningFormPanel({ availableIdeas, onClose, onSubmit })
                     onChange={(e) => updateForm("status", e.target.value)}
                     className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                   >
-                    {STATUS_OPTIONS.map((s) => (
+                    {PLANNING_STATUS_OPTIONS.map((s) => (
                       <option key={s} value={s}>
                         {s}
                       </option>

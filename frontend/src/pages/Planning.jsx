@@ -11,14 +11,7 @@ import IdeaFilterBar from "../components/Filters/IdeaFilterBar";
 import { useIdeaFilters } from "../hooks/useIdeaFilters";
 import { matchesIdeaFilters } from "../utils/ideaFilters";
 
-export const STATUS_OPTIONS = [
-  "Not Started",
-  "Under Review",
-  "Started",
-  "In Development",
-  "Completed",
-  "Cancelled",
-];
+import { PLANNING_STATUS_OPTIONS } from "../utils/planningStatus";
 
 export default function Planning() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -92,7 +85,7 @@ export default function Planning() {
   const tabCounts = useMemo(() => {
     const base = plannings.filter((p) => matchesIdeaFilters(p.idea || {}, filters));
     const counts = { All: base.length };
-    for (const status of STATUS_OPTIONS) {
+    for (const status of PLANNING_STATUS_OPTIONS) {
       counts[status] = base.filter((p) => p.status === status).length;
     }
     return counts;
@@ -101,7 +94,7 @@ export default function Planning() {
   const tabs = useMemo(
     () => [
       { value: "All", label: "All", count: tabCounts.All },
-      ...STATUS_OPTIONS.map((status) => ({
+      ...PLANNING_STATUS_OPTIONS.map((status) => ({
         value: status,
         label: status,
         count: tabCounts[status],

@@ -1,5 +1,6 @@
 // Centraliza o que antes estava duplicado em PlanningCard.jsx,
-// PlanningDetailModal.jsx e DayIdeasModal.jsx. Se um dia adicionar um novo
+// PlanningDetailModal.jsx (removido) e DayIdeasModal.jsx. Fonte única dos status de planning
+// (usada também pelas telas e painéis de Planning). Se um dia adicionar um novo
 // status, muda só aqui.
 export const PLANNING_STATUS_OPTIONS = [
   "Not Started",
