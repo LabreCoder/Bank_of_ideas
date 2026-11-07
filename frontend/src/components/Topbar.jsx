@@ -3,8 +3,8 @@ import { NavLink, useLocation } from "react-router-dom";
 import { NAV_ITEMS } from "../router/navigationItems";
 import { useTheme } from "../context/ThemeContext";
 import SoundToggle from "./SoundToggle";
-import darkIcon from "../../public/icons/dark.png";
-import brightIcon from "../../public/icons/bright_2.png";
+import darkIcon from "../assets/icons/dark.png";
+import brightIcon from "../assets/icons/bright_2.png";
 import { Background } from "../components/Default/Background.jsx";
 
 
