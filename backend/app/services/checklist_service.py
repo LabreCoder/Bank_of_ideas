@@ -10,18 +10,36 @@ from services.planning_service import _get_or_404, _serialize
 from schemas.checklist import ChecklistItemUpdate
 from datetime import date
 
+def _ordered_items(planning: Planning) -> List[PlanningChecklistItem]:
+    return sorted(planning.checklist_items, key=lambda i: (i.position, i.id or 0))
+
+
+def _renumber(items: List[PlanningChecklistItem]) -> None:
+    # Posições sempre sequenciais (0..n-1): evita duplicidade depois de exclusões.
+    for index, item in enumerate(items):
+        item.position = index
+
+
 def add_checklist_item(
-    db: Session, planning_id: int, description: str, due_date: Optional[date] = None
+    db: Session,
+    planning_id: int,
+    description: str,
+    due_date: Optional[date] = None,
+    position: Optional[int] = None,
 ) -> PlanningResponse:
+    """
+    Sem `position`: o item vai para o fim. Com `position`: é inserido nesse
+    índice (limitado a 0..n) e os demais são deslocados.
+    """
     planning = _get_or_404(db, planning_id)
-    next_position = len(planning.checklist_items)
-    item = PlanningChecklistItem(
-        planning_id=planning_id, 
-        description=description, 
-        due_date=due_date, 
-        position=next_position
-    )
-    db.add(item)
+    items = _ordered_items(planning)
+    index = len(items) if position is None else max(0, min(position, len(items)))
+
+    item = PlanningChecklistItem(description=description, due_date=due_date)
+    items.insert(index, item)
+    _renumber(items)
+    planning.checklist_items.append(item)
+
     db.commit()
     db.refresh(planning)
     return _serialize(planning)
@@ -87,7 +105,10 @@ def delete_checklist_item(db: Session, planning_id: int, item_id: int) -> Planni
     )
     if item is None:
         raise HTTPException(status_code=404, detail="Checklist item not found")
-    db.delete(item)
+    planning = _get_or_404(db, planning_id)
+    remaining = [i for i in _ordered_items(planning) if i.id != item.id]
+    planning.checklist_items.remove(item)  # delete-orphan apaga a linha
+    _renumber(remaining)
     db.commit()
     planning = _get_or_404(db, planning_id)
     return _serialize(planning)
