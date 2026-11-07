@@ -1,7 +1,8 @@
-from typing import List, Optional
-from datetime import date, datetime
-from enum import Enum
-from pydantic import BaseModel, field_validator
+from typing import Optional
+from datetime import date
+from pydantic import BaseModel, Field, field_validator
+
+from schemas._common import INPUT_CONFIG, ORM_CONFIG
 
 
 def _empty_date_to_none(value):
@@ -12,7 +13,9 @@ def _empty_date_to_none(value):
 
 
 class ChecklistItemCreate(BaseModel):
-    description: str
+    model_config = INPUT_CONFIG
+
+    description: str = Field(min_length=1)
     due_date: Optional[date] = None
     position: Optional[int] = None  # se None, o service calcula o próximo
 
@@ -20,19 +23,21 @@ class ChecklistItemCreate(BaseModel):
 
 
 class ChecklistItemResponse(BaseModel):
+    model_config = ORM_CONFIG
+
     id: int
     description: str
     due_date: Optional[date] = None
     is_done: bool
     position: int
 
-    class Config:
-        from_attributes = True
-    
-    
+
 class ChecklistItemUpdate(BaseModel):
-    id: Optional[int] = None  
-    description: Optional[str] = None
+    model_config = INPUT_CONFIG
+
+    id: Optional[int] = None
+    # None/omitido = mantém a descrição atual; string vazia ou só espaços = 422.
+    description: Optional[str] = Field(default=None, min_length=1)
     due_date: Optional[date] = None
     is_done: Optional[bool] = None
     position: Optional[int] = None

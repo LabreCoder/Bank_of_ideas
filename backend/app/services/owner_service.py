@@ -15,7 +15,14 @@ def list_owners(db: Session) -> List[OwnerResponse]:
 def create_owner(db: Session, payload: OwnerCreate) -> OwnerResponse:
     owner = Owner(name=payload.name)
     db.add(owner)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not create owner",
+        ) from e
     db.refresh(owner)
     return OwnerResponse.model_validate(owner)
 
@@ -43,7 +50,14 @@ def update_owner(
     for field, value in updates.items():
         setattr(owner, field, value)
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not update owner",
+        ) from e
     db.refresh(owner)
     return OwnerResponse.model_validate(owner)
 

@@ -51,7 +51,14 @@ def update_category(
     for field, value in updates.items():
         setattr(category, field, value)
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not update category",
+        ) from e
     db.refresh(category)
     return CategoryResponse.model_validate(category)
 

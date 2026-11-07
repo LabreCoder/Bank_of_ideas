@@ -1,21 +1,29 @@
 from typing import List, Optional
 from datetime import date, datetime
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
+from schemas._common import INPUT_CONFIG, ORM_CONFIG, reject_null
 from schemas.planning import PlanningResponse
 
 
 class CycleCreate(BaseModel):
-    name: str
+    model_config = INPUT_CONFIG
+
+    name: str = Field(min_length=1)
     description: Optional[str] = None
     start_date: date
     due_date: Optional[date] = None
 
 
 class CycleUpdate(BaseModel):
-    name: Optional[str] = None
+    model_config = INPUT_CONFIG
+
+    name: Optional[str] = Field(default=None, min_length=1)
     description: Optional[str] = None
     start_date: Optional[date] = None
+
+    # name e start_date são NOT NULL no banco: null explícito -> 422.
+    _not_null = field_validator("name", "start_date")(reject_null)
 
 
 class CycleDueDateUpdate(BaseModel):
@@ -63,5 +71,4 @@ class CycleResponse(BaseModel):
     created_at: datetime
     plannings: List[PlanningResponse] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ORM_CONFIG
