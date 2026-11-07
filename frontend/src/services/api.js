@@ -1,6 +1,8 @@
 import { friendlyValidationMessage } from "../utils/validationMessages.js";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// E01: por padrão chama /api no próprio frontend (proxy do Vite em dev, nginx
+// em produção). VITE_API_URL continua permitindo apontar para outra API.
+const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {

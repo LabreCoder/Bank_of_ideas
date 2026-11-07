@@ -7,8 +7,10 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+    # E01: só a API acessa o banco (rede interna do Docker). A porta fica
+    # publicada apenas em 127.0.0.1 para um cliente SQL local; não é exposta à rede.
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
@@ -27,14 +29,16 @@ services:
         INSTALL_DEV: "true"   # instala pytest/httpx (requirements-dev.txt)
     container_name: bank_ideas_api
     restart: unless-stopped
+    # E01: API sem autenticação -> só acessível neste computador.
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     env_file:
       - .env
     environment:
       # Sem cache do pytest: ele criaria /app/.pytest_cache e pastas temporárias
       # que derrubam o reloader do uvicorn (FileNotFoundError no StatReload).
       PYTEST_ADDOPTS: "-p no:cacheprovider"
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
     depends_on:
       db:
         condition: service_healthy
@@ -50,17 +54,15 @@ services:
     container_name: bank_ideas_frontend
     restart: unless-stopped
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:5173"
     volumes:
       - ./frontend:/app
       # Anonymous volume: keeps the container's own node_modules
       # (installed during build) instead of letting the bind mount
       # above overwrite it with your host's (possibly empty/missing) one.
       - /app/node_modules
-    environment:
-      # This URL is used by the BROWSER (see explanation below),
-      # so it must be an address your host machine can reach.
-      - VITE_API_URL=http://localhost:8000
+    # E01: o navegador chama /api no próprio frontend e o Vite repassa para
+    # http://api:8000 (vite.config.js). Não há mais URL fixa da API.
     depends_on:
       - api
 
