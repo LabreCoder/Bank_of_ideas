@@ -2,12 +2,14 @@ import { useState, useEffect, useId } from "react";
 import { cycleApi } from "../../services/cycle";
 import DetailModal from "../Default/DetailModal";
 import ConfirmDialog from "../Default/ConfirmDialog";
+import { TERMINAL_PLANNING_STATUSES } from "../../utils/planningStatus";
 import CycleDetailView from "./CycleDetailView";
 import CycleEditView from "./CycleEditView";
 
 export default function CycleDetailModal({
   cycle,
   availablePlannings,
+  planningCycleNames,
   onClose,
   onUpdated,
   onDeleted,
@@ -28,6 +30,7 @@ export default function CycleDetailModal({
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   // Ação (fechar / voltar à visão geral) aguardando "descartar alterações?".
   const [pendingDiscard, setPendingDiscard] = useState(null);
+  const [savedRecently, setSavedRecently] = useState(false);
   const titleId = useId();
 
   useEffect(() => {
@@ -38,7 +41,14 @@ export default function CycleDetailModal({
     setDueDate(cycle.due_date || "");
   }, [cycle]);
 
-  const handleUpdateInfo = async () => {
+  // D09: um único "Save" envia nome, descrição, início e fim. O backend
+  // valida tudo junto e não salva nada se houver conflito (409) — antes eram
+  // dois botões e editar nome + data e clicar "Done" perdia tudo sem aviso.
+  const handleSave = async () => {
+    if (!startDate) {
+      setError("Start date is required.");
+      return;
+    }
     setSaving(true);
     setError(null);
     setConflictPrompt(null);
@@ -47,35 +57,17 @@ export default function CycleDetailModal({
         name: name.trim(),
         description: description.trim() || null,
         start_date: startDate,
+        due_date: dueDate || null,
       });
       setCurrentCycle(updated);
       onUpdated(updated);
+      setSavedRecently(true);
     } catch (err) {
-      // 409: a nova start_date deixa plannings vinculados fora do período.
+      // 409: as novas datas deixam plannings vinculados fora do período.
       if (err.status === 409 && err.detail?.conflicts) {
         setConflictPrompt(err.detail.conflicts);
       } else {
-        setError(err.message || "Failed to update cycle details.");
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleUpdateDueDate = async () => {
-    setSaving(true);
-    setError(null);
-    setConflictPrompt(null);
-
-    try {
-      const updated = await cycleApi.updateDueDate(currentCycle.id, dueDate || null);
-      setCurrentCycle(updated);
-      onUpdated(updated);
-    } catch (err) {
-      if (err.status === 409 && err.detail?.conflicts) {
-        setConflictPrompt(err.detail.conflicts);
-      } else {
-        setError(err.message || "Failed to update due date.");
+        setError(err.message || "Failed to update the cycle.");
       }
     } finally {
       setSaving(false);
@@ -162,11 +154,23 @@ export default function CycleDetailModal({
 
   const backToOverview = () => {
     resetEditFields();
+    setSavedRecently(false);
     setMode("view");
   };
 
   const boundIds = new Set((currentCycle.plannings || []).map((p) => p.id));
-  const unassignedPlannings = availablePlannings.filter((p) => !boundIds.has(p.id));
+  // planningId -> nomes dos OUTROS ciclos em que o planning já está.
+  const otherCycleNames = new Map(
+    [...(planningCycleNames ?? new Map())].map(([planningId, cycles]) => [
+      planningId,
+      cycles.filter((c) => c.id !== currentCycle.id).map((c) => c.name),
+    ])
+  );
+
+  // D09: plannings concluídos/cancelados não aparecem na lista de vínculo.
+  const unassignedPlannings = availablePlannings.filter(
+    (p) => !boundIds.has(p.id) && !TERMINAL_PLANNING_STATUSES.has(p.status)
+  );
 
   return (
     <DetailModal onClose={onClose} size="lg" labelledBy={titleId} dirty={editDirty}>
@@ -192,14 +196,16 @@ export default function CycleDetailModal({
           selectedPlanningId={selectedPlanningId}
           setSelectedPlanningId={setSelectedPlanningId}
           unassignedPlannings={unassignedPlannings}
+          planningCycleNames={otherCycleNames}
           saving={saving}
           error={error}
           confirmationPrompt={confirmationPrompt}
           setConfirmationPrompt={setConfirmationPrompt}
           conflictPrompt={conflictPrompt}
           setConflictPrompt={setConflictPrompt}
-          onUpdateInfo={handleUpdateInfo}
-          onUpdateDueDate={handleUpdateDueDate}
+          dirty={editDirty}
+          savedRecently={savedRecently && !editDirty}
+          onSave={handleSave}
           onBindPlanning={handleBindPlanning}
           onUnbindPlanning={handleUnbindPlanning}
           onDeleteCycle={() => setConfirmingDelete(true)}

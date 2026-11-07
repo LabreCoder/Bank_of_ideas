@@ -66,6 +66,11 @@ def _attach_computed_fields(cycle: Cycle) -> Cycle:
     # Plain Python attributes, not DB columns — Pydantic reads them via
     # from_attributes when building the CycleResponse.
     cycle.status = _compute_cycle_status(cycle.plannings)
+    # D09: o status continua vindo só dos plannings (3 valores); o atraso é
+    # um indicador à parte.
+    cycle.is_overdue = bool(
+        cycle.due_date and cycle.due_date < date.today() and cycle.status != "Finished"
+    )
     completed, total, progress = _compute_progress(cycle.plannings)
     cycle.completed_plannings = completed
     cycle.total_plannings = total
@@ -319,17 +324,27 @@ def update_cycle(db: Session, cycle_id: int, payload: CycleUpdate) -> Cycle:
     cycle = _get_cycle_or_404(db, cycle_id)
     updates = payload.model_dump(exclude_unset=True)
 
-    new_start = updates.get("start_date")
-    if new_start is not None and new_start != cycle.start_date:
-        if cycle.due_date and new_start > cycle.due_date:
+    # Período efetivo depois do update (payload ou valor gravado). D09: a
+    # due_date pode vir junto, então início e fim são validados em conjunto e
+    # nada é salvo se houver erro (o update é atômico).
+    new_start = updates.get("start_date", cycle.start_date)
+    new_due = updates["due_date"] if "due_date" in updates else cycle.due_date
+    start_changed = new_start != cycle.start_date
+    due_changed = new_due != cycle.due_date
+
+    if start_changed or due_changed:
+        if new_due and new_start > new_due:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cycle start_date cannot be later than due_date.",
+                detail="Cycle due_date cannot be earlier than start_date.",
             )
-        conflicts = find_planning_conflicts(cycle.plannings, new_start, cycle.due_date)
+        conflicts = find_planning_conflicts(cycle.plannings, new_start, new_due)
         if conflicts:
+            changed = " and ".join(
+                name for name, flag in (("start_date", start_changed), ("due_date", due_changed)) if flag
+            )
             raise_planning_conflicts(
-                "Updating cycle start_date creates conflicts with bound plannings.", conflicts
+                f"Updating cycle {changed} creates conflicts with bound plannings.", conflicts
             )
 
     for field, value in updates.items():

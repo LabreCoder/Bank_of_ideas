@@ -1,14 +1,15 @@
 import { formatShortDate } from "../../utils/dateFormat";
 
-const CYCLE_STATUS_STYLES = {
-  "Waiting Start": "bg-ui-surface-2 text-ui-text-secondary border-ui-border",
-  "In Progress": "bg-status-amber-bg text-status-amber-fg border-status-amber-border",
-  "Finished": "bg-status-emerald-bg text-status-emerald-fg border-status-emerald-border",
-};
+import {
+  CYCLE_OVERDUE_LABEL,
+  CYCLE_OVERDUE_STYLE,
+  CYCLE_STATUS_STYLES,
+  STATUS_FALLBACK_STYLE,
+} from "../../utils/cycleStatus";
 
 export default function CycleTimelineCard({ cycle, onClick }) {
   const statusClass =
-    CYCLE_STATUS_STYLES[cycle.status] || "bg-ui-surface-2 text-ui-text-secondary border-ui-border";
+    CYCLE_STATUS_STYLES[cycle.status] || STATUS_FALLBACK_STYLE;
   const isFinished = cycle.status === "Finished";
   const progressBarClass = isFinished ? "bg-emerald-500" : "bg-accent-600";
 
@@ -19,9 +20,16 @@ export default function CycleTimelineCard({ cycle, onClick }) {
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <h4 className="font-semibold text-ui-text-primary text-base">{cycle.name}</h4>
-        <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full border font-medium ${statusClass}`}>
+        <div className="flex shrink-0 flex-wrap justify-end gap-1">
+          {cycle.is_overdue && (
+            <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${CYCLE_OVERDUE_STYLE}`}>
+              {CYCLE_OVERDUE_LABEL}
+            </span>
+          )}
+          <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full border font-medium ${statusClass}`}>
           {cycle.status}
         </span>
+        </div>
       </div>
 
       {cycle.description && (
@@ -46,7 +54,9 @@ export default function CycleTimelineCard({ cycle, onClick }) {
           {cycle.completed_plannings} / {cycle.total_plannings} plannings
         </span>
         <span>
-          {isFinished ? "Finished" : "Due"} {formatShortDate(cycle.due_date)}
+          {cycle.due_date
+            ? `${isFinished ? "Finished" : "Due"} ${formatShortDate(cycle.due_date)}`
+            : "No due date"}
         </span>
       </div>
     </div>

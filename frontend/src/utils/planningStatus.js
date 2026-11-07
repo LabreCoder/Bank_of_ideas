@@ -21,3 +21,6 @@ export const PLANNING_STATUS_STYLES = {
 };
 // Estilo usado quando um status não está mapeado (D07).
 export const STATUS_FALLBACK_STYLE = "bg-ui-surface-2 text-ui-text-secondary border-ui-border";
+
+// Status finais (espelha TERMINAL_PLANNING_STATUSES do backend).
+export const TERMINAL_PLANNING_STATUSES = new Set(["Completed", "Cancelled"]);

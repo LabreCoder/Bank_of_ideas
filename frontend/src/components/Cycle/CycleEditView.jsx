@@ -13,14 +13,16 @@ export default function CycleEditView({
   selectedPlanningId,
   setSelectedPlanningId,
   unassignedPlannings,
+  planningCycleNames,
   saving,
   error,
   confirmationPrompt,
   setConfirmationPrompt,
   conflictPrompt,
   setConflictPrompt,
-  onUpdateInfo,
-  onUpdateDueDate,
+  dirty,
+  savedRecently,
+  onSave,
   onBindPlanning,
   onUnbindPlanning,
   onDeleteCycle,
@@ -47,22 +49,36 @@ export default function CycleEditView({
       </h2>
 
       <div className="flex flex-col gap-5">
+        {/* D09: nome, descrição, início e fim num único formulário com um só "Save"
+            (PUT /cycle/{id} valida tudo junto e é atômico). */}
+        <div>
+          <label className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+          />
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
-            />
-          </div>
           <div>
             <label className="block text-sm font-medium text-ui-text-secondary mb-1">Start Date</label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
+              className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ui-text-secondary mb-1">
+              Due Date (optional)
+            </label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
               className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             />
           </div>
@@ -78,38 +94,29 @@ export default function CycleEditView({
           />
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          {dirty ? (
+            <span role="status" className="text-xs font-medium text-status-amber-fg">
+              Unsaved changes
+            </span>
+          ) : (
+            savedRecently && (
+              <span role="status" className="text-xs font-medium text-status-emerald-fg">
+                Saved
+              </span>
+            )
+          )}
           <button
             type="button"
-            onClick={onUpdateInfo}
-            disabled={saving}
-            className="bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium px-3 py-1.5 rounded-md disabled:opacity-50"
+            onClick={onSave}
+            disabled={saving || !dirty}
+            className="bg-accent-600 hover:bg-accent-700 text-white text-sm font-medium px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Update Cycle Details
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
 
-        <hr className="border-ui-border/60" />
-
         <div>
-          <label className="block text-sm font-medium text-ui-text-secondary mb-1">Cycle Due Date</label>
-          <div className="flex gap-2">
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
-            />
-            <button
-              type="button"
-              onClick={onUpdateDueDate}
-              disabled={saving}
-              className="border border-ui-border hover:bg-ui-surface-2 text-ui-text-secondary text-xs font-medium px-3 py-2 rounded-md"
-            >
-              Update Due Date
-            </button>
-          </div>
-
           {conflictPrompt && (
             <div className="mt-3 bg-status-amber-bg border border-status-amber-border rounded-md p-3 text-sm text-status-amber-fg">
               <p className="font-semibold mb-1">These cycle dates conflict with bound plannings:</p>
@@ -147,11 +154,17 @@ export default function CycleEditView({
               className="flex-1 text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             >
               <option value="">Select planning to bind...</option>
-              {unassignedPlannings.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.idea?.name || `Planning #${p.id}`}
-                </option>
-              ))}
+              {unassignedPlannings.map((p) => {
+                // D09: N:N continua permitido, mas o usuário vê quando o
+                // planning já pertence a outro ciclo.
+                const otherCycles = planningCycleNames?.get(p.id) ?? [];
+                return (
+                  <option key={p.id} value={p.id}>
+                    {p.idea?.name || `Planning #${p.id}`}
+                    {otherCycles.length > 0 ? ` — also in: ${otherCycles.join(", ")}` : ""}
+                  </option>
+                );
+              })}
             </select>
             <button
               type="button"
@@ -197,7 +210,7 @@ export default function CycleEditView({
                   <div>
                     <span className="font-medium text-ui-text-primary">{p.idea?.name}</span>
                     <span className="text-xs text-ui-text-muted ml-2">
-                      (Due: {p.due_date || "Not set"})
+                      (Due: {formatShortDate(p.due_date, "Not set")})
                     </span>
                   </div>
                   <button

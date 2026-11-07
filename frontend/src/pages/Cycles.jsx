@@ -48,6 +48,18 @@ export default function Cycles() {
     [cycles, filters]
   );
 
+  // D09: planningId -> ciclos aos quais ele já pertence (para avisar no vínculo).
+  const planningCycleNames = useMemo(() => {
+    const map = new Map();
+    for (const cycle of cycles) {
+      for (const planning of cycle.plannings ?? []) {
+        if (!map.has(planning.id)) map.set(planning.id, []);
+        map.get(planning.id).push({ id: cycle.id, name: cycle.name });
+      }
+    }
+    return map;
+  }, [cycles]);
+
   const activeCycles = useMemo(
     () => visibleCycles.filter((c) => c.status !== "Finished"),
     [visibleCycles]
@@ -184,6 +196,7 @@ export default function Cycles() {
         <CycleDetailModal
           cycle={selectedCycle}
           availablePlannings={plannings}
+          planningCycleNames={planningCycleNames}
           onClose={() => setSelectedCycle(null)}
           onUpdated={handleUpdated}
           onDeleted={handleDeleted}
