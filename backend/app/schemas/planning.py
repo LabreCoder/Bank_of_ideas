@@ -2,6 +2,7 @@ from typing import List, Optional
 from datetime import date, datetime
 from enum import Enum
 from pydantic import BaseModel, field_validator
+from schemas._common import ORM_CONFIG, reject_null
 from schemas.category import CategoryResponse
 from schemas.owner import OwnerResponse
 from schemas.checklist import (
@@ -31,7 +32,6 @@ class PlanningCreate(BaseModel):
 
     normalize_dates = field_validator("start_date", "due_date", mode="before")(_empty_date_to_none)
 
-
 class PlanningUpdate(BaseModel):
     details: Optional[str] = None
     start_date: Optional[date] = None
@@ -40,7 +40,8 @@ class PlanningUpdate(BaseModel):
     checklist_items: Optional[List[ChecklistItemUpdate]] = None
 
     normalize_dates = field_validator("start_date", "due_date", mode="before")(_empty_date_to_none)
-
+    # status é NOT NULL no banco: null explícito -> 422 (omitir mantém o atual).
+    _status_not_null = field_validator("status")(reject_null)
 
 class PlanningIdeaSummary(BaseModel):
     id: int
@@ -49,9 +50,7 @@ class PlanningIdeaSummary(BaseModel):
     owner: Optional[OwnerResponse] = None
     is_active: bool = True
 
-    class Config:
-        from_attributes = True
-
+    model_config = ORM_CONFIG
 
 class PlanningResponse(BaseModel):
     id: int
@@ -63,5 +62,4 @@ class PlanningResponse(BaseModel):
     created_at: datetime
     checklist_items: List[ChecklistItemResponse] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ORM_CONFIG
