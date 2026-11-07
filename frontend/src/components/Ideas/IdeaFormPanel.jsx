@@ -1,9 +1,10 @@
 import { IDEA_DESCRIPTION_MAX } from "./IdeaDetailPanel";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useId } from "react";
 
 const EMPTY_FORM = { name: "", description: "", category_id: "", owner_id: "" };
 
 export default function IdeaForm({ categories, owners, onClose, onSubmit, backLabel = "Ideas" }) {
+  const fieldId = useId(); // D10: liga <label htmlFor> aos campos
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -69,8 +70,8 @@ export default function IdeaForm({ categories, owners, onClose, onSubmit, backLa
             <h2 className="text-lg font-semibold text-ui-text-primary">Idea</h2>
             
             <div>
-              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
-              <input
+              <label htmlFor={`${fieldId}-name`} className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
+              <input id={`${fieldId}-name`}
                 type="text"
                 value={form.name}
                 onChange={(e) => update("name", e.target.value)}
@@ -81,7 +82,7 @@ export default function IdeaForm({ categories, owners, onClose, onSubmit, backLa
 
             <div>
               <div className="flex items-baseline justify-between mb-1">
-                <label className="block text-sm font-medium text-ui-text-secondary">Description</label>
+                <label htmlFor={`${fieldId}-description`} className="block text-sm font-medium text-ui-text-secondary">Description</label>
                 <span
                   className={`text-xs tabular-nums ${
                     form.description.length >= IDEA_DESCRIPTION_MAX
@@ -92,7 +93,7 @@ export default function IdeaForm({ categories, owners, onClose, onSubmit, backLa
                   {form.description.length}/{IDEA_DESCRIPTION_MAX}
                 </span>
               </div>
-              <textarea
+              <textarea id={`${fieldId}-description`}
                 value={form.description}
                 onChange={(e) => update("description", e.target.value)}
                 maxLength={IDEA_DESCRIPTION_MAX}
@@ -107,8 +108,8 @@ export default function IdeaForm({ categories, owners, onClose, onSubmit, backLa
             <h2 className="text-lg font-semibold text-ui-text-primary">Organization</h2>
             
             <div>
-              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Category</label>
-              <select
+              <label htmlFor={`${fieldId}-category`} className="block text-sm font-medium text-ui-text-secondary mb-1">Category</label>
+              <select id={`${fieldId}-category`}
                 value={form.category_id}
                 onChange={(e) => update("category_id", e.target.value)}
                 className="w-full text-sm bg-ui-surface border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 focus:border-accent-600"
@@ -121,8 +122,8 @@ export default function IdeaForm({ categories, owners, onClose, onSubmit, backLa
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Owner</label>
-              <select
+              <label htmlFor={`${fieldId}-owner`} className="block text-sm font-medium text-ui-text-secondary mb-1">Owner</label>
+              <select id={`${fieldId}-owner`}
                 value={form.owner_id}
                 onChange={(e) => update("owner_id", e.target.value)}
                 className="w-full text-sm bg-ui-surface border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 focus:border-accent-600"

@@ -123,6 +123,7 @@ export default function CategoriesPanel() {
             value={newDraft.name}
             onChange={(e) => setNewDraft((d) => ({ ...d, name: e.target.value }))}
             placeholder="Category name..."
+            aria-label="Category name"
             className="text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
           />
           <input
@@ -136,6 +137,7 @@ export default function CategoriesPanel() {
               }
             }}
             placeholder="Description (optional)..."
+            aria-label="Category description"
             className="h-[100px] text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
           />
         </div>
@@ -164,6 +166,7 @@ export default function CategoriesPanel() {
                   <input
                     type="text"
                     value={editDraft.name}
+                    aria-label="Name"
                     onChange={(e) => setEditDraft((d) => ({ ...d, name: e.target.value }))}
                     autoFocus
                     className="text-sm font-medium border border-ui-border rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-600"
@@ -176,6 +179,7 @@ export default function CategoriesPanel() {
                     }}
                     rows={2}
                     placeholder="Description..."
+                    aria-label="Category description"
                     className="text-sm text-ui-text-secondary border border-ui-border rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-600"
                   />
                   <div className="flex gap-2 justify-end">
@@ -210,6 +214,7 @@ export default function CategoriesPanel() {
                     <button
                       onClick={() => startEditing(c)}
                       title="Edit"
+                      aria-label={`Edit ${c.name}`}
                       className="p-1.5 text-ui-text-muted hover:text-accent-600 hover:bg-accent-50 rounded-md transition-colors"
                     >
                       <PencilIcon />
@@ -217,6 +222,7 @@ export default function CategoriesPanel() {
                     <button
                       onClick={() => setPendingDelete(c)}
                       title="Remove"
+                      aria-label={`Remove ${c.name}`}
                       className="p-1.5 text-ui-text-muted hover:text-status-red-fg hover:bg-status-red-bg rounded-md transition-colors"
                     >
                       <TrashIcon />

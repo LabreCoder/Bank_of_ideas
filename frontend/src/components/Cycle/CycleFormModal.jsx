@@ -3,6 +3,7 @@ import { cycleApi } from "../../services/cycle";
 import DetailModal from "../Default/DetailModal";
 
 export default function CycleFormModal({ onClose, onCreated }) {
+  const fieldId = useId(); // D10: liga <label htmlFor> aos campos
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -47,8 +48,8 @@ export default function CycleFormModal({ onClose, onCreated }) {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
-            <input
+            <label htmlFor={`${fieldId}-name`} className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
+            <input id={`${fieldId}-name`}
               type="text"
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -58,8 +59,8 @@ export default function CycleFormModal({ onClose, onCreated }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-ui-text-secondary mb-1">Description</label>
-            <textarea
+            <label htmlFor={`${fieldId}-description`} className="block text-sm font-medium text-ui-text-secondary mb-1">Description</label>
+            <textarea id={`${fieldId}-description`}
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               rows={3}
@@ -70,8 +71,8 @@ export default function CycleFormModal({ onClose, onCreated }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Start Date</label>
-              <input
+              <label htmlFor={`${fieldId}-start-date`} className="block text-sm font-medium text-ui-text-secondary mb-1">Start Date</label>
+              <input id={`${fieldId}-start-date`}
                 type="date"
                 value={form.start_date}
                 onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
@@ -80,8 +81,8 @@ export default function CycleFormModal({ onClose, onCreated }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Due Date (Optional)</label>
-              <input
+              <label htmlFor={`${fieldId}-due-date`} className="block text-sm font-medium text-ui-text-secondary mb-1">Due Date (Optional)</label>
+              <input id={`${fieldId}-due-date`}
                 type="date"
                 value={form.due_date}
                 onChange={(e) => setForm((f) => ({ ...f, due_date: e.target.value }))}

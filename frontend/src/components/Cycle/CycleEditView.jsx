@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { formatShortDate } from "../../utils/dateFormat";
 export default function CycleEditView({
   titleId,
@@ -29,6 +30,7 @@ export default function CycleEditView({
   onDone,
   onClose,
 }) {
+  const fieldId = useId(); // D10: liga <label htmlFor> aos campos
   return (
     <div>
       <div className="flex items-start justify-between mb-4">
@@ -52,8 +54,8 @@ export default function CycleEditView({
         {/* D09: nome, descrição, início e fim num único formulário com um só "Save"
             (PUT /cycle/{id} valida tudo junto e é atômico). */}
         <div>
-          <label className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
-          <input
+          <label htmlFor={`${fieldId}-name`} className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
+          <input id={`${fieldId}-name`}
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -63,8 +65,8 @@ export default function CycleEditView({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-ui-text-secondary mb-1">Start Date</label>
-            <input
+            <label htmlFor={`${fieldId}-start-date`} className="block text-sm font-medium text-ui-text-secondary mb-1">Start Date</label>
+            <input id={`${fieldId}-start-date`}
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
@@ -72,10 +74,8 @@ export default function CycleEditView({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-ui-text-secondary mb-1">
-              Due Date (optional)
-            </label>
-            <input
+            <label htmlFor={`${fieldId}-due-date`} className="block text-sm font-medium text-ui-text-secondary mb-1">Due Date (optional)</label>
+            <input id={`${fieldId}-due-date`}
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
@@ -85,8 +85,8 @@ export default function CycleEditView({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-ui-text-secondary mb-1">Description</label>
-          <textarea
+          <label htmlFor={`${fieldId}-description`} className="block text-sm font-medium text-ui-text-secondary mb-1">Description</label>
+          <textarea id={`${fieldId}-description`}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}

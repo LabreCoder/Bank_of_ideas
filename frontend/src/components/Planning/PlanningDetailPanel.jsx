@@ -1,5 +1,5 @@
 import { formatShortDate } from "../../utils/dateFormat";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useId } from "react";
 import { planningApi } from "../../services/planning";
 import { checklistApi } from "../../services/checklist";
 import { useUnsavedChangesGuard } from "../../hooks/useUnsavedChangesGuard";
@@ -39,6 +39,7 @@ export default function PlanningDetailPanel({
   onUpdated,
   onDeleted,
 }) {
+  const fieldId = useId(); // D10: liga <label htmlFor> aos campos
   const [checklistItems, setChecklistItems] = useState(planning.checklist_items || []);
   const tempIdCounter = useRef(0);
   // Só a resposta da operação mais recente substitui a lista local; respostas
@@ -269,8 +270,8 @@ export default function PlanningDetailPanel({
 
             <div className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm font-medium text-ui-text-secondary mb-1">Status</label>
-                <select
+                <label htmlFor={`${fieldId}-status`} className="block text-sm font-medium text-ui-text-secondary mb-1">Status</label>
+                <select id={`${fieldId}-status`}
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                   className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
@@ -285,8 +286,8 @@ export default function PlanningDetailPanel({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-ui-text-secondary mb-1">Start</label>
-                  <input
+                  <label htmlFor={`${fieldId}-start`} className="block text-sm font-medium text-ui-text-secondary mb-1">Start</label>
+                  <input id={`${fieldId}-start`}
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
@@ -294,8 +295,8 @@ export default function PlanningDetailPanel({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-ui-text-secondary mb-1">Due</label>
-                  <input
+                  <label htmlFor={`${fieldId}-due`} className="block text-sm font-medium text-ui-text-secondary mb-1">Due</label>
+                  <input id={`${fieldId}-due`}
                     type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
@@ -305,8 +306,8 @@ export default function PlanningDetailPanel({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-ui-text-secondary mb-1">Details</label>
-                <textarea
+                <label htmlFor={`${fieldId}-details`} className="block text-sm font-medium text-ui-text-secondary mb-1">Details</label>
+                <textarea id={`${fieldId}-details`}
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
                   rows={6}
@@ -331,8 +332,8 @@ export default function PlanningDetailPanel({
 
             <div className="flex flex-wrap gap-2 mb-2 items-end">
               <div className="flex-1 min-w-[12rem]">
-                <label className="block text-xs font-medium text-ui-text-muted mb-1">Description</label>
-                <input
+                <label htmlFor={`${fieldId}-description`} className="block text-xs font-medium text-ui-text-muted mb-1">Description</label>
+                <input id={`${fieldId}-description`}
                   type="text"
                   value={newItem.description}
                   onChange={(e) => setNewItem((prev) => ({ ...prev, description: e.target.value }))}
@@ -347,8 +348,8 @@ export default function PlanningDetailPanel({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-ui-text-muted mb-1">Due</label>
-                <input
+                <label htmlFor={`${fieldId}-due-2`} className="block text-xs font-medium text-ui-text-muted mb-1">Due</label>
+                <input id={`${fieldId}-due-2`}
                   type="date"
                   value={newItem.due_date}
                   onChange={(e) => setNewItem((prev) => ({ ...prev, due_date: e.target.value }))}
@@ -378,6 +379,7 @@ export default function PlanningDetailPanel({
                         <input
                           type="text"
                           value={editItem.description}
+                          aria-label="Item description"
                           onChange={(e) =>
                             setEditItem((prev) => ({ ...prev, description: e.target.value }))
                           }
@@ -395,6 +397,7 @@ export default function PlanningDetailPanel({
                         <input
                           type="date"
                           value={editItem.due_date}
+                          aria-label="Item due date"
                           onChange={(e) =>
                             setEditItem((prev) => ({ ...prev, due_date: e.target.value }))
                           }
@@ -422,6 +425,7 @@ export default function PlanningDetailPanel({
                           type="checkbox"
                           checked={item.is_done}
                           onChange={() => handleToggleItem(item.id)}
+                          aria-label={`Mark "${item.description}" as done`}
                           disabled={isTempId(item.id)}
                           className="accent-accent-600"
                         />
@@ -436,6 +440,7 @@ export default function PlanningDetailPanel({
                             type="button"
                             onClick={() => startEditingItem(item)}
                             title="Edit"
+                            aria-label={`Edit ${item.description}`}
                             className="p-1 text-ui-text-muted hover:text-accent-600 hover:bg-accent-50 rounded transition-colors"
                           >
                             <PencilIcon />
@@ -444,6 +449,7 @@ export default function PlanningDetailPanel({
                             type="button"
                             onClick={() => setPendingDelete({ type: "item", item })}
                             title="Remove"
+                            aria-label={`Remove ${item.description}`}
                             className="p-1 text-ui-text-muted hover:text-status-red-fg hover:bg-status-red-bg rounded transition-colors"
                           >
                             <TrashIcon />

@@ -14,9 +14,19 @@ export default function CycleTimelineCard({ cycle, onClick }) {
   const progressBarClass = isFinished ? "bg-emerald-500" : "bg-accent-600";
 
   return (
+    // D10: card clicável também por teclado (Tab + Enter/Espaço) e anunciado como botão.
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Open cycle ${cycle.name}`}
       onClick={() => onClick(cycle)}
-      className="bg-ui-surface border border-ui-border rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick(cycle);
+        }
+      }}
+      className="bg-ui-surface border border-ui-border rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-600"
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <h4 className="font-semibold text-ui-text-primary text-base">{cycle.name}</h4>
