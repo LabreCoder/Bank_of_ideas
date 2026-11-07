@@ -116,16 +116,10 @@ export default function Dashboard() {
     setSelectedDay({ key, plannings: dayPlannings });
   };
 
-  // "fromLabel" faz a página Planning saber pra onde voltar ao fechar o detalhe.
-  const handleOpenPlanning = (planningId) => {
-    navigate(`/planning?planningId=${planningId}`, { state: { fromLabel: "Dashboard" } });
-  };
-
-  // Reaproveita o formulário de criação da página Ideas. "fromLabel" faz a
-  // página Ideas saber que deve voltar pra cá ao cancelar ou salvar.
-  const handleNewIdea = () => {
-    navigate("/ideas?new=1", { state: { fromLabel: "Dashboard" } });
-  };
+  // D02: detalhe e criação têm URL própria; o "voltar" dessas telas usa o
+  // histórico e retorna para cá.
+  const handleOpenPlanning = (planningId) => navigate(`/planning/${planningId}`);
+  const handleNewIdea = () => navigate("/ideas/new");
 
   return (
     <div className="space-y-6">

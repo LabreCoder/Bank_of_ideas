@@ -10,9 +10,15 @@ function ChecklistEmptyIcon() {
   );
 }
 
-export default function PlanningFormPanel({ availableIdeas, onClose, onSubmit }) {
+export default function PlanningFormPanel({
+  availableIdeas,
+  initialIdeaId = "",
+  backLabel = "Planning",
+  onClose,
+  onSubmit,
+}) {
   const [form, setForm] = useState({
-    idea_id: "",
+    idea_id: initialIdeaId, // /planning/new?ideaId=<id> já vem com a ideia selecionada
     details: "",
     start_date: "",
     due_date: "",
@@ -73,7 +79,7 @@ export default function PlanningFormPanel({ availableIdeas, onClose, onSubmit })
   return (
     <div>
       <button type="button" onClick={onClose} className="text-sm text-gray-500 hover:text-gray-700 mb-2">
-        ← Planning
+        ← {backLabel}
       </button>
 
       <div className="flex items-start justify-between mb-1">
