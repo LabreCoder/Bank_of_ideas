@@ -1,7 +1,9 @@
 from typing import List
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
+
+from services._loading import planning_load_options
 
 from models.planning import Planning, PlanningChecklistItem
 from models.idea import Idea
@@ -17,7 +19,7 @@ def _serialize(planning: Planning) -> PlanningResponse:
 def _get_or_404(db: Session, planning_id: int) -> Planning:
     planning = (
         db.query(Planning)
-        .options(joinedload(Planning.idea), joinedload(Planning.checklist_items))
+        .options(*planning_load_options())
         .filter(Planning.id == planning_id)
         .first()
     )
@@ -31,7 +33,7 @@ def _get_or_404(db: Session, planning_id: int) -> Planning:
 def list_plannings(db: Session) -> List[PlanningResponse]:
     plannings = (
         db.query(Planning)
-        .options(joinedload(Planning.idea), joinedload(Planning.checklist_items))
+        .options(*planning_load_options())
         .order_by(Planning.created_at.desc())
         .all()
     )

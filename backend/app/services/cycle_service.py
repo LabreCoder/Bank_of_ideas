@@ -1,7 +1,9 @@
 from typing import List, Optional, Tuple
 from datetime import date
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
+
+from services._loading import planning_load_options
 
 from models.cycle import Cycle
 from models.planning import Planning
@@ -74,10 +76,7 @@ def _attach_computed_fields(cycle: Cycle) -> Cycle:
 def _get_cycle_or_404(db: Session, cycle_id: int) -> Cycle:
     cycle = (
         db.query(Cycle)
-        .options(
-            joinedload(Cycle.plannings).joinedload(Planning.idea),
-            joinedload(Cycle.plannings).joinedload(Planning.checklist_items),
-        )
+        .options(*planning_load_options(Cycle.plannings))
         .filter(Cycle.id == cycle_id)
         .first()
     )
@@ -89,7 +88,7 @@ def _get_cycle_or_404(db: Session, cycle_id: int) -> Cycle:
 def _get_planning_or_404(db: Session, planning_id: int) -> Planning:
     planning = (
         db.query(Planning)
-        .options(joinedload(Planning.idea), joinedload(Planning.checklist_items))
+        .options(*planning_load_options())
         .filter(Planning.id == planning_id)
         .first()
     )
@@ -206,10 +205,7 @@ def create_cycle(db: Session, payload: CycleCreate) -> Cycle:
 def list_cycles(db: Session) -> List[Cycle]:
     cycles = (
         db.query(Cycle)
-        .options(
-            joinedload(Cycle.plannings).joinedload(Planning.idea),
-            joinedload(Cycle.plannings).joinedload(Planning.checklist_items),
-        )
+        .options(*planning_load_options(Cycle.plannings))
         .order_by(Cycle.created_at.desc())
         .all()
     )
