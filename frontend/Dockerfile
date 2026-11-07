@@ -9,10 +9,9 @@ WORKDIR /app
 
 # Copying only package files first lets Docker cache the npm install
 # layer, so it doesn't reinstall dependencies every time source code changes.
+# npm ci instala exatamente o que está no package-lock.json (builds reproduzíveis).
 COPY package*.json ./
-RUN npm install
-
-RUN npm install recharts
+RUN npm ci
 
 # Source code is also mounted as a volume in docker-compose for hot-reload,
 # but we COPY it here too so the image is self-contained if run standalone.
