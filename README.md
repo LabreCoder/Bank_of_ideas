@@ -92,26 +92,34 @@ The system is split into four core areas:
 
 ### Environment variables
 
-Create a `.env` file in the project root:
+Copy the example file and set your own password:
+
+```bash
+cp .env.example .env
+```
 
 ```env
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_NAME=content_planner
-DB_HOST=your_host
-DB_PORT=your_port
+DB_USER=bank_user
+DB_PASSWORD=change_me
+DB_NAME=bank_db
+DB_HOST=db        # name of the Postgres service in docker-compose.yml
+DB_PORT=5432      # internal Postgres port (inside the Docker network)
 ```
+
+`DB_HOST` and `DB_PORT` are used by the API **inside** Docker, so they must point to the `db` service and port `5432`.
 
 ### Running the project
 
 ```bash
 # Clone the repository
-git clone https://github.com/LabreCoder/content-planner.git
-cd content-planner
+git clone https://github.com/LabreCoder/Bank_of_ideas.git
+cd Bank_of_ideas
 
 # Build and start all services (database, API, and frontend)
 docker compose up --build
 ```
+
+The schema in `database/schema.sql` is applied automatically only the first time the database volume is created. Optional sample data lives in `database/seeds.sql` (enable the commented line in `docker-compose.yml` **before** the first start).
 
 Once everything is up:
 
@@ -153,7 +161,7 @@ curl -X POST http://localhost:8000/ideas/ \
 **List all active ideas**
 
 ```bash
-curl "http://localhost:8000/ideas/?active=true"
+curl "http://localhost:8000/ideas/list?active=true"
 ```
 
 **Toggle an idea's active status**
