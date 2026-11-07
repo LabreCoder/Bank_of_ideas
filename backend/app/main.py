@@ -1,7 +1,13 @@
 import os
 
 import models  # registra todos os ORM models no Base antes de qualquer query
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
+from fastapi.responses import JSONResponse
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+
+from database.connection import get_db
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes.ideas import router as ideas_router
@@ -11,7 +17,9 @@ from routes.planning import router as planning_router
 from routes.checklist import router as checklist_router
 from routes.cycle import router as cycle_router
 
-app = FastAPI()
+API_VERSION = "1.0.0"
+
+app = FastAPI(title="Bank of Ideas API", version=API_VERSION)
 
 # E01: origens permitidas vindas do ambiente (lista separada por vírgula).
 # Com o proxy /api do frontend, o navegador nem precisa de CORS; isto só vale
@@ -40,3 +48,12 @@ app.include_router(cycle_router)
 @app.get("/")
 def home():
     return {"message": "API Online"}
+
+@app.get("/health", tags=["Health"])
+def health(db: Session = Depends(get_db)):
+    """E02: usado pelo healthcheck do Docker. Testa o banco com SELECT 1."""
+    try:
+        db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        return JSONResponse(status_code=503, content={"status": "error", "database": "unavailable"})
+    return {"status": "ok", "database": "ok"}

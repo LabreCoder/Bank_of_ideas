@@ -39,6 +39,13 @@ services:
       # que derrubam o reloader do uvicorn (FileNotFoundError no StatReload).
       PYTEST_ADDOPTS: "-p no:cacheprovider"
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+    # E02: saudável só quando /health responde (testa o banco com SELECT 1).
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health', timeout=4).status == 200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     depends_on:
       db:
         condition: service_healthy
@@ -64,7 +71,8 @@ services:
     # E01: o navegador chama /api no próprio frontend e o Vite repassa para
     # http://api:8000 (vite.config.js). Não há mais URL fixa da API.
     depends_on:
-      - api
+      api:
+        condition: service_healthy
 
 volumes:
   postgres_data:

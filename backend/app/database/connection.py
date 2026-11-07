@@ -19,7 +19,9 @@ DATABASE_URL = (
     f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
-engine = create_engine(DATABASE_URL)
+# E02: pool_pre_ping testa a conexão antes de usar; se o Postgres reiniciou,
+# a conexão morta é descartada em vez de gerar erro 500 na próxima requisição.
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
 SessionLocal = sessionmaker(
     autocommit=False,
