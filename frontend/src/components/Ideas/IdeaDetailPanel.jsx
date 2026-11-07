@@ -4,8 +4,8 @@ import { checklistApi } from "../../services/checklist";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 
 const IDEA_STATUS_STYLES = {
-  Free: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "In Planning": "bg-indigo-50 text-indigo-700 border-indigo-200",
+  Free: "bg-status-emerald-bg text-status-emerald-fg border-status-emerald-border",
+  "In Planning": "bg-status-indigo-bg text-status-indigo-fg border-status-indigo-border",
 };
 
 export default function IdeaDetail({
@@ -43,7 +43,7 @@ export default function IdeaDetail({
     }
   };
 
-  const statusClass = IDEA_STATUS_STYLES[idea.execution_status] || "bg-gray-100 text-gray-600 border-gray-200";
+  const statusClass = IDEA_STATUS_STYLES[idea.execution_status] || "bg-ui-surface-2 text-ui-text-secondary border-ui-border";
 
   const handleNameBlur = () => {
     const trimmed = name.trim();
@@ -94,30 +94,30 @@ export default function IdeaDetail({
   return (
     <div className="animate-fade-in w-full pb-10">
       {/* Top Navigation */}
-      <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <button onClick={onClose} className="hover:text-gray-900">&larr; {backLabel}</button>
+      <div className="flex items-center gap-2 text-sm text-ui-text-muted mb-6">
+        <button onClick={onClose} className="hover:text-ui-text-primary">&larr; {backLabel}</button>
         <span>/</span>
-        <span className="text-gray-900">{idea.name}</span>
+        <span className="text-ui-text-primary">{idea.name}</span>
       </div>
 
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{idea.name}</h1>
-          <p className="text-gray-500 mt-1">Idea details and planning, together in one place.</p>
+          <h1 className="text-3xl font-bold text-ui-text-primary">{idea.name}</h1>
+          <p className="text-ui-text-muted mt-1">Idea details and planning, together in one place.</p>
         </div>
-        <button onClick={onClose} className="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
+        <button onClick={onClose} className="text-sm font-medium text-ui-text-secondary hover:text-ui-text-primary flex items-center gap-2">
           ✕ Close
         </button>
       </div>
 
       {/* Main Container */}
-      <div className="bg-white border border-gray-200 rounded-xl p-8 flex flex-col md:flex-row gap-12">
+      <div className="bg-ui-surface border border-ui-border rounded-xl p-8 flex flex-col md:flex-row gap-12">
         
         {/* Left Column: Idea Details */}
         <div className="flex-1 flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">Idea</h2>
+            <h2 className="text-lg font-semibold text-ui-text-primary">Idea</h2>
             <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${statusClass}`}>
               {idea.execution_status}
             </span>
@@ -125,31 +125,31 @@ export default function IdeaDetail({
 
           <div className="flex flex-col gap-4 flex-grow">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onBlur={handleNameBlur}
-                className="w-full text-sm border border-gray-200 rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Description</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onBlur={handleDescriptionBlur}
                 rows={8}
-                className="w-full text-sm border border-gray-200 rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 resize-none"
+                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 resize-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Category</label>
               <select
                 value={categoryId}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
               >
                 <option value="">No category</option>
                 {categories.map((c) => (
@@ -158,11 +158,11 @@ export default function IdeaDetail({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Owner</label>
+              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Owner</label>
               <select
                 value={ownerId}
                 onChange={(e) => handleOwnerChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
               >
                 {owners.map((o) => (
                   <option key={o.id} value={o.id}>{o.name}</option>
@@ -172,37 +172,37 @@ export default function IdeaDetail({
           </div>
 
           <div className="mt-8 pt-4">
-            <button onClick={() => onToggleActive(idea)} className="text-sm font-medium text-red-500 hover:text-red-600">
+            <button onClick={() => onToggleActive(idea)} className="text-sm font-medium text-status-red-fg hover:text-status-red-fg">
               {idea.is_active ? "Deactivate" : "Activate"}
             </button>
           </div>
         </div>
 
         {/* Vertical Divider (Desktop) */}
-        <div className="hidden md:block w-px bg-gray-100 -my-8"></div>
+        <div className="hidden md:block w-px bg-ui-surface-2 -my-8"></div>
 
         {/* Right Column: Planning */}
         <div className="flex-1 flex flex-col">
           {!planning ? (
-            <p className="text-sm text-gray-400 mt-2">This idea does not have a planning yet.</p>
+            <p className="text-sm text-ui-text-muted mt-2">This idea does not have a planning yet.</p>
           ) : (
             <>
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">Planning</h2>
-                <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${PLANNING_STATUS_STYLES[planning.status] || "bg-gray-100 text-gray-600 border-gray-200"}`}>
+                <h2 className="text-lg font-semibold text-ui-text-primary">Planning</h2>
+                <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${PLANNING_STATUS_STYLES[planning.status] || "bg-ui-surface-2 text-ui-text-secondary border-ui-border"}`}>
                   {planning.status}
                 </span>
               </div>
 
               <div className="mb-6">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Planning Description</p>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{planning.details || "--"}</p>
+                <p className="text-xs font-medium text-ui-text-muted uppercase tracking-wide mb-2">Planning Description</p>
+                <p className="text-sm text-ui-text-secondary whitespace-pre-wrap">{planning.details || "--"}</p>
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Checklist</h3>
-                  <span className="text-xs font-medium text-gray-400">{completedCount}/{totalCount}</span>
+                  <h3 className="text-lg font-semibold text-ui-text-primary">Checklist</h3>
+                  <span className="text-xs font-medium text-ui-text-muted">{completedCount}/{totalCount}</span>
                 </div>
 
                 <div className="flex gap-2 mb-4">
@@ -212,23 +212,23 @@ export default function IdeaDetail({
                     onChange={(e) => setNewItem(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
                     placeholder="New item..."
-                    className="flex-1 text-sm border border-gray-200 rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                    className="flex-1 text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
                   />
-                  <button onClick={handleAddItem} className="text-sm font-medium px-4 py-2 rounded-md border border-gray-200 hover:bg-gray-50">
+                  <button onClick={handleAddItem} className="text-sm font-medium px-4 py-2 rounded-md border border-ui-border hover:bg-ui-surface-2">
                     Add
                   </button>
                 </div>
 
                 <ul className="flex flex-col gap-2">
                   {planning.checklist_items.map((item) => (
-                    <li key={item.id} className="flex items-center gap-3 text-sm border border-gray-100 rounded-md px-4 py-3">
+                    <li key={item.id} className="flex items-center gap-3 text-sm border border-ui-border/60 rounded-md px-4 py-3">
                       <input
                         type="checkbox"
                         checked={item.is_done}
                         onChange={() => handleToggleItem(item.id)}
-                        className="w-4 h-4 rounded border-gray-300 text-accent-600 focus:ring-accent-600"
+                        className="w-4 h-4 rounded border-ui-border text-accent-600 focus:ring-accent-600"
                       />
-                      <span className={`flex-1 ${item.is_done ? "line-through text-gray-400" : "text-gray-700"}`}>
+                      <span className={`flex-1 ${item.is_done ? "line-through text-ui-text-muted" : "text-ui-text-secondary"}`}>
                         {item.description}
                       </span>
                     </li>

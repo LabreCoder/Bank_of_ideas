@@ -223,16 +223,16 @@ export default function Ideas() {
       />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md p-3 mb-4">
+        <div className="bg-status-red-bg border border-status-red-border text-status-red-fg text-sm rounded-md p-3 mb-4">
           {error}
         </div>
       )}
 
       {/* Grid de Ideias */}
       {loading ? (
-        <div className="text-center text-gray-400 py-20">Loading ideas...</div>
+        <div className="text-center text-ui-text-muted py-20">Loading ideas...</div>
       ) : filteredIdeas.length === 0 ? (
-        <div className="text-center text-gray-400 py-20">No ideas found with the current filters.</div>
+        <div className="text-center text-ui-text-muted py-20">No ideas found with the current filters.</div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredIdeas.map((idea) => (

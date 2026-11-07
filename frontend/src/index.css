@@ -1,56 +1,32 @@
 /* These three directives inject Tailwind's base reset, component
    classes and utility classes. Everything else in the app is styled
    using Tailwind utility classes directly in JSX (no custom CSS files
-   per component, which is the idiomatic Tailwind approach). */
+   per component, which is the idiomatic Tailwind approach).
+
+   D04: o tema (claro/escuro) vem só dos tokens ui-* e status-* definidos em
+   theme-variables.css. Não há mais sobrescrita de classes do Tailwind
+   (antes: html[data-mode="dark"] .bg-white {...}). */
 
 @import "./theme-variables.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-ui-page text-ui-text-primary;
+  }
 
-body {
-  @apply bg-ui-page text-ui-text-primary;
-}
+  /* Campos de formulário seguem o tema por padrão; classes utilitárias no
+     JSX continuam podendo sobrescrever (camada base tem prioridade menor). */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    @apply bg-ui-input text-ui-text-primary;
+  }
 
-html[data-mode="dark"] .bg-white {
-  background-color: rgb(var(--color-ui-surface) / 1);
-}
-
-html[data-mode="dark"] .bg-gray-50,
-html[data-mode="dark"] .bg-gray-100 {
-  background-color: rgb(var(--color-ui-surface-2) / 1);
-}
-
-html[data-mode="dark"] .text-gray-900,
-html[data-mode="dark"] .text-gray-800,
-html[data-mode="dark"] .text-gray-700,
-html[data-mode="dark"] .text-gray-600,
-html[data-mode="dark"] .text-gray-500,
-html[data-mode="dark"] .text-gray-400,
-html[data-mode="dark"] .text-gray-300 {
-  color: rgb(var(--color-ui-text-secondary) / 1);
-}
-
-html[data-mode="dark"] .text-ui-text-muted {
-  color: rgb(var(--color-ui-text-muted) / 1);
-}
-
-html[data-mode="dark"] .text-ui-text-secondary {
-  color: rgb(var(--color-ui-text-secondary) / 1);
-}
-
-html[data-mode="dark"] .border-gray-200,
-html[data-mode="dark"] .border-gray-300,
-html[data-mode="dark"] .border-gray-700,
-html[data-mode="dark"] .border-gray-800 {
-  border-color: rgb(var(--color-ui-border) / 1);
-}
-
-html[data-mode="dark"] input,
-html[data-mode="dark"] select,
-html[data-mode="dark"] textarea {
-  background-color: rgb(var(--color-ui-surface-2) / 1);
-  color: rgb(var(--color-ui-text-primary) / 1);
-  border-color: rgb(var(--color-ui-border) / 1);
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-ui-text-muted;
+  }
 }

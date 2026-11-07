@@ -19,7 +19,7 @@ export default function CycleProgressRing({ percentage, size = 110 }) {
           r={radius}
           fill="none"
           strokeWidth={strokeWidth}
-          className="stroke-gray-100"
+          className="stroke-ui-border"
         />
         <circle
           cx={size / 2}
@@ -34,7 +34,7 @@ export default function CycleProgressRing({ percentage, size = 110 }) {
           style={{ transition: "stroke-dashoffset 0.3s ease" }}
         />
       </svg>
-      <span className="absolute text-xl font-semibold text-gray-900">{percentage}%</span>
+      <span className="absolute text-xl font-semibold text-ui-text-primary">{percentage}%</span>
     </div>
   );
 }

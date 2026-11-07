@@ -13,12 +13,44 @@
   --color-ui-text-primary: 241 245 249;
   --color-ui-text-secondary: 203 213 225;
   --color-ui-text-muted: 148 163 184;
+  /* Fundo de campos de formulário (input/select/textarea). */
+  --color-ui-input: 30 41 59;
 
   /* Card de destaque (ex.: "From spark to shipped" no Dashboard). No escuro
      fica mais fundo que a página pra se destacar; no claro vira um navy. */
   --color-ui-feature: 3 5 10;
   --color-ui-feature-text: 241 245 249;
   --color-ui-feature-muted: 148 163 184;
+
+  /* Tons de status (D04): badges, avisos e caixas de erro. Cada tom tem
+     fundo (bg), texto (fg) e borda (border), com versão própria no claro e
+     no escuro — sem caixas claras sobre fundo escuro. */
+  --color-status-neutral-bg: 30 41 59;
+  --color-status-neutral-fg: 203 213 225;
+  --color-status-neutral-border: 71 85 105;
+  --color-status-blue-bg: 23 37 84;
+  --color-status-blue-fg: 147 197 253;
+  --color-status-blue-border: 30 64 175;
+  --color-status-purple-bg: 59 7 100;
+  --color-status-purple-fg: 216 180 254;
+  --color-status-purple-border: 107 33 168;
+  --color-status-indigo-bg: 30 27 75;
+  --color-status-indigo-fg: 165 180 252;
+  --color-status-indigo-border: 55 48 163;
+  --color-status-amber-bg: 69 26 3;
+  --color-status-amber-fg: 252 211 77;
+  --color-status-amber-border: 146 64 14;
+  --color-status-emerald-bg: 2 44 34;
+  --color-status-emerald-fg: 110 231 183;
+  --color-status-emerald-border: 6 95 70;
+  --color-status-rose-bg: 76 5 25;
+  --color-status-rose-fg: 253 164 175;
+  --color-status-rose-border: 159 18 57;
+  --color-status-red-bg: 69 10 10;
+  --color-status-red-fg: 252 165 165;
+  --color-status-red-border: 153 27 27;
+
+  color-scheme: dark; /* ícones nativos (ex.: calendário do input date) */
 
   --color-accent-50:  238 242 255;
   --color-accent-100: 224 231 255;
@@ -40,10 +72,38 @@
   --color-ui-text-primary: 17 24 39;
   --color-ui-text-secondary: 75 85 99;
   --color-ui-text-muted: 107 114 128;
+  --color-ui-input: 255 255 255;
 
   --color-ui-feature: 31 36 56;
   --color-ui-feature-text: 248 250 252;
   --color-ui-feature-muted: 161 168 190;
+
+  --color-status-neutral-bg: 243 244 246;
+  --color-status-neutral-fg: 75 85 99;
+  --color-status-neutral-border: 229 231 235;
+  --color-status-blue-bg: 239 246 255;
+  --color-status-blue-fg: 29 78 216;
+  --color-status-blue-border: 191 219 254;
+  --color-status-purple-bg: 250 245 255;
+  --color-status-purple-fg: 126 34 206;
+  --color-status-purple-border: 233 213 255;
+  --color-status-indigo-bg: 238 242 255;
+  --color-status-indigo-fg: 67 56 202;
+  --color-status-indigo-border: 199 210 254;
+  --color-status-amber-bg: 255 251 235;
+  --color-status-amber-fg: 180 83 9;
+  --color-status-amber-border: 253 230 138;
+  --color-status-emerald-bg: 236 253 245;
+  --color-status-emerald-fg: 4 120 87;
+  --color-status-emerald-border: 167 243 208;
+  --color-status-rose-bg: 255 241 242;
+  --color-status-rose-fg: 190 18 60;
+  --color-status-rose-border: 254 205 211;
+  --color-status-red-bg: 254 242 242;
+  --color-status-red-fg: 185 28 28;
+  --color-status-red-border: 254 202 202;
+
+  color-scheme: light;
 }
 
 [data-theme="cyan"] {

@@ -18,10 +18,10 @@ export default function Settings() {
     <div>
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-1">Settings</h2>
-        <p className="text-gray-500">Customize your application settings.</p>
+        <p className="text-ui-text-muted">Customize your application settings.</p>
       </div>
 
-      <div className="flex gap-2 mb-4 border-b border-gray-200">
+      <div className="flex gap-2 mb-4 border-b border-ui-border">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -29,7 +29,7 @@ export default function Settings() {
             className={`text-sm font-medium px-4 py-2 border-b-2 -mb-px transition-colors ${
               activeTab === tab.id
                 ? "border-accent-600 text-accent-700"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                : "border-transparent text-ui-text-muted hover:text-ui-text-primary"
             }`}
           >
             {tab.label}

@@ -4,7 +4,7 @@
 // (Pendente / Em andamento / Concluído / Cancelado), como no mockup.
 
 export const PLANNING_GROUPS = {
-  pending: { label: "Pending", dotClass: "bg-gray-400" },
+  pending: { label: "Pending", dotClass: "bg-ui-text-muted" },
   in_progress: { label: "In Progress", dotClass: "bg-blue-500" },
   completed: { label: "Completed", dotClass: "bg-emerald-500" },
   cancelled: { label: "Cancelled", dotClass: "bg-rose-500" },

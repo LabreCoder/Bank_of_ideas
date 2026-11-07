@@ -76,21 +76,21 @@ export default function Cycles() {
 
   const renderTimelineSection = (title, sectionCycles, emptyMessage) => (
     <div className="mb-8">
-      <div className="flex items-center justify-between border-b border-gray-200 pb-2 mb-4">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+      <div className="flex items-center justify-between border-b border-ui-border pb-2 mb-4">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ui-text-muted">
           {title}
         </h3>
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-ui-text-muted">
           {sectionCycles.length} {sectionCycles.length === 1 ? "cycle" : "cycles"}
         </span>
       </div>
 
       {sectionCycles.length === 0 ? (
-        <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-          <p className="text-sm text-gray-500">{emptyMessage}</p>
+        <div className="text-center py-8 bg-ui-surface-2 rounded-lg border border-dashed border-ui-border">
+          <p className="text-sm text-ui-text-muted">{emptyMessage}</p>
         </div>
       ) : (
-        <div className="relative pl-6 border-l-2 border-gray-200">
+        <div className="relative pl-6 border-l-2 border-ui-border">
           {sectionCycles.map((cycle) => (
             <div key={cycle.id} className="relative mb-4 last:mb-0">
               <span className="absolute -left-[29px] top-2 w-3 h-3 rounded-full bg-accent-600 ring-4 ring-white" />
@@ -126,16 +126,16 @@ export default function Cycles() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md p-3 mb-4">
+        <div className="bg-status-red-bg border border-status-red-border text-status-red-fg text-sm rounded-md p-3 mb-4">
           {error}
         </div>
       )}
 
       {loading ? (
-        <p className="text-sm text-gray-500">Loading cycles...</p>
+        <p className="text-sm text-ui-text-muted">Loading cycles...</p>
       ) : cycles.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-          <p className="text-sm text-gray-500">No cycles created yet.</p>
+        <div className="text-center py-12 bg-ui-surface-2 rounded-lg border border-dashed border-ui-border">
+          <p className="text-sm text-ui-text-muted">No cycles created yet.</p>
         </div>
       ) : (
         <>
@@ -148,8 +148,8 @@ export default function Cycles() {
           />
 
           {visibleCycles.length === 0 ? (
-            <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-              <p className="text-sm text-gray-500 mb-3">
+            <div className="text-center py-12 bg-ui-surface-2 rounded-lg border border-dashed border-ui-border">
+              <p className="text-sm text-ui-text-muted mb-3">
                 No cycles match your filters.
               </p>
               <button

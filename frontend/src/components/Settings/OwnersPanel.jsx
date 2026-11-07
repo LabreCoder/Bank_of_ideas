@@ -107,21 +107,21 @@ export default function OwnersPanel() {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
+    <div className="bg-ui-surface rounded-lg border border-ui-border p-4">
       <h3 className="text-lg font-semibold mb-2">Owners</h3>
-      <p className="text-gray-500 text-sm mb-4">
+      <p className="text-ui-text-muted text-sm mb-4">
         Manage your content owners. You can add, edit, or remove owners as needed.
       </p>
 
       {/* Formulário de criação */}
-      <div className="border border-dashed border-gray-300 rounded-lg p-3 mb-4 flex flex-col gap-2">
+      <div className="border border-dashed border-ui-border rounded-lg p-3 mb-4 flex flex-col gap-2">
         <div className="grid sm:grid-cols-1 gap-2">
           <input
             type="text"
             value={newDraft.name}
             onChange={(e) => setNewDraft((d) => ({ ...d, name: e.target.value }))}
             placeholder="Owner name..."
-            className="text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+            className="text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
           />
         </div>
         <button
@@ -134,16 +134,16 @@ export default function OwnersPanel() {
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+      {error && <p className="text-sm text-status-red-fg mb-3">{error}</p>}
 
       {loading ? (
-        <p className="text-sm text-gray-400">Loading owners...</p>
+        <p className="text-sm text-ui-text-muted">Loading owners...</p>
       ) : owners.length === 0 ? (
-        <p className="text-sm text-gray-400">No owners yet.</p>
+        <p className="text-sm text-ui-text-muted">No owners yet.</p>
       ) : (
         <div className="grid sm:grid-cols-4 gap-3">
           {owners.map((c) => (
-            <div key={c.id} className="border border-gray-200 rounded-lg p-3">
+            <div key={c.id} className="border border-ui-border rounded-lg p-3">
               {editingId === c.id ? (
                 <div className="flex flex-col gap-2">
                   <input
@@ -151,12 +151,12 @@ export default function OwnersPanel() {
                     value={editDraft.name}
                     onChange={(e) => setEditDraft((d) => ({ ...d, name: e.target.value }))}
                     autoFocus
-                    className="text-sm font-medium border border-gray-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                    className="text-sm font-medium border border-ui-border rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-600"
                   />
                   <div className="flex gap-2 justify-end">
                     <button
                       onClick={cancelEditing}
-                      className="text-xs font-medium text-gray-500 hover:text-gray-700 px-2 py-1"
+                      className="text-xs font-medium text-ui-text-muted hover:text-ui-text-primary px-2 py-1"
                     >
                       Cancel
                     </button>
@@ -172,20 +172,20 @@ export default function OwnersPanel() {
               ) : (
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="font-medium text-gray-900 text-sm">{c.name}</p>
+                    <p className="font-medium text-ui-text-primary text-sm">{c.name}</p>
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <button
                       onClick={() => startEditing(c)}
                       title="Edit"
-                      className="p-1.5 text-gray-400 hover:text-accent-600 hover:bg-accent-50 rounded-md transition-colors"
+                      className="p-1.5 text-ui-text-muted hover:text-accent-600 hover:bg-accent-50 rounded-md transition-colors"
                     >
                       <PencilIcon />
                     </button>
                     <button
                       onClick={() => setPendingDelete(c)}
                       title="Remove"
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      className="p-1.5 text-ui-text-muted hover:text-status-red-fg hover:bg-status-red-bg rounded-md transition-colors"
                     >
                       <TrashIcon />
                     </button>

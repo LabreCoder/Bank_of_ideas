@@ -32,48 +32,48 @@ export default function CycleEditView({
         <button
           type="button"
           onClick={onDone}
-          className="text-sm font-medium text-gray-500 hover:text-gray-700"
+          className="text-sm font-medium text-ui-text-muted hover:text-ui-text-primary"
         >
           ← Back to overview
         </button>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm">
+        <button onClick={onClose} className="text-ui-text-muted hover:text-ui-text-primary text-sm">
           Close
         </button>
       </div>
 
-      <h2 id={titleId} className="text-xl font-semibold text-gray-900 mb-4">
+      <h2 id={titleId} className="text-xl font-semibold text-ui-text-primary mb-4">
         Edit cycle
       </h2>
 
       <div className="flex flex-col gap-5">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <label className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+              className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+            <label className="block text-sm font-medium text-ui-text-secondary mb-1">Start Date</label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+              className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <label className="block text-sm font-medium text-ui-text-secondary mb-1">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+            className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
           />
         </div>
 
@@ -88,29 +88,29 @@ export default function CycleEditView({
           </button>
         </div>
 
-        <hr className="border-gray-100" />
+        <hr className="border-ui-border/60" />
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Cycle Due Date</label>
+          <label className="block text-sm font-medium text-ui-text-secondary mb-1">Cycle Due Date</label>
           <div className="flex gap-2">
             <input
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+              className="text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             />
             <button
               type="button"
               onClick={onUpdateDueDate}
               disabled={saving}
-              className="border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-medium px-3 py-2 rounded-md"
+              className="border border-ui-border hover:bg-ui-surface-2 text-ui-text-secondary text-xs font-medium px-3 py-2 rounded-md"
             >
               Update Due Date
             </button>
           </div>
 
           {conflictPrompt && (
-            <div className="mt-3 bg-amber-50 border border-amber-200 rounded-md p-3 text-sm text-amber-800">
+            <div className="mt-3 bg-status-amber-bg border border-status-amber-border rounded-md p-3 text-sm text-status-amber-fg">
               <p className="font-semibold mb-1">These cycle dates conflict with bound plannings:</p>
               <ul className="list-disc pl-5 mb-2 text-xs">
                 {conflictPrompt.map((c) => (
@@ -126,7 +126,7 @@ export default function CycleEditView({
               <button
                 type="button"
                 onClick={() => setConflictPrompt(null)}
-                className="text-xs text-gray-600 hover:underline px-2 py-1.5"
+                className="text-xs text-ui-text-secondary hover:underline px-2 py-1.5"
               >
                 Dismiss
               </button>
@@ -134,16 +134,16 @@ export default function CycleEditView({
           )}
         </div>
 
-        <hr className="border-gray-100" />
+        <hr className="border-ui-border/60" />
 
         <div>
-          <h4 className="text-sm font-semibold text-gray-800 mb-2">Bound Plannings</h4>
+          <h4 className="text-sm font-semibold text-ui-text-primary mb-2">Bound Plannings</h4>
 
           <div className="flex gap-2 mb-3">
             <select
               value={selectedPlanningId}
               onChange={(e) => setSelectedPlanningId(e.target.value)}
-              className="flex-1 text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+              className="flex-1 text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             >
               <option value="">Select planning to bind...</option>
               {unassignedPlannings.map((p) => (
@@ -163,7 +163,7 @@ export default function CycleEditView({
           </div>
 
           {confirmationPrompt && (
-            <div className="mb-3 bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800 flex flex-col gap-2">
+            <div className="mb-3 bg-status-blue-bg border border-status-blue-border rounded-md p-3 text-sm text-status-blue-fg flex flex-col gap-2">
               <p>{confirmationPrompt.message}</p>
               <div className="flex gap-2">
                 <button
@@ -176,7 +176,7 @@ export default function CycleEditView({
                 <button
                   type="button"
                   onClick={() => setConfirmationPrompt(null)}
-                  className="text-xs text-gray-600 hover:underline px-2 py-1.5"
+                  className="text-xs text-ui-text-secondary hover:underline px-2 py-1.5"
                 >
                   Cancel
                 </button>
@@ -185,24 +185,24 @@ export default function CycleEditView({
           )}
 
           {currentCycle.plannings?.length === 0 ? (
-            <p className="text-xs text-gray-400">No plannings bound to this cycle yet.</p>
+            <p className="text-xs text-ui-text-muted">No plannings bound to this cycle yet.</p>
           ) : (
             <ul className="flex flex-col gap-1.5">
               {currentCycle.plannings.map((p) => (
                 <li
                   key={p.id}
-                  className="flex items-center justify-between text-sm bg-gray-50 border border-gray-100 rounded-md px-3 py-2"
+                  className="flex items-center justify-between text-sm bg-ui-surface-2 border border-ui-border/60 rounded-md px-3 py-2"
                 >
                   <div>
-                    <span className="font-medium text-gray-800">{p.idea?.name}</span>
-                    <span className="text-xs text-gray-400 ml-2">
+                    <span className="font-medium text-ui-text-primary">{p.idea?.name}</span>
+                    <span className="text-xs text-ui-text-muted ml-2">
                       (Due: {p.due_date || "Not set"})
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={() => onUnbindPlanning(p.id)}
-                    className="text-xs text-red-600 hover:text-red-700 font-medium"
+                    className="text-xs text-status-red-fg hover:text-status-red-fg font-medium"
                   >
                     Unbind
                   </button>
@@ -212,20 +212,20 @@ export default function CycleEditView({
           )}
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-status-red-fg">{error}</p>}
 
-        <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+        <div className="flex justify-between items-center pt-3 border-t border-ui-border/60">
           <button
             type="button"
             onClick={onDeleteCycle}
-            className="text-sm text-red-600 hover:text-red-700 font-medium"
+            className="text-sm text-status-red-fg hover:text-status-red-fg font-medium"
           >
             Delete Cycle
           </button>
           <button
             type="button"
             onClick={onDone}
-            className="text-sm font-medium px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700"
+            className="text-sm font-medium px-4 py-2 rounded-md bg-ui-surface-2 hover:bg-ui-border text-ui-text-secondary"
           >
             Done
           </button>
