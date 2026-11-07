@@ -15,7 +15,7 @@ class Cycle(Base):
     __tablename__ = "cycle"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
+    name = Column(String(255), nullable=False)  # VARCHAR(255) no schema.sql (X02)
     description = Column(Text, nullable=True)
     start_date = Column(Date, nullable=False)
     due_date = Column(Date, nullable=True)  # Optional due_date

@@ -17,8 +17,8 @@ class Planning(Base):
     details = Column(Text, nullable=True)
     start_date = Column(Date, nullable=True)
     due_date = Column(Date, nullable=True)
-    status = Column(String, nullable=False, default="Not Started")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    status = Column(String, nullable=False, default="Not Started", server_default="Not Started")
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     idea = relationship("Idea", back_populates="planning")
     checklist_items = relationship(
