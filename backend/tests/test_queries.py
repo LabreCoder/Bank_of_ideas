@@ -38,7 +38,7 @@ def plannings_with_distinct_relations(client):
 
 def test_list_plannings_constant_queries(client, plannings_with_distinct_relations):
     with count_selects() as selects:
-        r = client.get("/planning/plannings")
+        r = client.get("/planning/")
     assert r.status_code == 200
     assert len(r.json()) == 4
     assert len(selects) == 1, f"{len(selects)} SELECTs:\n" + "\n---\n".join(selects)

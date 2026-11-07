@@ -161,7 +161,7 @@ curl -X POST http://localhost:8000/ideas/ \
 **List all active ideas**
 
 ```bash
-curl "http://localhost:8000/ideas/list?active=true"
+curl "http://localhost:8000/ideas/?active=true"
 ```
 
 **Toggle an idea's active status**
