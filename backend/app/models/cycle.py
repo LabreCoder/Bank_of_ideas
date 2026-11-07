@@ -14,7 +14,7 @@ cycle_planning = Table(
 class Cycle(Base):
     __tablename__ = "cycle"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)  # VARCHAR(255) no schema.sql (X02)
     description = Column(Text, nullable=True)
     start_date = Column(Date, nullable=False)

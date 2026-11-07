@@ -12,7 +12,7 @@ from schemas.owner import OwnerResponse
 class IdeaCreate(BaseModel):
     model_config = INPUT_CONFIG
 
-    name: str = Field(min_length=1)
+    name: str = Field(min_length=1, max_length=200)  # VARCHAR(200) (X03)
     description: Optional[str] = Field(default=None, max_length=200)
     category_id: Optional[int] = None
     owner_id: int
@@ -26,7 +26,7 @@ class IdeaCreate(BaseModel):
 class IdeaUpdate(BaseModel):
     model_config = INPUT_CONFIG
 
-    name: Optional[str] = Field(default=None, min_length=1)
+    name: Optional[str] = Field(default=None, min_length=1, max_length=200)
     description: Optional[str] = Field(default=None, max_length=200)
     category_id: Optional[int] = None
     owner_id: Optional[int] = None

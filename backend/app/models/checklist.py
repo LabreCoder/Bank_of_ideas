@@ -11,7 +11,7 @@ from database.connection import Base
 class PlanningChecklistItem(Base):
     __tablename__ = "checklist"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     # X02: ON DELETE CASCADE como no schema.sql (o ORM também apaga via delete-orphan).
     planning_id = Column(Integer, ForeignKey("planning.id", ondelete="CASCADE"), nullable=False)
     description = Column(String, nullable=False)

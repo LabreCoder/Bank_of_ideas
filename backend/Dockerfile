@@ -15,4 +15,5 @@ COPY app/ .
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# X03: aplica as migrações pendentes do Alembic antes de subir a API.
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn main:app --host 0.0.0.0 --port 8000 --reload"]

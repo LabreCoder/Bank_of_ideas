@@ -12,7 +12,7 @@ from models.checklist import PlanningChecklistItem
 class Planning(Base):
     __tablename__ = "planning"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     idea_id = Column(Integer, ForeignKey("idea.id"), nullable=False, unique=True)
     details = Column(Text, nullable=True)
     start_date = Column(Date, nullable=True)
