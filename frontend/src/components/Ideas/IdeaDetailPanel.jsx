@@ -1,6 +1,28 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 export const IDEA_DESCRIPTION_MAX = 200; // VARCHAR(200) no banco
+
+// D07: ideia sem planning ganha uma ação direta, em vez de só um aviso.
+function NoPlanningState({ idea, loaded }) {
+  if (!loaded) return <p className="text-sm text-ui-text-muted mt-2">Loading planning…</p>;
+  return (
+    <div className="mt-2 rounded-lg border border-dashed border-ui-border p-6 text-center">
+      <h2 className="text-lg font-semibold text-ui-text-primary">Planning</h2>
+      <p className="mt-1 text-sm text-ui-text-muted">This idea does not have a planning yet.</p>
+      {idea.is_active ? (
+        <Link
+          to={`/planning/new?ideaId=${idea.id}`}
+          className="mt-4 inline-block rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700"
+        >
+          + Create planning
+        </Link>
+      ) : (
+        <p className="mt-3 text-xs text-ui-text-muted">Activate the idea to create a planning for it.</p>
+      )}
+    </div>
+  );
+}
 
 const SAVE_STATE_LABELS = {
   saving: { text: "Saving…", className: "text-ui-text-muted" },
@@ -11,10 +33,7 @@ import { ideasApi } from "../../services/ideas";
 import { checklistApi } from "../../services/checklist";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 
-const IDEA_STATUS_STYLES = {
-  Free: "bg-status-emerald-bg text-status-emerald-fg border-status-emerald-border",
-  "In Planning": "bg-status-indigo-bg text-status-indigo-fg border-status-indigo-border",
-};
+import { IDEA_STATUS_STYLES, STATUS_FALLBACK_STYLE } from "../../utils/ideaStatus";
 
 export default function IdeaDetail({
   idea,
@@ -25,6 +44,7 @@ export default function IdeaDetail({
   onClose,
   onUpdated,
   onToggleActive,
+  planningsLoaded = true,
   onPlanningUpdated,
 }) {
   const [name, setName] = useState(idea.name);
@@ -32,6 +52,7 @@ export default function IdeaDetail({
   const [categoryId, setCategoryId] = useState(idea.category?.id ?? "");
   const [ownerId, setOwnerId] = useState(idea.owner.id);
   const [newItem, setNewItem] = useState("");
+  const [newItemDue, setNewItemDue] = useState("");
   const [error, setError] = useState(null);
   // D06: feedback do autosave — "idle" | "saving" | "saved" | "error".
   const [saveState, setSaveState] = useState("idle");
@@ -69,7 +90,7 @@ export default function IdeaDetail({
     }
   };
 
-  const statusClass = IDEA_STATUS_STYLES[idea.execution_status] || "bg-ui-surface-2 text-ui-text-secondary border-ui-border";
+  const statusClass = IDEA_STATUS_STYLES[idea.execution_status] || STATUS_FALLBACK_STYLE;
 
   const handleNameBlur = () => {
     const trimmed = name.trim();
@@ -107,9 +128,14 @@ export default function IdeaDetail({
     if (!newItem.trim() || !planning) return;
     setError(null);
     try {
-      const updated = await checklistApi.addChecklistItem(planning.id, newItem.trim());
+      // D07: mesmo formulário do detalhe do planning (descrição + data opcional).
+      const updated = await checklistApi.addChecklistItem(planning.id, {
+        description: newItem.trim(),
+        due_date: newItemDue || null,
+      });
       onPlanningUpdated(updated);
       setNewItem("");
+      setNewItemDue("");
     } catch (err) {
       setError(err.message || "It was not possible to add the item.");
     }
@@ -237,7 +263,12 @@ export default function IdeaDetail({
           </div>
 
           <div className="mt-8 pt-4">
-            <button onClick={() => onToggleActive(idea)} className="text-sm font-medium text-status-red-fg hover:text-status-red-fg">
+            <button
+              onClick={() => onToggleActive(idea)}
+              className={`text-sm font-medium hover:underline ${
+                idea.is_active ? "text-status-red-fg" : "text-status-emerald-fg"
+              }`}
+            >
               {idea.is_active ? "Deactivate" : "Activate"}
             </button>
           </div>
@@ -249,12 +280,12 @@ export default function IdeaDetail({
         {/* Right Column: Planning */}
         <div className="flex-1 flex flex-col">
           {!planning ? (
-            <p className="text-sm text-ui-text-muted mt-2">This idea does not have a planning yet.</p>
+            <NoPlanningState idea={idea} loaded={planningsLoaded} />
           ) : (
             <>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold text-ui-text-primary">Planning</h2>
-                <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${PLANNING_STATUS_STYLES[planning.status] || "bg-ui-surface-2 text-ui-text-secondary border-ui-border"}`}>
+                <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${PLANNING_STATUS_STYLES[planning.status] || STATUS_FALLBACK_STYLE}`}>
                   {planning.status}
                 </span>
               </div>
@@ -278,6 +309,13 @@ export default function IdeaDetail({
                     onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
                     placeholder="New item..."
                     className="flex-1 text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                  />
+                  <input
+                    type="date"
+                    value={newItemDue}
+                    onChange={(e) => setNewItemDue(e.target.value)}
+                    aria-label="Due date (optional)"
+                    className="text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
                   />
                   <button onClick={handleAddItem} className="text-sm font-medium px-4 py-2 rounded-md border border-ui-border hover:bg-ui-surface-2">
                     Add

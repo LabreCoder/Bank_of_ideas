@@ -1,11 +1,8 @@
-const STATUS_STYLES = {
-  "Free": "bg-status-emerald-bg text-status-emerald-fg border-status-emerald-border",
-  "In Planning": "bg-status-amber-bg text-status-amber-fg border-status-amber-border",
-};
+import { IDEA_STATUS_STYLES, STATUS_FALLBACK_STYLE } from "../../utils/ideaStatus";
 
 export default function IdeaCard({ idea, onOpen }) {
   const statusClass =
-    STATUS_STYLES[idea.execution_status] || "bg-ui-surface-2 text-ui-text-secondary border-ui-border";
+    IDEA_STATUS_STYLES[idea.execution_status] || STATUS_FALLBACK_STYLE;
 
   return (
     <button
