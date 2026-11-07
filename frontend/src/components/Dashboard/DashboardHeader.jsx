@@ -1,11 +1,8 @@
 import { CYCLE_FILTER_ALL, CYCLE_FILTER_NONE } from "../../utils/dashboardMetrics";
+import { formatMediumDate } from "../../utils/dateFormat";
 
 export default function DashboardHeader({ cycles, cycleFilter, onCycleFilterChange, onNewIdea }) {
-  const dateLabel = new Date().toLocaleDateString("en-US", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  const dateLabel = formatMediumDate(new Date());
 
   return (
     <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">

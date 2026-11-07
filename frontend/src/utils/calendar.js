@@ -7,6 +7,15 @@
 // direto aqui — sempre quebramos a string em ano/mês/dia e construímos a
 // data manualmente com `new Date(year, month, day)`, que é sempre local.
 
+import {
+  formatLongDate,
+  formatMediumDate,
+  formatMonthYear,
+  formatShortDate,
+  getMonthLabels,
+  getWeekdayLabels,
+} from "./dateFormat.js";
+
 export function dateKeyToLocalDate(dateKey) {
   const [year, month, day] = dateKey.split("-").map(Number);
   return new Date(year, month - 1, day);
@@ -55,33 +64,14 @@ export function shiftAnchorDate(anchorDate, view, direction) {
 }
 
 export function getPeriodLabel(anchorDate, view) {
-  if (view === "day") {
-    return anchorDate.toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
-  }
+  if (view === "day") return formatLongDate(anchorDate);
 
   if (view === "week") {
     const weekDates = getWeekDates(anchorDate);
-    const start = weekDates[0];
-    const end = weekDates[6];
-
-    const startLabel = start.toLocaleDateString("en-US", {
-      month: "short",
-      day: "2-digit",
-    });
-    const endLabel = end.toLocaleDateString("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    });
-
-    return `${startLabel} - ${endLabel}`;
+    return `${formatShortDate(weekDates[0])} - ${formatMediumDate(weekDates[6])}`;
   }
 
-  return `${MONTH_LABELS[anchorDate.getMonth()]} ${anchorDate.getFullYear()}`;
+  return formatMonthYear(anchorDate);
 }
 
 // Gera a matriz de semanas (arrays de 7 dias) pro mês informado, incluindo
@@ -122,9 +112,7 @@ export function isToday(date) {
   );
 }
 
-export const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+// Rótulos no locale da interface (APP_LOCALE em dateFormat.js).
+export const WEEKDAY_LABELS = getWeekdayLabels("short");
 
-export const MONTH_LABELS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
+export const MONTH_LABELS = getMonthLabels("long");
