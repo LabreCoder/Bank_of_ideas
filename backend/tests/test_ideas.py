@@ -23,7 +23,7 @@ def test_create_idea(client, owner, category):
 def test_get_and_list_ideas(client, make_idea):
     idea = make_idea("Listada")
     assert client.get(f"/ideas/{idea['id']}").json()["name"] == "Listada"
-    names = [i["name"] for i in client.get("/ideas/list").json()]
+    names = [i["name"] for i in client.get("/ideas/").json()]
     assert "Listada" in names
 
 
@@ -41,8 +41,8 @@ def test_toggle_active_and_filter(client, make_idea):
     assert r.status_code == 200, r.text
     assert r.json()["is_active"] is False
 
-    inactive_ids = [i["id"] for i in client.get("/ideas/list", params={"active": False}).json()]
-    active_ids = [i["id"] for i in client.get("/ideas/list", params={"active": True}).json()]
+    inactive_ids = [i["id"] for i in client.get("/ideas/", params={"active": False}).json()]
+    active_ids = [i["id"] for i in client.get("/ideas/", params={"active": True}).json()]
     assert idea["id"] in inactive_ids
     assert idea["id"] not in active_ids
 

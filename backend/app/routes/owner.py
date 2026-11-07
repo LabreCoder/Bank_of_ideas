@@ -10,7 +10,8 @@ from services import owner_service
 router = APIRouter(prefix="/owner", tags=["Owner"])
 
 
-@router.get("/owners", response_model=List[OwnerResponse])
+@router.get("/", response_model=List[OwnerResponse])
+@router.get("/owners", response_model=List[OwnerResponse], deprecated=True)  # alias antigo (B09)
 def list_owner(db: Session = Depends(get_db)):
     return owner_service.list_owners(db)
 
@@ -32,5 +33,5 @@ def update_owner_info(
 
 
 @router.delete("/{owner_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete(owner_id: int, db: Session = Depends(get_db)):
+def delete_owner(owner_id: int, db: Session = Depends(get_db)):
     owner_service.delete_owner(db, owner_id)
