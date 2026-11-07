@@ -23,6 +23,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        INSTALL_DEV: "true"   # instala pytest/httpx (requirements-dev.txt)
     container_name: bank_ideas_api
     restart: unless-stopped
     ports:
@@ -34,6 +36,8 @@ services:
         condition: service_healthy
     volumes:
       - ./backend/app:/app
+      # Testes ficam fora de app/; montados para rodar "docker compose exec api pytest -q"
+      - ./backend/tests:/app/tests
 
   frontend:
     build:

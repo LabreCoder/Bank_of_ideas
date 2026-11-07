@@ -121,6 +121,16 @@ Once everything is up:
 | API | http://localhost:8000 | Backend REST API |
 | API Docs | http://localhost:8000/docs | Interactive Swagger UI |
 
+### Running the backend tests
+
+Tests run inside the `api` container (pytest and httpx are installed in the dev image via `backend/requirements-dev.txt`):
+
+```bash
+docker compose exec api pytest -q
+```
+
+The tests use a **separate database** named `<DB_NAME>_test`, created automatically in the same `db` container. Tables are created from the SQLAlchemy models and truncated after each test — the main database is never touched. Test files live in `backend/tests/`.
+
 ---
 
 ## 📡 API Examples
