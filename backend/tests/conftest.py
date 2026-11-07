@@ -68,6 +68,9 @@ def _guard_test_database():
     db_name = engine.url.database or ""
     if not db_name.endswith("_test"):
         pytest.exit(f"Abortado: engine aponta para '{db_name}', que não é um banco de teste.", 2)
+    # Recria as tabelas a cada sessão (só no banco _test, garantido acima),
+    # para que mudanças nos models (ex.: X02) valham também no banco de teste.
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield
 

@@ -31,3 +31,29 @@ def test_created_at_is_timezone_aware(client, make_planning):
         client.get(f"/ideas/{planning['idea']['id']}").json()["created_at"],
     ):
         assert created_at.endswith("Z") or created_at[-6] in "+-", created_at
+
+
+def test_models_match_schema_sql():
+    """X02 — models alinhados ao database/schema.sql (limites, cascade, NOT NULL)."""
+    from models.checklist import PlanningChecklistItem
+    from models.cycle import Cycle
+    from models.idea import Idea
+    from models.planning import Planning
+
+    assert Cycle.__table__.c.name.type.length == 255
+    fk = next(iter(PlanningChecklistItem.__table__.c.planning_id.foreign_keys))
+    assert fk.ondelete == "CASCADE"
+    assert Idea.__table__.c.created_at.nullable is False
+    assert Planning.__table__.c.created_at.nullable is False
+
+
+def test_deleting_planning_in_db_cascades_to_checklist(client, make_planning):
+    """ON DELETE CASCADE no banco (não só no ORM): DELETE direto em SQL remove os itens."""
+    from sqlalchemy import text
+    from database.connection import engine
+
+    planning = make_planning(checklist_items=[{"description": "a"}])
+    with engine.begin() as conn:
+        conn.execute(text("DELETE FROM planning WHERE id = :id"), {"id": planning["id"]})
+        left = conn.execute(text("SELECT count(*) FROM checklist")).scalar()
+    assert left == 0
