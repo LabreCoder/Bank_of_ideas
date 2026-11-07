@@ -1,3 +1,4 @@
+import { formatLongDate, formatWeekday } from "../../utils/dateFormat";
 import { localDateToKey } from "../../utils/calendar";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 import { getChecklistProgress, getDayPlanningEntriesByDate } from "./calendarViewUtils";
@@ -10,10 +11,10 @@ export default function CalendarDayView({ dayDate, plannings, onOpenPlanning }) 
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-ui-text-secondary">
-          {dayDate.toLocaleDateString("en-US", { weekday: "long" })}
+          {formatWeekday(dayDate, "long")}
         </p>
         <span className="text-xs text-ui-text-muted">
-          {dayDate.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
+          {formatLongDate(dayDate)}
         </span>
       </div>
 

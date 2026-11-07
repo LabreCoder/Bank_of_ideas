@@ -1,3 +1,4 @@
+import { formatShortDate } from "../../utils/dateFormat";
 export default function CycleEditView({
   titleId,
   currentCycle,
@@ -115,7 +116,7 @@ export default function CycleEditView({
               <ul className="list-disc pl-5 mb-2 text-xs">
                 {conflictPrompt.map((c) => (
                   <li key={c.planning_id}>
-                    {c.idea_name}: due {c.candidate_due_date} — {c.message}
+                    {c.idea_name}: due {formatShortDate(c.candidate_due_date)} — {c.message}
                   </li>
                 ))}
               </ul>

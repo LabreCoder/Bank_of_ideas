@@ -1,3 +1,4 @@
+import { formatShortDate } from "../../utils/dateFormat";
 import { useState } from "react";
 import { PLANNING_STATUS_OPTIONS } from "../../utils/planningStatus";
 
@@ -245,7 +246,7 @@ export default function PlanningFormPanel({
                     <span className="truncate">
                       {item.description}{" "}
                       {item.due_date && (
-                        <span className="text-xs text-ui-text-muted">({item.due_date})</span>
+                        <span className="text-xs text-ui-text-muted">{formatShortDate(item.due_date)}</span>
                       )}
                     </span>
                     <button

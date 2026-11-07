@@ -1,12 +1,12 @@
 import { getCategoryColor } from "../../utils/categoryColors";
+import { formatMonthYear, formatWeekday } from "../../utils/dateFormat";
 
 const MAX_ROWS = 4;
 const MAX_DOTS = 3;
 const WEEKDAY_INITIALS = ["S", "M", "T", "W", "T", "F", "S"];
 
 export default function NextDaysCard({ days, ideaById, colorMap, onDayClick, onOpenPlanning }) {
-  const monthLabel = days[0].date
-    .toLocaleDateString("en-US", { month: "short", year: "2-digit" })
+  const monthLabel = formatMonthYear(days[0].date, { month: "short", year: "2-digit" })
     .replace(" ", " '");
 
   const deadlines = days
@@ -78,7 +78,7 @@ export default function NextDaysCard({ days, ideaById, colorMap, onDayClick, onO
                       {String(day.date.getDate()).padStart(2, "0")}
                     </span>
                     <span className="mt-1 block font-mono text-[10px] uppercase text-ui-text-muted">
-                      {day.date.toLocaleDateString("en-US", { weekday: "short" })}
+                      {formatWeekday(day.date, "short")}
                     </span>
                   </span>
                   <span className="min-w-0 flex-1">

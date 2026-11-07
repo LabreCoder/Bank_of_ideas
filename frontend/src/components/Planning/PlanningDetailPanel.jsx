@@ -1,3 +1,4 @@
+import { formatShortDate } from "../../utils/dateFormat";
 import { useState, useEffect, useRef } from "react";
 import { planningApi } from "../../services/planning";
 import { checklistApi } from "../../services/checklist";
@@ -428,7 +429,7 @@ export default function PlanningDetailPanel({
                           {item.description}
                         </span>
                         {item.due_date && (
-                          <span className="text-xs text-ui-text-muted">({item.due_date})</span>
+                          <span className="text-xs text-ui-text-muted">{formatShortDate(item.due_date)}</span>
                         )}
                         <div className="flex gap-1 shrink-0">
                           <button

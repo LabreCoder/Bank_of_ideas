@@ -1,15 +1,9 @@
 import { useId } from "react";
 import DetailModal from "../Default/DetailModal";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
+import { formatLongDate } from "../../utils/dateFormat";
 
-function formatDateLabel(dateKey) {
-  const [year, month, day] = dateKey.split("-").map(Number);
-  return new Date(year, month - 1, day).toLocaleDateString("en-US", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-}
+const formatDateLabel = formatLongDate;
 
 function checklistSummary(checklistItems = []) {
   const total = checklistItems.length;

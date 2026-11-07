@@ -1,4 +1,5 @@
 import ProgressBar from "../Default/ProgressBar";
+import { formatMediumDate } from "../../utils/dateFormat";
 
 const STATUS_STYLES = {
   "Not Started": "bg-ui-surface-2 text-ui-text-secondary border-ui-border",
@@ -8,11 +9,6 @@ const STATUS_STYLES = {
   "Completed": "bg-status-emerald-bg text-status-emerald-fg border-status-emerald-border",
   "Cancelled": "bg-status-red-bg text-status-red-fg border-status-red-border",
 };
-
-function formatDate(value) {
-  if (!value) return "—";
-  return new Date(value + "T00:00:00").toLocaleDateString("en-US");
-}
 
 export default function PlanningCard({ planning, checklist, onOpen }) {
   const statusClass =
@@ -40,10 +36,10 @@ export default function PlanningCard({ planning, checklist, onOpen }) {
 
       <div className="pt-3 border-t border-ui-border/60 flex justify-between text-xs text-ui-text-muted">
         <div>
-          <span>Start: {planning.start_date || "--"}</span>
+          <span>Start: {formatMediumDate(planning.start_date)}</span>
         </div>
         <div>
-          <span>End: {planning.due_date || "--"}</span>
+          <span>End: {formatMediumDate(planning.due_date)}</span>
         </div>
       </div>
     </button>

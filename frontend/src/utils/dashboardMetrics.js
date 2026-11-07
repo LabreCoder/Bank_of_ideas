@@ -6,6 +6,7 @@
 // qualquer cálculo — assim funil, categorias, KPIs (inclusive % do checklist),
 // próximos dias, calendário e tabela de projetos usam o mesmo conjunto.
 import { addDays, dateKeyToLocalDate, localDateToKey, startOfDay } from "./calendar.js";
+import { formatShortDate } from "./dateFormat.js";
 
 export const CYCLE_FILTER_ALL = "all";
 export const CYCLE_FILTER_NONE = "none";
@@ -120,12 +121,10 @@ export function getUpcomingDays(plannings, today = new Date()) {
   });
 }
 
+// Mantido por compatibilidade com quem importa daqui; a formatação em si
+// fica em dateFormat.js (D05).
 export function formatDueLabel(dateKey) {
-  if (!dateKey) return "No due date";
-  return dateKeyToLocalDate(dateKey).toLocaleDateString("en-US", {
-    month: "short",
-    day: "2-digit",
-  });
+  return formatShortDate(dateKey);
 }
 
 export function isOverdue(planning, today = new Date()) {
