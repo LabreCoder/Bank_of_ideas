@@ -1,5 +1,5 @@
 import { formatShortDate } from "../../utils/dateFormat";
-import { useState } from "react";
+import { useState, useId } from "react";
 import { PLANNING_STATUS_OPTIONS } from "../../utils/planningStatus";
 
 function ChecklistEmptyIcon() {
@@ -18,6 +18,7 @@ export default function PlanningFormPanel({
   onClose,
   onSubmit,
 }) {
+  const fieldId = useId(); // D10: liga <label htmlFor> aos campos
   const [form, setForm] = useState({
     idea_id: initialIdeaId, // /planning/new?ideaId=<id> já vem com a ideia selecionada
     details: "",
@@ -100,8 +101,8 @@ export default function PlanningFormPanel({
 
               <div className="flex flex-col gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-ui-text-secondary mb-1">Idea</label>
-                  <select
+                  <label htmlFor={`${fieldId}-idea`} className="block text-sm font-medium text-ui-text-secondary mb-1">Idea</label>
+                  <select id={`${fieldId}-idea`}
                     value={form.idea_id}
                     onChange={(e) => updateForm("idea_id", e.target.value)}
                     className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
@@ -121,8 +122,8 @@ export default function PlanningFormPanel({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-ui-text-secondary mb-1">Details</label>
-                  <textarea
+                  <label htmlFor={`${fieldId}-details`} className="block text-sm font-medium text-ui-text-secondary mb-1">Details</label>
+                  <textarea id={`${fieldId}-details`}
                     value={form.details}
                     onChange={(e) => updateForm("details", e.target.value)}
                     rows={8}
@@ -139,8 +140,8 @@ export default function PlanningFormPanel({
               <div className="flex flex-col gap-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-ui-text-secondary mb-1">Start</label>
-                    <input
+                    <label htmlFor={`${fieldId}-start`} className="block text-sm font-medium text-ui-text-secondary mb-1">Start</label>
+                    <input id={`${fieldId}-start`}
                       type="date"
                       value={form.start_date}
                       onChange={(e) => updateForm("start_date", e.target.value)}
@@ -148,8 +149,8 @@ export default function PlanningFormPanel({
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-ui-text-secondary mb-1">Due</label>
-                    <input
+                    <label htmlFor={`${fieldId}-due`} className="block text-sm font-medium text-ui-text-secondary mb-1">Due</label>
+                    <input id={`${fieldId}-due`}
                       type="date"
                       value={form.due_date}
                       onChange={(e) => updateForm("due_date", e.target.value)}
@@ -159,8 +160,8 @@ export default function PlanningFormPanel({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-ui-text-secondary mb-1">Status</label>
-                  <select
+                  <label htmlFor={`${fieldId}-status`} className="block text-sm font-medium text-ui-text-secondary mb-1">Status</label>
+                  <select id={`${fieldId}-status`}
                     value={form.status}
                     onChange={(e) => updateForm("status", e.target.value)}
                     className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
@@ -202,6 +203,7 @@ export default function PlanningFormPanel({
                     }
                   }}
                   placeholder="Item description..."
+                  aria-label="New checklist item"
                   className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                 />
               </div>
@@ -209,6 +211,7 @@ export default function PlanningFormPanel({
                 <input
                   type="date"
                   value={checklistItem.due_date}
+                  aria-label="Checklist item due date (optional)"
                   onChange={(e) =>
                     setChecklistItem((prev) => ({ ...prev, due_date: e.target.value }))
                   }
@@ -252,6 +255,7 @@ export default function PlanningFormPanel({
                     <button
                       type="button"
                       onClick={() => removeChecklistDraftItem(index)}
+                      aria-label={`Remove ${item.description}`}
                       className="text-ui-text-muted hover:text-status-red-fg text-xs ml-2"
                     >
                       remove

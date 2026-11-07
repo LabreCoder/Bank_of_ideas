@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
 import { Link } from "react-router-dom";
 
 export const IDEA_DESCRIPTION_MAX = 200; // VARCHAR(200) no banco
@@ -47,6 +47,7 @@ export default function IdeaDetail({
   planningsLoaded = true,
   onPlanningUpdated,
 }) {
+  const fieldId = useId(); // D10: liga <label htmlFor> aos campos
   const [name, setName] = useState(idea.name);
   const [description, setDescription] = useState(idea.description || "");
   const [categoryId, setCategoryId] = useState(idea.category?.id ?? "");
@@ -206,8 +207,8 @@ export default function IdeaDetail({
 
           <div className="flex flex-col gap-4 flex-grow">
             <div>
-              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
-              <input
+              <label htmlFor={`${fieldId}-name`} className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
+              <input id={`${fieldId}-name`}
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -217,7 +218,7 @@ export default function IdeaDetail({
             </div>
             <div>
               <div className="flex items-baseline justify-between mb-1">
-                <label className="block text-sm font-medium text-ui-text-secondary">Description</label>
+                <label htmlFor={`${fieldId}-description`} className="block text-sm font-medium text-ui-text-secondary">Description</label>
                 <span
                   className={`text-xs tabular-nums ${
                     description.length >= IDEA_DESCRIPTION_MAX ? "text-status-amber-fg" : "text-ui-text-muted"
@@ -226,7 +227,7 @@ export default function IdeaDetail({
                   {description.length}/{IDEA_DESCRIPTION_MAX}
                 </span>
               </div>
-              <textarea
+              <textarea id={`${fieldId}-description`}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onBlur={handleDescriptionBlur}
@@ -236,8 +237,8 @@ export default function IdeaDetail({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Category</label>
-              <select
+              <label htmlFor={`${fieldId}-category`} className="block text-sm font-medium text-ui-text-secondary mb-1">Category</label>
+              <select id={`${fieldId}-category`}
                 value={categoryId}
                 onChange={(e) => handleCategoryChange(e.target.value)}
                 className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
@@ -249,8 +250,8 @@ export default function IdeaDetail({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-ui-text-secondary mb-1">Owner</label>
-              <select
+              <label htmlFor={`${fieldId}-owner`} className="block text-sm font-medium text-ui-text-secondary mb-1">Owner</label>
+              <select id={`${fieldId}-owner`}
                 value={ownerId}
                 onChange={(e) => handleOwnerChange(e.target.value)}
                 className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
@@ -308,6 +309,7 @@ export default function IdeaDetail({
                     onChange={(e) => setNewItem(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
                     placeholder="New item..."
+                    aria-label="New checklist item"
                     className="flex-1 min-w-[12rem] text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
                   />
                   <input
@@ -329,6 +331,7 @@ export default function IdeaDetail({
                         type="checkbox"
                         checked={item.is_done}
                         onChange={() => handleToggleItem(item.id)}
+                        aria-label={`Mark "${item.description}" as done`}
                         className="w-4 h-4 rounded border-ui-border text-accent-600 focus:ring-accent-600"
                       />
                       <span className={`flex-1 ${item.is_done ? "line-through text-ui-text-muted" : "text-ui-text-secondary"}`}>
