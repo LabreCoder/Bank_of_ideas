@@ -93,7 +93,7 @@ export default function PlanningFormPanel({
 
       <form onSubmit={handleSubmit}>
         <div className="bg-ui-surface border border-ui-border rounded-lg p-6">
-          <div className="grid grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* ---- Planning ---- */}
             <div>
               <h3 className="text-lg font-semibold text-ui-text-primary mb-4">Planning</h3>
@@ -133,11 +133,11 @@ export default function PlanningFormPanel({
             </div>
 
             {/* ---- Schedule ---- */}
-            <div className="border-l border-ui-border/60 pl-8">
+            <div className="border-t border-ui-border/60 pt-6 md:border-t-0 md:border-l md:pt-0 md:pl-8">
               <h3 className="text-lg font-semibold text-ui-text-primary mb-4">Schedule</h3>
 
               <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-ui-text-secondary mb-1">Start</label>
                     <input
@@ -187,8 +187,8 @@ export default function PlanningFormPanel({
               </span>
             </div>
 
-            <div className="flex gap-2 mb-2 items-end">
-              <div className="flex-1">
+            <div className="flex flex-wrap gap-2 mb-2 items-end">
+              <div className="flex-1 min-w-[12rem]">
                 <input
                   type="text"
                   value={checklistItem.description}
