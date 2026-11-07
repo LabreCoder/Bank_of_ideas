@@ -15,7 +15,13 @@ router = APIRouter(prefix="/planning", tags=["Planning"])
 def add_checklist_item(
     planning_id: int, payload: ChecklistItemCreate, db: Session = Depends(get_db)
 ):
-    return checklist_service.add_checklist_item(db, planning_id, description=payload.description, due_date=payload.due_date)
+    return checklist_service.add_checklist_item(
+        db,
+        planning_id,
+        description=payload.description,
+        due_date=payload.due_date,
+        position=payload.position,
+    )
 
 @router.put("/{planning_id}/checklist/{item_id}", response_model=PlanningResponse)
 def update_checklist_item(
