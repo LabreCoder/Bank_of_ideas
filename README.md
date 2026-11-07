@@ -139,6 +139,12 @@ docker compose exec api pytest -q
 
 The tests use a **separate database** named `<DB_NAME>_test`, created automatically in the same `db` container. Tables are created from the SQLAlchemy models and truncated after each test — the main database is never touched. Test files live in `backend/tests/`.
 
+Frontend utility tests (pure functions in `src/utils/`, Node's built-in test runner, no extra dependencies):
+
+```bash
+docker compose exec frontend npm test
+```
+
 ---
 
 ## 📡 API Examples

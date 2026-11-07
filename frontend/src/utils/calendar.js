@@ -44,9 +44,14 @@ export function shiftAnchorDate(anchorDate, view, direction) {
   if (view === "day") return addDays(anchorDate, direction);
   if (view === "week") return addDays(anchorDate, direction * 7);
 
-  const next = new Date(anchorDate);
-  next.setMonth(next.getMonth() + direction);
-  return next;
+  // Visão mensal: `setMonth` sobre um dia 29–31 transborda para o mês seguinte
+  // (31/jan + 1 mês = 3/mar). Montamos a data no mês de destino e limitamos o
+  // dia ao último dia desse mês, preservando o dia quando ele existe (útil ao
+  // voltar para as visões de dia/semana).
+  const year = anchorDate.getFullYear();
+  const targetMonth = anchorDate.getMonth() + direction;
+  const lastDayOfTarget = new Date(year, targetMonth + 1, 0).getDate();
+  return new Date(year, targetMonth, Math.min(anchorDate.getDate(), lastDayOfTarget));
 }
 
 export function getPeriodLabel(anchorDate, view) {
