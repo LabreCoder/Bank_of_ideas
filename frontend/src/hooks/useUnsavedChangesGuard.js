@@ -3,13 +3,15 @@ import { useBlocker } from "react-router-dom";
 
 export const UNSAVED_CHANGES_MESSAGE = "You have unsaved changes. Leave without saving?";
 
-// Protege telas com alterações não salvas (D01/D02):
-// - fechar/recarregar a aba: aviso nativo do navegador (beforeunload);
-// - qualquer troca de rota dentro do app (voltar, links do topo, botões da tela):
-//   useBlocker pede confirmação.
+// Protege telas com alterações não salvas (D01/D02/D03):
+// - fechar/recarregar a aba: aviso nativo do navegador (beforeunload — o texto
+//   não pode ser personalizado);
+// - qualquer troca de rota dentro do app (voltar, links do topo, botões da
+//   tela): useBlocker segura a navegação e a tela mostra um ConfirmDialog com
+//   `leaveDialog` ({ open, onConfirm, onCancel }).
 // `allowNextNavigation()` libera a próxima navegação sem perguntar (ex.: depois
 // de excluir o registro, quando as alterações deixam de fazer sentido).
-export function useUnsavedChangesGuard(dirty, message = UNSAVED_CHANGES_MESSAGE) {
+export function useUnsavedChangesGuard(dirty) {
   const allowRef = useRef(false);
 
   useEffect(() => {
@@ -28,15 +30,15 @@ export function useUnsavedChangesGuard(dirty, message = UNSAVED_CHANGES_MESSAGE)
       dirty && !allowRef.current && currentLocation.pathname !== nextLocation.pathname
   );
 
-  useEffect(() => {
-    if (blocker.state !== "blocked") return;
-    if (window.confirm(message)) blocker.proceed();
-    else blocker.reset();
-  }, [blocker, message]);
-
   const allowNextNavigation = useCallback(() => {
     allowRef.current = true;
   }, []);
 
-  return { allowNextNavigation };
+  const leaveDialog = {
+    open: blocker.state === "blocked",
+    onConfirm: () => blocker.proceed?.(),
+    onCancel: () => blocker.reset?.(),
+  };
+
+  return { allowNextNavigation, leaveDialog };
 }

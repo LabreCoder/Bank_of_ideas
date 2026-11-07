@@ -10,7 +10,7 @@ const CYCLE_STATUS_STYLES = {
   "Finished": "bg-emerald-50 text-emerald-700 border-emerald-200",
 };
 
-export default function CycleDetailView({ cycle, onEdit, onClose }) {
+export default function CycleDetailView({ cycle, titleId, onEdit, onClose }) {
   const navigate = useNavigate();
   const statusClass =
     CYCLE_STATUS_STYLES[cycle.status] || "bg-gray-100 text-gray-600 border-gray-200";
@@ -46,7 +46,7 @@ export default function CycleDetailView({ cycle, onEdit, onClose }) {
         </div>
       </div>
 
-      <h2 className="text-2xl font-semibold text-gray-900 mb-2">{cycle.name}</h2>
+      <h2 id={titleId} className="text-2xl font-semibold text-gray-900 mb-2">{cycle.name}</h2>
       {cycle.description && <p className="text-gray-500 mb-6">{cycle.description}</p>}
 
       <div className="flex flex-col-3 items-center justify-between gap-4 mb-6 pb-6 border-b border-gray-100">

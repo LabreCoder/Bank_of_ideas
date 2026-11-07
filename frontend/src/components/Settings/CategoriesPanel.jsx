@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ConfirmDialog from "../Default/ConfirmDialog";
 import { categoriesApi } from "../../services/categories";
 
 const EMPTY_DRAFT = { name: "", description: "" };
@@ -92,6 +93,9 @@ export default function CategoriesPanel() {
       setError(err.message || "It was not possible to update the category.");
     }
   };
+
+  // D03: exclusão só depois de confirmar no ConfirmDialog.
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const handleDelete = async (id) => {
     setError(null);
@@ -211,7 +215,7 @@ export default function CategoriesPanel() {
                       <PencilIcon />
                     </button>
                     <button
-                      onClick={() => handleDelete(c.id)}
+                      onClick={() => setPendingDelete(c)}
                       title="Remove"
                       className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                     >
@@ -224,6 +228,24 @@ export default function CategoriesPanel() {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        title="Delete this category?"
+        message={
+          <>
+            <strong>{pendingDelete?.name}</strong> will be deleted. Categories still used by an idea cannot be deleted — change those ideas first. This cannot be
+            undone.
+          </>
+        }
+        confirmLabel="Delete category"
+        onConfirm={() => {
+          const id = pendingDelete.id;
+          setPendingDelete(null);
+          handleDelete(id);
+        }}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }
