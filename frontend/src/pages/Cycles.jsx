@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { cycleApi } from "../services/cycle";
 import { planningApi } from "../services/planning";
-import CyclesSummary from "../components/Cycle/CyclesSummary";
 import CycleTimelineCard from "../components/Cycle/CycleTimelineCard";
 import CycleFormModal from "../components/Cycle/CycleFormModal";
 import CycleDetailModal from "../components/Cycle/CycleDetailModal";
@@ -105,7 +104,6 @@ export default function Cycles() {
 
   return (
     <div>
-      {/* <CyclesSummary cycles={cycles} /> */}
       <div className="flex justify-between items-start mb-6">
         <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0">

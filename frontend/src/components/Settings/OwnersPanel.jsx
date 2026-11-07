@@ -118,20 +118,7 @@ export default function OwnersPanel() {
             onChange={(e) => setNewDraft((d) => ({ ...d, name: e.target.value }))}
             placeholder="Owner name..."
             className="text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
-          />{/*
-          <input
-            type="text"
-            value={newDraft.description}
-            onChange={(e) => setNewDraft((d) => ({ ...d, description: e.target.value }))}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleAdd();
-              }
-            }}
-            placeholder="Description (optional)..."
-            className="h-[100px] text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
-          />*/}
+          />
         </div>
         <button
           type="button"
@@ -161,17 +148,7 @@ export default function OwnersPanel() {
                     onChange={(e) => setEditDraft((d) => ({ ...d, name: e.target.value }))}
                     autoFocus
                     className="text-sm font-medium border border-gray-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-600"
-                  />{/*
-                  <textarea
-                    value={editDraft.description}
-                    onChange={(e) => setEditDraft((d) => ({ ...d, description: e.target.value }))}
-                    onKeyDown={(e) => {
-                      if (e.key === "Escape") cancelEditing();
-                    }}
-                    rows={2}
-                    placeholder="Description..."
-                    className="text-sm text-gray-600 border border-gray-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-600"
-                  />*/}
+                  />
                   <div className="flex gap-2 justify-end">
                     <button
                       onClick={cancelEditing}
@@ -192,13 +169,6 @@ export default function OwnersPanel() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="font-medium text-gray-900 text-sm">{c.name}</p>
-                    {/*<p
-                      className={`text-sm mt-0.5 ${
-                        c.description ? "text-gray-500" : "text-gray-300 italic"
-                      }`}
-                    >
-                      {c.description || "No description"}
-                    </p>*/}
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <button
