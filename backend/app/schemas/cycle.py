@@ -9,7 +9,7 @@ from schemas.planning import PlanningResponse
 class CycleCreate(BaseModel):
     model_config = INPUT_CONFIG
 
-    name: str = Field(min_length=1)
+    name: str = Field(min_length=1, max_length=255)  # VARCHAR(255) no banco
     description: Optional[str] = None
     start_date: date
     due_date: Optional[date] = None
@@ -18,7 +18,7 @@ class CycleCreate(BaseModel):
 class CycleUpdate(BaseModel):
     model_config = INPUT_CONFIG
 
-    name: Optional[str] = Field(default=None, min_length=1)
+    name: Optional[str] = Field(default=None, min_length=1, max_length=255)
     description: Optional[str] = None
     start_date: Optional[date] = None
 
