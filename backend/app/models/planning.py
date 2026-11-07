@@ -26,3 +26,8 @@ class Planning(Base):
         back_populates="planning",
         cascade="all, delete-orphan",
     )
+    # N:N com Cycle (tabela cycle_planning). String "cycle_planning" resolvida
+    # pelo nome da tabela no metadata; Cycle é registrado em models/__init__.py.
+    cycles = relationship(
+        "Cycle", secondary="cycle_planning", back_populates="plannings"
+    )

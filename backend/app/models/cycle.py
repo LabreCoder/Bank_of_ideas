@@ -21,4 +21,4 @@ class Cycle(Base):
     due_date = Column(Date, nullable=True)  # Optional due_date
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    plannings = relationship("Planning", secondary=cycle_planning, backref="cycles")
+    plannings = relationship("Planning", secondary=cycle_planning, back_populates="cycles")
