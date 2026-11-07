@@ -1,4 +1,4 @@
-import { IDEA_DESCRIPTION_MAX } from "./IdeaDetailPanel";
+import { IDEA_DESCRIPTION_MAX, IDEA_NAME_MAX } from "./IdeaDetailPanel";
 import { useEffect, useState, useId } from "react";
 
 const EMPTY_FORM = { name: "", description: "", category_id: "", owner_id: "" };
@@ -75,6 +75,7 @@ export default function IdeaForm({ categories, owners, onClose, onSubmit, backLa
                 type="text"
                 value={form.name}
                 onChange={(e) => update("name", e.target.value)}
+                maxLength={IDEA_NAME_MAX}
                 className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 focus:border-accent-600"
                 autoFocus
               />

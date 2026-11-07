@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useId } from "react";
 import { Link } from "react-router-dom";
 
 export const IDEA_DESCRIPTION_MAX = 200; // VARCHAR(200) no banco
+export const IDEA_NAME_MAX = 200; // VARCHAR(200) no banco (migração Alembic 0002)
 
 // D07: ideia sem planning ganha uma ação direta, em vez de só um aviso.
 function NoPlanningState({ idea, loaded }) {
@@ -213,6 +214,7 @@ export default function IdeaDetail({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onBlur={handleNameBlur}
+                maxLength={IDEA_NAME_MAX}
                 className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
               />
             </div>

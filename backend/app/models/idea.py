@@ -13,8 +13,8 @@ from database.connection import Base
 class Idea(Base):
     __tablename__ = "idea"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(200), nullable=False)  # VARCHAR(200) — migração Alembic 0002
     description = Column(String(200), nullable=True)
     category_id = Column(Integer, ForeignKey("category.id"), nullable=True)
     owner_id = Column(Integer, ForeignKey("owner.id"), nullable=False)

@@ -121,6 +121,19 @@ docker compose up --build
 
 The schema in `database/schema.sql` is applied automatically only the first time the database volume is created. Optional sample data lives in `database/seeds.sql` (enable the commented line in `docker-compose.yml` **before** the first start).
 
+### Database migrations (Alembic)
+
+`database/schema.sql` is the **baseline** (Alembic revision `0001_baseline`). Every later database change is an Alembic revision in `backend/app/migrations/versions/`, applied automatically when the `api` container starts (`alembic upgrade head`). Useful commands:
+
+```bash
+docker compose exec api alembic current
+docker compose exec api alembic revision --autogenerate -m "describe the change"
+docker compose exec api alembic upgrade head
+docker compose exec api alembic check   # models vs database: no pending differences?
+```
+
+`database/migrations/001_timestamptz.sql` is a one-off SQL script from before Alembic (already part of the baseline).
+
 Once everything is up:
 
 | Service | URL | Purpose |
