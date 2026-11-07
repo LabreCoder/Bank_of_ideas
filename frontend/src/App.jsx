@@ -1,22 +1,17 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout.jsx";
 import { routes } from "./router/routes.jsx";
 
-export default function App() {
-  return (
-    <Routes>
-      {/* MainLayout renders the sidebar once, and all pages below
-          share it via <Outlet /> — no need to repeat the sidebar
-          in every page component. */}
-      <Route element={<MainLayout />}>
-        {/* Redirects "/" straight to the Dashboard, so the app always
-            opens on a meaningful screen instead of a blank route. */}
-        <Route index element={<Navigate to="/dashboard" replace />} />
-
-        {routes.map((route) => (
-          <Route key={route.path} path={route.path} element={route.element} />
-        ))}
-      </Route>
-    </Routes>
-  );
-}
+// Data router (createBrowserRouter) em vez de <BrowserRouter>: é o que permite
+// usar useBlocker para confirmar a saída de telas com alterações não salvas (D01/D02).
+export const router = createBrowserRouter([
+  {
+    // MainLayout renders the top bar once, and all pages below share it via <Outlet />.
+    element: <MainLayout />,
+    children: [
+      // "/" vai direto para o Dashboard.
+      { index: true, element: <Navigate to="/dashboard" replace /> },
+      ...routes,
+    ],
+  },
+]);

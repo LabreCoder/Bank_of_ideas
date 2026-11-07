@@ -13,6 +13,7 @@ export default function IdeaDetail({
   planning,
   categories,
   owners,
+  backLabel = "Ideas",
   onClose,
   onUpdated,
   onToggleActive,
@@ -94,7 +95,7 @@ export default function IdeaDetail({
     <div className="animate-fade-in w-full pb-10">
       {/* Top Navigation */}
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <button onClick={onClose} className="hover:text-gray-900">&larr; Ideas</button>
+        <button onClick={onClose} className="hover:text-gray-900">&larr; {backLabel}</button>
         <span>/</span>
         <span className="text-gray-900">{idea.name}</span>
       </div>

@@ -80,14 +80,9 @@ export default function PlanningDetailPanel({
   const pendingNewItem = newItem.description.trim() !== "";
   const dirty = fieldsDirty || pendingNewItem;
 
-  useUnsavedChangesGuard(dirty);
-
-  const confirmDiscard = () =>
-    !dirty || window.confirm("You have unsaved changes. Leave without saving?");
-
-  const handleClose = () => {
-    if (confirmDiscard()) onClose();
-  };
+  // Voltar/fechar navegam (D02); a confirmação com alterações pendentes vem do guard.
+  const { allowNextNavigation } = useUnsavedChangesGuard(dirty);
+  const handleClose = onClose;
 
   // Executa uma ação do checklist: aplica o estado otimista, chama a API e
   // usa a resposta (planning completo) como verdade; em erro, volta ao anterior.
@@ -208,6 +203,8 @@ export default function PlanningDetailPanel({
     setError(null);
     try {
       await planningApi.delete(planning.id);
+      // O planning não existe mais: alterações pendentes não fazem sentido.
+      allowNextNavigation();
       onDeleted(planning.id);
     } catch (err) {
       setError(err.message || "It was not possible to remove the plan.");
