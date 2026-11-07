@@ -4,16 +4,17 @@ import { getPlanningGroup, PLANNING_GROUP_LEGEND } from "../../utils/cyclePlanni
 import { formatShortDate } from "../../utils/dateFormat";
 import ProgressBar from "../Default/ProgressBar";
 
-const CYCLE_STATUS_STYLES = {
-  "Waiting Start": "bg-ui-surface-2 text-ui-text-secondary border-ui-border",
-  "In Progress": "bg-status-amber-bg text-status-amber-fg border-status-amber-border",
-  "Finished": "bg-status-emerald-bg text-status-emerald-fg border-status-emerald-border",
-};
+import {
+  CYCLE_OVERDUE_LABEL,
+  CYCLE_OVERDUE_STYLE,
+  CYCLE_STATUS_STYLES,
+  STATUS_FALLBACK_STYLE,
+} from "../../utils/cycleStatus";
 
 export default function CycleDetailView({ cycle, titleId, onEdit, onClose }) {
   const navigate = useNavigate();
   const statusClass =
-    CYCLE_STATUS_STYLES[cycle.status] || "bg-ui-surface-2 text-ui-text-secondary border-ui-border";
+    CYCLE_STATUS_STYLES[cycle.status] || STATUS_FALLBACK_STYLE;
 
   // Fecha a modal antes de navegar — senão ela continua "por cima" da tela
   // de Planning depois da troca de rota.
@@ -30,9 +31,19 @@ export default function CycleDetailView({ cycle, titleId, onEdit, onClose }) {
   return (
     <div>
       <div className="flex items-start justify-between mb-4">
-        <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusClass}`}>
+        <div className="flex flex-wrap gap-1">
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusClass}`}>
           {cycle.status}
         </span>
+          {cycle.is_overdue && (
+            <span
+              className={`text-xs font-medium px-2 py-0.5 rounded-full border ${CYCLE_OVERDUE_STYLE}`}
+              title="The due date has passed and the cycle is not finished"
+            >
+              {CYCLE_OVERDUE_LABEL}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-3">
           <button
             onClick={onEdit}
