@@ -36,6 +36,7 @@ export default function CycleDetailModal({
   const handleUpdateInfo = async () => {
     setSaving(true);
     setError(null);
+    setConflictPrompt(null);
     try {
       const updated = await cycleApi.update(currentCycle.id, {
         name: name.trim(),
@@ -45,7 +46,12 @@ export default function CycleDetailModal({
       setCurrentCycle(updated);
       onUpdated(updated);
     } catch (err) {
-      setError(err.message || "Failed to update cycle details.");
+      // 409: a nova start_date deixa plannings vinculados fora do período.
+      if (err.status === 409 && err.detail?.conflicts) {
+        setConflictPrompt(err.detail.conflicts);
+      } else {
+        setError(err.message || "Failed to update cycle details.");
+      }
     } finally {
       setSaving(false);
     }

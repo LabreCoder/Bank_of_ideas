@@ -98,6 +98,71 @@ def _get_planning_or_404(db: Session, planning_id: int) -> Planning:
     return planning
 
 
+def _out_of_period(day: date, start_date: date, due_date: Optional[date]) -> bool:
+    return day < start_date or (due_date is not None and day > due_date)
+
+
+def _period_label(start_date: date, due_date: Optional[date]) -> str:
+    return f"{start_date} to {due_date}" if due_date else f"from {start_date} (no due date)"
+
+
+def find_planning_conflicts(
+    plannings: List[Planning], start_date: date, due_date: Optional[date]
+) -> List[PlanningDateValidationResult]:
+    """Plannings vinculados cuja due_date cai fora do período [start_date, due_date] do ciclo."""
+    conflicts = []
+    for planning in plannings:
+        if not planning.due_date or not _out_of_period(planning.due_date, start_date, due_date):
+            continue
+        conflicts.append(
+            PlanningDateValidationResult(
+                planning_id=planning.id,
+                idea_name=planning.idea.name,
+                candidate_due_date=planning.due_date,
+                origin=DateCandidateOrigin.planning,
+                is_valid=False,
+                requires_confirmation=False,
+                message=(
+                    f"Planning due_date ({planning.due_date}) falls outside the "
+                    f"new cycle period ({_period_label(start_date, due_date)})."
+                ),
+            )
+        )
+    return conflicts
+
+
+def raise_planning_conflicts(message: str, conflicts: List[PlanningDateValidationResult]) -> None:
+    # mode="json": datas e enums viram texto. Sem isso o 409 virava 500
+    # ("Object of type date is not JSON serializable") — achado da Fase 0.
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail={
+            "message": message,
+            "conflicts": [c.model_dump(mode="json") for c in conflicts],
+        },
+    )
+
+
+def find_cycle_conflicts_for_planning_due(planning: Planning, new_due_date: Optional[date]) -> List[dict]:
+    """Ciclos aos quais o planning está vinculado cujo período não comporta new_due_date."""
+    if new_due_date is None:
+        return []
+    return [
+        {
+            "cycle_id": cycle.id,
+            "cycle_name": cycle.name,
+            "start_date": str(cycle.start_date),
+            "due_date": str(cycle.due_date) if cycle.due_date else None,
+            "message": (
+                f"Due date {new_due_date} falls outside cycle '{cycle.name}' "
+                f"({_period_label(cycle.start_date, cycle.due_date)})."
+            ),
+        }
+        for cycle in planning.cycles
+        if _out_of_period(new_due_date, cycle.start_date, cycle.due_date)
+    ]
+
+
 def calculate_planning_candidate_due_date(
     planning: Planning, cycle_due_date: Optional[date]
 ) -> Tuple[Optional[date], Optional[DateCandidateOrigin]]:
@@ -166,6 +231,15 @@ def bind_planning_to_cycle(db: Session, cycle_id: int, payload: CyclePlanningBin
         )
 
     if not cycle.due_date:
+        # Sem due_date no ciclo, ao menos o início precisa ser respeitado.
+        if planning.due_date and planning.due_date < cycle.start_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Planning due_date ({planning.due_date}) is earlier than the "
+                    f"cycle start_date ({cycle.start_date})."
+                ),
+            )
         cycle.plannings.append(planning)
         db.commit()
         db.refresh(cycle)
@@ -233,33 +307,10 @@ def update_cycle_due_date(db: Session, cycle_id: int, payload: CycleDueDateUpdat
         )
 
     if new_due_date:
-        conflicts = []
-        for planning in cycle.plannings:
-            if not planning.due_date:
-                continue
-            if planning.due_date < cycle.start_date or planning.due_date > new_due_date:
-                conflicts.append(
-                    PlanningDateValidationResult(
-                        planning_id=planning.id,
-                        idea_name=planning.idea.name,
-                        candidate_due_date=planning.due_date,
-                        origin=DateCandidateOrigin.planning,
-                        is_valid=False,
-                        requires_confirmation=False,
-                        message=(
-                            f"Planning due_date ({planning.due_date}) falls outside the "
-                            f"new cycle period ({cycle.start_date} to {new_due_date})."
-                        ),
-                    )
-                )
-
+        conflicts = find_planning_conflicts(cycle.plannings, cycle.start_date, new_due_date)
         if conflicts:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={
-                    "message": "Updating cycle due_date creates conflicts with bound plannings.",
-                    "conflicts": [c.model_dump() for c in conflicts],
-                },
+            raise_planning_conflicts(
+                "Updating cycle due_date creates conflicts with bound plannings.", conflicts
             )
 
     cycle.due_date = new_due_date
@@ -271,6 +322,19 @@ def update_cycle_due_date(db: Session, cycle_id: int, payload: CycleDueDateUpdat
 def update_cycle(db: Session, cycle_id: int, payload: CycleUpdate) -> Cycle:
     cycle = _get_cycle_or_404(db, cycle_id)
     updates = payload.model_dump(exclude_unset=True)
+
+    new_start = updates.get("start_date")
+    if new_start is not None and new_start != cycle.start_date:
+        if cycle.due_date and new_start > cycle.due_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cycle start_date cannot be later than due_date.",
+            )
+        conflicts = find_planning_conflicts(cycle.plannings, new_start, cycle.due_date)
+        if conflicts:
+            raise_planning_conflicts(
+                "Updating cycle start_date creates conflicts with bound plannings.", conflicts
+            )
 
     for field, value in updates.items():
         setattr(cycle, field, value)
