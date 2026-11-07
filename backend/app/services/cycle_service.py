@@ -147,6 +147,27 @@ def raise_planning_conflicts(message: str, conflicts: List[PlanningDateValidatio
     )
 
 
+def _raise_bind_conflict(
+    planning: Planning, candidate: date, origin: DateCandidateOrigin, message: str
+) -> None:
+    """X01: bind fora do período usa o mesmo 409 com `conflicts` dos demais
+    conflitos de data (antes era 400 com texto simples)."""
+    raise_planning_conflicts(
+        message,
+        [
+            PlanningDateValidationResult(
+                planning_id=planning.id,
+                idea_name=planning.idea.name,
+                candidate_due_date=candidate,
+                origin=origin,
+                is_valid=False,
+                requires_confirmation=False,
+                message=message,
+            )
+        ],
+    )
+
+
 def find_cycle_conflicts_for_planning_due(planning: Planning, new_due_date: Optional[date]) -> List[dict]:
     """Ciclos aos quais o planning está vinculado cujo período não comporta new_due_date."""
     if new_due_date is None:
@@ -234,12 +255,12 @@ def bind_planning_to_cycle(db: Session, cycle_id: int, payload: CyclePlanningBin
     if not cycle.due_date:
         # Sem due_date no ciclo, ao menos o início precisa ser respeitado.
         if planning.due_date and planning.due_date < cycle.start_date:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Planning due_date ({planning.due_date}) is earlier than the "
-                    f"cycle start_date ({cycle.start_date})."
-                ),
+            _raise_bind_conflict(
+                planning,
+                planning.due_date,
+                DateCandidateOrigin.planning,
+                f"Planning due_date ({planning.due_date}) is earlier than the "
+                f"cycle start_date ({cycle.start_date}).",
             )
         cycle.plannings.append(planning)
         db.commit()
@@ -250,12 +271,12 @@ def bind_planning_to_cycle(db: Session, cycle_id: int, payload: CyclePlanningBin
 
     if candidate_date:
         if candidate_date < cycle.start_date or candidate_date > cycle.due_date:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Calculated due_date ({candidate_date}) from origin '{origin.value}' "
-                    f"falls outside the cycle range ({cycle.start_date} to {cycle.due_date})."
-                ),
+            _raise_bind_conflict(
+                planning,
+                candidate_date,
+                origin,
+                f"Calculated due_date ({candidate_date}) from origin '{origin.value}' "
+                f"falls outside the cycle range ({cycle.start_date} to {cycle.due_date}).",
             )
 
         if not planning.due_date and not payload.confirm_candidate_due_date:
