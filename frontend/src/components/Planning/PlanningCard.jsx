@@ -1,18 +1,11 @@
 import ProgressBar from "../Default/ProgressBar";
 import { formatMediumDate } from "../../utils/dateFormat";
 
-const STATUS_STYLES = {
-  "Not Started": "bg-ui-surface-2 text-ui-text-secondary border-ui-border",
-  "Under Review": "bg-status-blue-bg text-status-blue-fg border-status-blue-border",
-  "Started": "bg-status-purple-bg text-status-purple-fg border-status-purple-border",
-  "In Development": "bg-status-amber-bg text-status-amber-fg border-status-amber-border",
-  "Completed": "bg-status-emerald-bg text-status-emerald-fg border-status-emerald-border",
-  "Cancelled": "bg-status-red-bg text-status-red-fg border-status-red-border",
-};
+import { PLANNING_STATUS_STYLES, STATUS_FALLBACK_STYLE } from "../../utils/planningStatus";
 
 export default function PlanningCard({ planning, checklist, onOpen }) {
   const statusClass =
-    STATUS_STYLES[planning.status] || "bg-ui-surface-2 text-ui-text-secondary border-ui-border";
+    PLANNING_STATUS_STYLES[planning.status] || STATUS_FALLBACK_STYLE;
   const total = checklist.length;
   const done = checklist.filter((i) => i.is_done).length;
 

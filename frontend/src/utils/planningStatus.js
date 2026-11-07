@@ -19,3 +19,5 @@ export const PLANNING_STATUS_STYLES = {
   "Completed": "bg-status-emerald-bg text-status-emerald-fg border-status-emerald-border",
   "Cancelled": "bg-status-rose-bg text-status-rose-fg border-status-rose-border",
 };
+// Estilo usado quando um status não está mapeado (D07).
+export const STATUS_FALLBACK_STYLE = "bg-ui-surface-2 text-ui-text-secondary border-ui-border";
