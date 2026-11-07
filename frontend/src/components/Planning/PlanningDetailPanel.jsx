@@ -255,7 +255,7 @@ export default function PlanningDetailPanel({
       <p className="text-ui-text-muted mb-6">Manage the plan, dates and checklist in one place.</p>
 
       <div className="bg-ui-surface border border-ui-border rounded-lg p-6">
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* ---- Planning ---- */}
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -283,7 +283,7 @@ export default function PlanningDetailPanel({
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-ui-text-secondary mb-1">Start</label>
                   <input
@@ -317,7 +317,7 @@ export default function PlanningDetailPanel({
           </div>
 
           {/* ---- Checklist ---- */}
-          <div className="border-l border-ui-border/60 pl-8">
+          <div className="border-t border-ui-border/60 pt-6 md:border-t-0 md:border-l md:pt-0 md:pl-8">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-lg font-semibold text-ui-text-primary">Checklist</h3>
               <span className="text-xs text-ui-text-muted">Saved automatically</span>
@@ -329,8 +329,8 @@ export default function PlanningDetailPanel({
               </div>
             )}
 
-            <div className="flex gap-2 mb-2 items-end">
-              <div className="flex-1">
+            <div className="flex flex-wrap gap-2 mb-2 items-end">
+              <div className="flex-1 min-w-[12rem]">
                 <label className="block text-xs font-medium text-ui-text-muted mb-1">Description</label>
                 <input
                   type="text"
@@ -374,7 +374,7 @@ export default function PlanningDetailPanel({
                     className="flex items-center gap-2 text-sm bg-ui-surface-2 rounded-md px-3 py-1.5"
                   >
                     {editingItemId === item.id ? (
-                      <div className="flex items-center gap-2 w-full">
+                      <div className="flex flex-wrap items-center gap-2 w-full">
                         <input
                           type="text"
                           value={editItem.description}
@@ -390,7 +390,7 @@ export default function PlanningDetailPanel({
                             }
                           }}
                           autoFocus
-                          className="flex-1 text-sm border border-ui-border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                          className="flex-1 min-w-[10rem] text-sm border border-ui-border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent-600"
                         />
                         <input
                           type="date"
@@ -425,7 +425,7 @@ export default function PlanningDetailPanel({
                           disabled={isTempId(item.id)}
                           className="accent-accent-600"
                         />
-                        <span className={`flex-1 ${item.is_done ? "line-through text-ui-text-muted" : ""}`}>
+                        <span className={`flex-1 min-w-0 break-words ${item.is_done ? "line-through text-ui-text-muted" : ""}`}>
                           {item.description}
                         </span>
                         {item.due_date && (

@@ -301,14 +301,14 @@ export default function IdeaDetail({
                   <span className="text-xs font-medium text-ui-text-muted">{completedCount}/{totalCount}</span>
                 </div>
 
-                <div className="flex gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 mb-4">
                   <input
                     type="text"
                     value={newItem}
                     onChange={(e) => setNewItem(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
                     placeholder="New item..."
-                    className="flex-1 text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                    className="flex-1 min-w-[12rem] text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
                   />
                   <input
                     type="date"
