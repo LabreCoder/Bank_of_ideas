@@ -35,7 +35,7 @@ CREATE TABLE idea (
     category_id INTEGER REFERENCES category(id),
     owner_id INTEGER NOT NULL REFERENCES owner(id),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by INTEGER REFERENCES owner(id)
 );
 
@@ -52,7 +52,7 @@ CREATE TABLE planning (
     start_date DATE,                    -- "Start Date"
     due_date DATE,                      -- "Due Date"
     status VARCHAR NOT NULL DEFAULT 'Not Started',
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ============================================================
