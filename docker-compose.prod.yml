@@ -1,0 +1,73 @@
+# E03 — Perfil de produção.
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
+#   -> app em http://127.0.0.1:8080 (mude WEB_BIND/WEB_PORT no .env)
+#
+# Diferenças em relação ao docker-compose.yml (desenvolvimento):
+# - frontend: build estático servido por nginx (sem Vite dev server, sem hot reload);
+# - api: sem --reload, com workers, sem bind mounts e sem pytest na imagem;
+# - db: nenhuma porta publicada (só a API acessa, pela rede interna);
+# - projeto, containers e VOLUME DO BANCO próprios (bank_of_ideas_prod_*):
+#   o banco de produção não se mistura com o de desenvolvimento.
+#
+# ATENÇÃO: a API ainda não tem autenticação. Publicar a porta para a rede
+# (WEB_BIND=0.0.0.0) deixa qualquer pessoa que alcance a máquina ler e alterar
+# os dados. Faça isso só em rede confiável, ou depois de existir autenticação.
+name: bank_of_ideas_prod
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        INSTALL_DEV: "false"
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      UVICORN_RELOAD: "false"
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-2}
+      # O navegador fala com o nginx (mesma origem); CORS só para chamadas diretas.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health', timeout=4).status == 200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    ports:
+      - "${WEB_BIND:-127.0.0.1}:${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
