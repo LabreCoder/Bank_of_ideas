@@ -1,5 +1,6 @@
 // Centraliza o que antes estava duplicado em PlanningCard.jsx,
-// PlanningDetailModal.jsx e DayIdeasModal.jsx. Se um dia adicionar um novo
+// PlanningDetailModal.jsx (removido) e DayIdeasModal.jsx. Fonte única dos status de planning
+// (usada também pelas telas e painéis de Planning). Se um dia adicionar um novo
 // status, muda só aqui.
 export const PLANNING_STATUS_OPTIONS = [
   "Not Started",
@@ -11,10 +12,15 @@ export const PLANNING_STATUS_OPTIONS = [
 ];
 
 export const PLANNING_STATUS_STYLES = {
-  "Not Started": "bg-gray-100 text-gray-600 border-gray-200",
-  "Under Review": "bg-blue-50 text-blue-700 border-blue-200",
-  "Started": "bg-purple-50 text-purple-700 border-purple-200",
-  "In Development": "bg-amber-50 text-amber-700 border-amber-200",
-  "Completed": "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "Cancelled": "bg-rose-50 text-rose-700 border-rose-200",
+  "Not Started": "bg-ui-surface-2 text-ui-text-secondary border-ui-border",
+  "Under Review": "bg-status-blue-bg text-status-blue-fg border-status-blue-border",
+  "Started": "bg-status-purple-bg text-status-purple-fg border-status-purple-border",
+  "In Development": "bg-status-amber-bg text-status-amber-fg border-status-amber-border",
+  "Completed": "bg-status-emerald-bg text-status-emerald-fg border-status-emerald-border",
+  "Cancelled": "bg-status-rose-bg text-status-rose-fg border-status-rose-border",
 };
+// Estilo usado quando um status não está mapeado (D07).
+export const STATUS_FALLBACK_STYLE = "bg-ui-surface-2 text-ui-text-secondary border-ui-border";
+
+// Status finais (espelha TERMINAL_PLANNING_STATUSES do backend).
+export const TERMINAL_PLANNING_STATUSES = new Set(["Completed", "Cancelled"]);

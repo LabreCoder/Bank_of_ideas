@@ -56,5 +56,3 @@ INSERT INTO cycle (name, description, start_date, due_date) VALUES
 -- ============================================================
 INSERT INTO cycle_planning (cycle_id, planning_id) VALUES
     (1, 1);
-INSERT INTO cycle_planning (cycle_id, planning_id) VALUES
-    (1, 2);

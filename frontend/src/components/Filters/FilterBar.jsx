@@ -4,7 +4,7 @@ import { FILTER_FIELD_CLASS } from "./filterStyles";
 function SearchIcon() {
   return (
     <svg
-      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ui-text-muted"
       width="16"
       height="16"
       viewBox="0 0 24 24"
@@ -46,9 +46,9 @@ export default function FilterBar({
   const showFooter = chips.length > 0 || showClear;
 
   return (
-    <div className="mb-6 rounded-lg border border-gray-200 bg-white shadow-sm">
+    <div className="mb-6 rounded-lg border border-ui-border bg-ui-surface shadow-sm">
       {tabs && (
-        <div role="tablist" className="flex gap-1 border-b border-gray-200 px-2 mt-2 mb-2">
+        <div role="tablist" className="flex gap-1 border-b border-ui-border px-2 mt-2 mb-2">
           {tabs.items.map((tab) => {
             const isActive = tabs.active === tab.value;
             return (
@@ -61,12 +61,12 @@ export default function FilterBar({
                 className={`-mb-px flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-lg font-medium transition-colors ${
                   isActive
                     ? "border-accent-600 text-accent-700"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
+                    : "border-transparent text-ui-text-muted hover:text-ui-text-primary"
                 }`}
               >
                 {tab.label}
                 {tab.count !== undefined && (
-                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-sm font-semibold text-gray-600">
+                  <span className="rounded-full bg-ui-surface-2 px-2 py-0.5 text-sm font-semibold text-ui-text-secondary">
                     {tab.count}
                   </span>
                 )}
@@ -94,13 +94,13 @@ export default function FilterBar({
       </div>
 
       {showFooter && (
-        <div className="flex items-center justify-between gap-3 border-t border-gray-200 px-3 py-2">
+        <div className="flex items-center justify-between gap-3 border-t border-ui-border px-3 py-2">
           <ActiveChips chips={chips} />
           {showClear && (
             <button
               type="button"
               onClick={onClear}
-              className="shrink-0 text-lg font-medium text-gray-500 transition-colors hover:text-gray-800"
+              className="shrink-0 text-lg font-medium text-ui-text-muted transition-colors hover:text-ui-text-primary"
             >
               Clear filters
             </button>

@@ -1,32 +1,21 @@
 import ProgressBar from "../Default/ProgressBar";
+import { formatMediumDate } from "../../utils/dateFormat";
 
-const STATUS_STYLES = {
-  "Not Started": "bg-gray-100 text-gray-600 border-gray-200",
-  "Under Review": "bg-blue-50 text-blue-700 border-blue-200",
-  "Started": "bg-purple-50 text-purple-700 border-purple-200",
-  "In Development": "bg-amber-50 text-amber-700 border-amber-200",
-  "Completed": "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "Cancelled": "bg-red-50 text-red-700 border-red-200",
-};
-
-function formatDate(value) {
-  if (!value) return "—";
-  return new Date(value + "T00:00:00").toLocaleDateString("en-US");
-}
+import { PLANNING_STATUS_STYLES, STATUS_FALLBACK_STYLE } from "../../utils/planningStatus";
 
 export default function PlanningCard({ planning, checklist, onOpen }) {
   const statusClass =
-    STATUS_STYLES[planning.status] || "bg-gray-100 text-gray-600 border-gray-200";
+    PLANNING_STATUS_STYLES[planning.status] || STATUS_FALLBACK_STYLE;
   const total = checklist.length;
   const done = checklist.filter((i) => i.is_done).length;
 
   return (
     <button
       onClick={() => onOpen(planning)}
-      className="text-left bg-white rounded-lg border border-gray-200 p-4 flex flex-col justify-between gap-3 hover:border-accent-300 transition-colors"
+      className="text-left bg-ui-surface rounded-lg border border-ui-border p-4 flex flex-col justify-between gap-3 hover:border-accent-300 transition-colors"
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-medium text-gray-900 leading-snug">{planning.idea.name}</h3>
+        <h3 className="font-medium text-ui-text-primary leading-snug">{planning.idea.name}</h3>
         <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full border ${statusClass}`}>
           {planning.status}
         </span>
@@ -38,12 +27,12 @@ export default function PlanningCard({ planning, checklist, onOpen }) {
         </div>
       )}
 
-      <div className="pt-3 border-t border-gray-100 flex justify-between text-xs text-gray-500">
+      <div className="pt-3 border-t border-ui-border/60 flex justify-between text-xs text-ui-text-muted">
         <div>
-          <span>Start: {planning.start_date || "--"}</span>
+          <span>Start: {formatMediumDate(planning.start_date)}</span>
         </div>
         <div>
-          <span>End: {planning.due_date || "--"}</span>
+          <span>End: {formatMediumDate(planning.due_date)}</span>
         </div>
       </div>
     </button>

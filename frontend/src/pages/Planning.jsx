@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { planningApi } from "../services/planning";
 import { ideasApi } from "../services/ideas";
 import { categoriesApi } from "../services/categories";
@@ -8,35 +8,35 @@ import PlanningCard from "../components/Planning/PlanningCard";
 import PlanningFormPanel from "../components/Planning/PlanningFormPanel";
 import PlanningDetailPanel from "../components/Planning/PlanningDetailPanel";
 import IdeaFilterBar from "../components/Filters/IdeaFilterBar";
+import NotFoundMessage from "../components/Default/NotFoundMessage";
 import { useIdeaFilters } from "../hooks/useIdeaFilters";
+import { useGoBack } from "../hooks/useGoBack";
 import { matchesIdeaFilters } from "../utils/ideaFilters";
 
-export const STATUS_OPTIONS = [
-  "Not Started",
-  "Under Review",
-  "Started",
-  "In Development",
-  "Completed",
-  "Cancelled",
-];
+import { PLANNING_STATUS_OPTIONS } from "../utils/planningStatus";
 
+// D02: lista (/planning), criação (/planning/new) e detalhe (/planning/:id)
+// vêm da URL — voltar do navegador, F5 e links compartilhados funcionam.
 export default function Planning() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
+  const { planningId: planningParam } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { goBack, hasInternalHistory } = useGoBack("/planning");
 
-  // Quando um planning é aberto a partir de outra página (Dashboard, Cycles...),
-  // a origem chega em location.state.fromLabel. Fechar o detalhe volta pra lá.
-  const [originLabel] = useState(() => location.state?.fromLabel ?? null);
-  const [openedFromOrigin, setOpenedFromOrigin] = useState(false);
+  const isCreate = planningParam === "new";
+  const detailId = planningParam && !isCreate ? Number(planningParam) : null;
+  const invalidParam = Boolean(planningParam) && !isCreate && !Number.isInteger(detailId);
+
   const [plannings, setPlannings] = useState([]);
   const [ideas, setIdeas] = useState([]);
   const [categories, setCategories] = useState([]);
   const [owners, setOwners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [detailPlanning, setDetailPlanning] = useState(null);
+  // Planning buscado por id (GET /planning/{id}) quando a URL é aberta direto
+  // e a lista ainda não o contém.
+  const [fetchedPlanning, setFetchedPlanning] = useState(null);
+  const [notFound, setNotFound] = useState(false);
   const [activeTab, setActiveTab] = useState("All");
   const { filters, updateFilter, resetFilters, activeCount } = useIdeaFilters();
 
@@ -65,34 +65,31 @@ export default function Planning() {
     loadAll();
   }, []);
 
+  const listedPlanning = detailId ? plannings.find((p) => p.id === detailId) : null;
+  const detailPlanning =
+    listedPlanning ?? (fetchedPlanning?.id === detailId ? fetchedPlanning : null);
+
   useEffect(() => {
-    const planningIdParam = searchParams.get("planningId");
-    if (!planningIdParam || !plannings.length) return;
-
-    const planningId = Number(planningIdParam);
-    if (!Number.isFinite(planningId)) return;
-
-    const targetPlanning = plannings.find((planning) => planning.id === planningId);
-    if (!targetPlanning) return;
-
-    setDetailPlanning(targetPlanning);
-    setOpenedFromOrigin(true);
-    // replace: remove ?planningId sem criar entrada no histórico, senão o
-    // "voltar" cairia de novo em /planning?planningId=... e reabriria o detalhe.
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        next.delete("planningId");
-        return next;
-      },
-      { replace: true, state: location.state }
-    );
-  }, [searchParams, plannings, setSearchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+    setNotFound(false);
+    if (!detailId || listedPlanning) return undefined;
+    let cancelled = false;
+    planningApi
+      .get(detailId)
+      .then((planning) => !cancelled && setFetchedPlanning(planning))
+      .catch((err) => {
+        if (cancelled) return;
+        if (err.status === 404) setNotFound(true);
+        else setError(err.message || "It was not possible to load the planning.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [detailId, Boolean(listedPlanning)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const tabCounts = useMemo(() => {
     const base = plannings.filter((p) => matchesIdeaFilters(p.idea || {}, filters));
     const counts = { All: base.length };
-    for (const status of STATUS_OPTIONS) {
+    for (const status of PLANNING_STATUS_OPTIONS) {
       counts[status] = base.filter((p) => p.status === status).length;
     }
     return counts;
@@ -101,7 +98,7 @@ export default function Planning() {
   const tabs = useMemo(
     () => [
       { value: "All", label: "All", count: tabCounts.All },
-      ...STATUS_OPTIONS.map((status) => ({
+      ...PLANNING_STATUS_OPTIONS.map((status) => ({
         value: status,
         label: status,
         count: tabCounts[status],
@@ -134,24 +131,18 @@ export default function Planning() {
         idea.id === created.idea?.id ? { ...idea, execution_status: "In Planning" } : idea
       )
     );
-    setCreateOpen(false);
+    goBack();
   };
 
   const handleUpdated = (updated) => {
     setPlannings((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
-    setDetailPlanning(updated);
-  };
-
-  const goBackToOrigin = () => navigate(-1);
-
-  const handleCloseDetail = () => {
-    if (openedFromOrigin && originLabel) goBackToOrigin();
-    else setDetailPlanning(null);
+    setFetchedPlanning((current) => (current?.id === updated.id ? updated : current));
   };
 
   const handleDeleted = (planningId) => {
-    const removed = plannings.find((p) => p.id === planningId);
+    const removed = plannings.find((p) => p.id === planningId) ?? detailPlanning;
     setPlannings((prev) => prev.filter((p) => p.id !== planningId));
+    setFetchedPlanning(null);
     if (removed && removed.idea) {
       setIdeas((prev) =>
         prev.map((idea) =>
@@ -159,26 +150,39 @@ export default function Planning() {
         )
       );
     }
-    handleCloseDetail();
+    goBack();
   };
 
-  if (detailPlanning) {
+  if (invalidParam || (detailId && notFound)) {
+    return <NotFoundMessage title="Planning not found" listPath="/planning" listLabel="Planning" />;
+  }
+
+  if (detailId) {
+    if (!detailPlanning) {
+      return (
+        <div className="py-20 text-center text-ui-text-muted">
+          {error || "Loading planning..."}
+        </div>
+      );
+    }
     return (
       <PlanningDetailPanel
         planning={detailPlanning}
-        backLabel={openedFromOrigin && originLabel ? originLabel : "Planning"}
-        onClose={handleCloseDetail}
+        backLabel={hasInternalHistory ? "Back" : "Planning"}
+        onClose={goBack}
         onUpdated={handleUpdated}
         onDeleted={handleDeleted}
       />
     );
   }
 
-  if (createOpen) {
+  if (isCreate) {
     return (
       <PlanningFormPanel
         availableIdeas={availableIdeas}
-        onClose={() => setCreateOpen(false)}
+        initialIdeaId={searchParams.get("ideaId") || ""}
+        backLabel={hasInternalHistory ? "Back" : "Planning"}
+        onClose={goBack}
         onSubmit={handleCreate}
       />
     );
@@ -199,7 +203,7 @@ export default function Planning() {
           </div>
         </header>
         <button
-          onClick={() => setCreateOpen(true)}
+          onClick={() => navigate("/planning/new")}
           className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-800 shrink-0"
         >
           + New Planning
@@ -217,17 +221,17 @@ export default function Planning() {
       />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md p-3 mb-4">
+        <div className="bg-status-red-bg border border-status-red-border text-status-red-fg text-sm rounded-md p-3 mb-4">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 h-96 flex items-center justify-center text-gray-400">
+        <div className="bg-ui-surface rounded-lg border border-ui-border p-4 h-96 flex items-center justify-center text-ui-text-muted">
           Loading plannings...
         </div>
       ) : filteredPlannings.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 h-96 flex items-center justify-center text-gray-400">
+        <div className="bg-ui-surface rounded-lg border border-ui-border p-4 h-96 flex items-center justify-center text-ui-text-muted">
           No planning found with the current filters.
         </div>
       ) : (
@@ -237,7 +241,7 @@ export default function Planning() {
               key={planning.id}
               planning={planning}
               checklist={planning.checklist_items}
-              onOpen={setDetailPlanning}
+              onOpen={(planning) => navigate(`/planning/${planning.id}`)}
             />
           ))}
         </div>

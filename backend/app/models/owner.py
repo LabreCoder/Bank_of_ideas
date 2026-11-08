@@ -6,5 +6,5 @@ from database.connection import Base
 class Owner(Base):
     __tablename__ = "owner"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)

@@ -4,10 +4,10 @@ import { useSound } from "../context/SoundContext";
 // Arquivos em public/ são servidos a partir da RAIZ do site pelo Vite —
 // o caminho é absoluto (/audio/...), nunca relativo ao arquivo JS
 // (../../public/audio/... nunca vai resolver certo).
+// Só faixas locais: nada de CDN externo (pode sair do ar e não funciona sem internet).
 const SOUNDS = {
-  piano: "../../public/audio/piano.mp3",
-  lofi: "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3",
-  soft: "../../public/audio/soft.mp3",
+  piano: "/audio/piano.mp3",
+  soft: "/audio/soft.mp3",
 };
 
 export default function AmbientAudio() {

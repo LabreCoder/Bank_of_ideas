@@ -1,6 +1,12 @@
 // Funções puras que transformam os dados da API nos números do Dashboard.
 // Ficam fora dos componentes pra que cada bloco só receba o que vai exibir.
-import { addDays, dateKeyToLocalDate, localDateToKey, startOfDay } from "./calendar";
+//
+// REGRA (C06): o Dashboard só considera ideias ATIVAS. Ideias inativas e os
+// plannings delas são removidos num único ponto, `filterByCycle`, antes de
+// qualquer cálculo — assim funil, categorias, KPIs (inclusive % do checklist),
+// próximos dias, calendário e tabela de projetos usam o mesmo conjunto.
+import { addDays, dateKeyToLocalDate, localDateToKey, startOfDay } from "./calendar.js";
+import { formatShortDate } from "./dateFormat.js";
 
 export const CYCLE_FILTER_ALL = "all";
 export const CYCLE_FILTER_NONE = "none";
@@ -39,7 +45,12 @@ export function isOpenPlanning(planning) {
 // - "none":  plannings sem nenhum cycle + ideias Free.
 // - <id>:    só os plannings daquele cycle e as ideias deles. Ideias Free não
 //            pertencem a nenhum cycle, então ficam de fora.
-export function filterByCycle(ideas, plannings, cycles, cycleFilter) {
+//
+// Antes do filtro de cycle, ideias inativas e seus plannings saem (ver REGRA no topo).
+export function filterByCycle(allIdeas, allPlannings, cycles, cycleFilter) {
+  const ideas = allIdeas.filter((idea) => idea.is_active !== false);
+  const plannings = allPlannings.filter((p) => p.idea?.is_active !== false);
+
   if (cycleFilter === CYCLE_FILTER_ALL) return { ideas, plannings };
 
   if (cycleFilter === CYCLE_FILTER_NONE) {
@@ -110,12 +121,10 @@ export function getUpcomingDays(plannings, today = new Date()) {
   });
 }
 
+// Mantido por compatibilidade com quem importa daqui; a formatação em si
+// fica em dateFormat.js (D05).
 export function formatDueLabel(dateKey) {
-  if (!dateKey) return "No due date";
-  return dateKeyToLocalDate(dateKey).toLocaleDateString("en-US", {
-    month: "short",
-    day: "2-digit",
-  });
+  return formatShortDate(dateKey);
 }
 
 export function isOverdue(planning, today = new Date()) {

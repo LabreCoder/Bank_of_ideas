@@ -12,17 +12,22 @@ from models.checklist import PlanningChecklistItem
 class Planning(Base):
     __tablename__ = "planning"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     idea_id = Column(Integer, ForeignKey("idea.id"), nullable=False, unique=True)
     details = Column(Text, nullable=True)
     start_date = Column(Date, nullable=True)
     due_date = Column(Date, nullable=True)
-    status = Column(String, nullable=False, default="Not Started")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    status = Column(String, nullable=False, default="Not Started", server_default="Not Started")
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     idea = relationship("Idea", back_populates="planning")
     checklist_items = relationship(
         "PlanningChecklistItem",
         back_populates="planning",
         cascade="all, delete-orphan",
+    )
+    # N:N com Cycle (tabela cycle_planning). String "cycle_planning" resolvida
+    # pelo nome da tabela no metadata; Cycle é registrado em models/__init__.py.
+    cycles = relationship(
+        "Cycle", secondary="cycle_planning", back_populates="plannings"
     )

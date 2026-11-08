@@ -4,14 +4,13 @@
 # python cache files
 __pycache__
 *.pyc
-.vite
 
-.gitignore
-*.txt
+# node / vite
+node_modules/
+dist/
+.vite
+frontend/.vite/
 
 # postman files
 *.postman
 *postman*
-
-# .github files
-.github

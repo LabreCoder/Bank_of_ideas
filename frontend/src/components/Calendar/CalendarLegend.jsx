@@ -14,8 +14,8 @@ export default function CalendarLegend({ view = "month" }) {
   const legendItems = view === "month" ? MONTH_LEGEND_ITEMS : WEEK_DAY_LEGEND_ITEMS;
 
   return (
-    <div className="flex items-center gap-4 text-xs text-gray-500">
-      <span className="font-medium text-gray-600">Legend:</span>
+    <div className="flex items-center gap-4 text-xs text-ui-text-muted">
+      <span className="font-medium text-ui-text-secondary">Legend:</span>
       {legendItems.map((item) => (
         <div key={item.label} className="flex items-center gap-1.5">
           <span className={`w-3 h-3 rounded-sm ${item.className}`} />

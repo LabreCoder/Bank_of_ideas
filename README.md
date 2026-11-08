@@ -92,34 +92,88 @@ The system is split into four core areas:
 
 ### Environment variables
 
-Create a `.env` file in the project root:
+Copy the example file and set your own password:
+
+```bash
+cp .env.example .env
+```
 
 ```env
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_NAME=content_planner
-DB_HOST=your_host
-DB_PORT=your_port
+DB_USER=bank_user
+DB_PASSWORD=change_me
+DB_NAME=bank_db
+DB_HOST=db        # name of the Postgres service in docker-compose.yml
+DB_PORT=5432      # internal Postgres port (inside the Docker network)
 ```
+
+`DB_HOST` and `DB_PORT` are used by the API **inside** Docker, so they must point to the `db` service and port `5432`.
 
 ### Running the project
 
 ```bash
 # Clone the repository
-git clone https://github.com/LabreCoder/content-planner.git
-cd content-planner
+git clone https://github.com/LabreCoder/Bank_of_ideas.git
+cd Bank_of_ideas
 
 # Build and start all services (database, API, and frontend)
 docker compose up --build
 ```
+
+The schema in `database/schema.sql` is applied automatically only the first time the database volume is created. Optional sample data lives in `database/seeds.sql` (enable the commented line in `docker-compose.yml` **before** the first start).
+
+### Database migrations (Alembic)
+
+`database/schema.sql` is the **baseline** (Alembic revision `0001_baseline`). Every later database change is an Alembic revision in `backend/app/migrations/versions/`, applied automatically when the `api` container starts (`alembic upgrade head`). Useful commands:
+
+```bash
+docker compose exec api alembic current
+docker compose exec api alembic revision --autogenerate -m "describe the change"
+docker compose exec api alembic upgrade head
+docker compose exec api alembic check   # models vs database: no pending differences?
+```
+
+`database/migrations/001_timestamptz.sql` is a one-off SQL script from before Alembic (already part of the baseline).
 
 Once everything is up:
 
 | Service | URL | Purpose |
 |---|---|---|
 | Frontend | http://localhost:5173 | The actual web app UI |
-| API | http://localhost:8000 | Backend REST API |
+| API (via frontend proxy) | http://localhost:5173/api/... | What the browser calls (no fixed API URL, no CORS needed) |
+| API (direct) | http://localhost:8000 | Backend REST API |
 | API Docs | http://localhost:8000/docs | Interactive Swagger UI |
+
+All ports are published on **127.0.0.1 only** (database, API and frontend): the API has no authentication yet, so it is not reachable from other machines on the network. The frontend's Vite dev server proxies `/api/*` to the `api` service (see `frontend/vite.config.js`). Extra CORS origins for direct API calls can be set with `CORS_ORIGINS` (comma-separated) in `.env`.
+
+### Running the backend tests
+
+Tests run inside the `api` container (pytest and httpx are installed in the dev image via `backend/requirements-dev.txt`):
+
+```bash
+docker compose exec api pytest -q
+```
+
+The tests use a **separate database** named `<DB_NAME>_test`, created automatically in the same `db` container. Tables are created from the SQLAlchemy models and truncated after each test — the main database is never touched. Test files live in `backend/tests/`.
+
+Frontend utility tests (pure functions in `src/utils/`, Node's built-in test runner, no extra dependencies):
+
+```bash
+docker compose exec frontend npm test
+```
+
+### Production profile
+
+`docker-compose.prod.yml` builds the frontend as static files served by **nginx** (with the same `/api` proxy) and runs the API without `--reload`, with workers and without test tools. It uses its **own** project, containers and database volume (`bank_of_ideas_prod_*`), so it never touches the development database.
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+The app is served at http://127.0.0.1:8080 (set `WEB_BIND` / `WEB_PORT` / `UVICORN_WORKERS` in `.env` to change). The database port is not published.
+
+> ⚠️ The API has no authentication yet. Only set `WEB_BIND=0.0.0.0` (reachable from other machines) on a trusted network.
+
+To stop it (data is kept in the volume): `docker compose -f docker-compose.prod.yml down`.
 
 ---
 

@@ -11,7 +11,8 @@ from services import planning_service
 router = APIRouter(prefix="/planning", tags=["Planning"])
 
 
-@router.get("/plannings", response_model=List[PlanningResponse])
+@router.get("/", response_model=List[PlanningResponse])
+@router.get("/plannings", response_model=List[PlanningResponse], deprecated=True)  # alias antigo (B09)
 def list_planning(db: Session = Depends(get_db)):
     return planning_service.list_plannings(db)
 
