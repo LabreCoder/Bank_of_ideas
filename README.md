@@ -161,6 +161,20 @@ Frontend utility tests (pure functions in `src/utils/`, Node's built-in test run
 docker compose exec frontend npm test
 ```
 
+### Production profile
+
+`docker-compose.prod.yml` builds the frontend as static files served by **nginx** (with the same `/api` proxy) and runs the API without `--reload`, with workers and without test tools. It uses its **own** project, containers and database volume (`bank_of_ideas_prod_*`), so it never touches the development database.
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+The app is served at http://127.0.0.1:8080 (set `WEB_BIND` / `WEB_PORT` / `UVICORN_WORKERS` in `.env` to change). The database port is not published.
+
+> ⚠️ The API has no authentication yet. Only set `WEB_BIND=0.0.0.0` (reachable from other machines) on a trusted network.
+
+To stop it (data is kept in the volume): `docker compose -f docker-compose.prod.yml down`.
+
 ---
 
 ## 📡 API Examples
