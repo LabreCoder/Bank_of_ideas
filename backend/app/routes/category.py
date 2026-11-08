@@ -33,5 +33,5 @@ def update_category_info(
 
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete(category_id: int, db: Session = Depends(get_db)):
+def delete_category(category_id: int, db: Session = Depends(get_db)):
     category_service.delete_category(db, category_id)

@@ -7,6 +7,15 @@
 // direto aqui — sempre quebramos a string em ano/mês/dia e construímos a
 // data manualmente com `new Date(year, month, day)`, que é sempre local.
 
+import {
+  formatLongDate,
+  formatMediumDate,
+  formatMonthYear,
+  formatShortDate,
+  getMonthLabels,
+  getWeekdayLabels,
+} from "./dateFormat.js";
+
 export function dateKeyToLocalDate(dateKey) {
   const [year, month, day] = dateKey.split("-").map(Number);
   return new Date(year, month - 1, day);
@@ -44,39 +53,25 @@ export function shiftAnchorDate(anchorDate, view, direction) {
   if (view === "day") return addDays(anchorDate, direction);
   if (view === "week") return addDays(anchorDate, direction * 7);
 
-  const next = new Date(anchorDate);
-  next.setMonth(next.getMonth() + direction);
-  return next;
+  // Visão mensal: `setMonth` sobre um dia 29–31 transborda para o mês seguinte
+  // (31/jan + 1 mês = 3/mar). Montamos a data no mês de destino e limitamos o
+  // dia ao último dia desse mês, preservando o dia quando ele existe (útil ao
+  // voltar para as visões de dia/semana).
+  const year = anchorDate.getFullYear();
+  const targetMonth = anchorDate.getMonth() + direction;
+  const lastDayOfTarget = new Date(year, targetMonth + 1, 0).getDate();
+  return new Date(year, targetMonth, Math.min(anchorDate.getDate(), lastDayOfTarget));
 }
 
 export function getPeriodLabel(anchorDate, view) {
-  if (view === "day") {
-    return anchorDate.toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
-  }
+  if (view === "day") return formatLongDate(anchorDate);
 
   if (view === "week") {
     const weekDates = getWeekDates(anchorDate);
-    const start = weekDates[0];
-    const end = weekDates[6];
-
-    const startLabel = start.toLocaleDateString("en-US", {
-      month: "short",
-      day: "2-digit",
-    });
-    const endLabel = end.toLocaleDateString("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    });
-
-    return `${startLabel} - ${endLabel}`;
+    return `${formatShortDate(weekDates[0])} - ${formatMediumDate(weekDates[6])}`;
   }
 
-  return `${MONTH_LABELS[anchorDate.getMonth()]} ${anchorDate.getFullYear()}`;
+  return formatMonthYear(anchorDate);
 }
 
 // Gera a matriz de semanas (arrays de 7 dias) pro mês informado, incluindo
@@ -117,9 +112,7 @@ export function isToday(date) {
   );
 }
 
-export const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+// Rótulos no locale da interface (APP_LOCALE em dateFormat.js).
+export const WEEKDAY_LABELS = getWeekdayLabels("short");
 
-export const MONTH_LABELS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
+export const MONTH_LABELS = getMonthLabels("long");

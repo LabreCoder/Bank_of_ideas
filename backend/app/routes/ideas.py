@@ -9,7 +9,8 @@ from services import idea_services
 
 router = APIRouter(prefix="/ideas", tags=["Ideas"])
 
-@router.get("/list", response_model=List[IdeaResponse])
+@router.get("/", response_model=List[IdeaResponse])
+@router.get("/list", response_model=List[IdeaResponse], deprecated=True)  # alias antigo (B09)
 def list_ideas(
     active: Optional[bool] = Query(default=None, description="Filter by active status"),
     db: Session = Depends(get_db),

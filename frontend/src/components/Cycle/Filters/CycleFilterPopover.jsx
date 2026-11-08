@@ -7,7 +7,7 @@ import { FILTER_FIELD_CLASS } from "../../Filters/filterStyles";
 
 const FIELD_CLASS = `w-full ${FILTER_FIELD_CLASS}`;
 const LABEL_CLASS =
-  "block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1";
+  "block text-xs font-semibold uppercase tracking-wide text-ui-text-muted mb-1";
 
 export default function CycleFilterPopover({ filters, onChange, onClose, anchorRef }) {
   const panelRef = useRef(null);
@@ -35,7 +35,7 @@ export default function CycleFilterPopover({ filters, onChange, onClose, anchorR
       ref={panelRef}
       role="dialog"
       aria-label="Cycle filters"
-      className="absolute right-0 top-full z-20 mt-2 w-[min(92vw,22rem)] space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg"
+      className="absolute right-0 top-full z-20 mt-2 w-[min(92vw,22rem)] space-y-4 rounded-lg border border-ui-border bg-ui-surface p-4 shadow-lg"
     >
       <div>
         <label htmlFor="cycle-filter-deadline" className={LABEL_CLASS}>
@@ -85,7 +85,7 @@ export default function CycleFilterPopover({ filters, onChange, onClose, anchorR
             />
           </div>
         </div>
-        <p className="mt-1 text-xs text-gray-400">
+        <p className="mt-1 text-xs text-ui-text-muted">
           Cycles whose dates overlap this range.
         </p>
       </div>
@@ -130,7 +130,7 @@ export default function CycleFilterPopover({ filters, onChange, onClose, anchorR
               filters.sortDir === "asc" ? "Ascending order" : "Descending order"
             }
             title={filters.sortDir === "asc" ? "Ascending" : "Descending"}
-            className="shrink-0 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-600 hover:bg-gray-50"
+            className="shrink-0 rounded-md border border-ui-border bg-ui-surface px-3 text-sm text-ui-text-secondary hover:bg-ui-surface-2"
           >
             {filters.sortDir === "asc" ? "↑" : "↓"}
           </button>

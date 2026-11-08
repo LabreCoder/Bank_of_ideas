@@ -1,0 +1,14 @@
+# E03: imagem de produção do frontend (multi-stage).
+# 1) build estático com as mesmas versões do package-lock.json
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# 2) servir o build com nginx (SPA + proxy /api -> api:8000)
+FROM nginx:1.27-alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80

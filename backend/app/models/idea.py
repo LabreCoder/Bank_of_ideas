@@ -4,7 +4,7 @@
 # (like the old VALID_STATUS check) now belongs in the Pydantic schemas
 # (see schemas/idea.py), since that's what FastAPI actually uses to
 # validate incoming requests. This class's only job is persistence.
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database.connection import Base
@@ -13,13 +13,13 @@ from database.connection import Base
 class Idea(Base):
     __tablename__ = "idea"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(200), nullable=False)  # VARCHAR(200) — migração Alembic 0002
     description = Column(String(200), nullable=True)
     category_id = Column(Integer, ForeignKey("category.id"), nullable=True)
     owner_id = Column(Integer, ForeignKey("owner.id"), nullable=False)
-    is_active = Column(Boolean, nullable=False, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    is_active = Column(Boolean, nullable=False, default=True, server_default=text("true"))
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     # Simplified for now: there's no authentication system yet, so this
     # just mirrors owner_id at creation time. Once auth exists, point
     # this at a real "logged in user" instead.

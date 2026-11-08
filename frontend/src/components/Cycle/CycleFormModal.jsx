@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { cycleApi } from "../../services/cycle";
 import DetailModal from "../Default/DetailModal";
 
 export default function CycleFormModal({ onClose, onCreated }) {
+  const fieldId = useId(); // D10: liga <label htmlFor> aos campos
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -11,6 +12,9 @@ export default function CycleFormModal({ onClose, onCreated }) {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const titleId = useId();
+  // D03: fechar com algo preenchido pede confirmação.
+  const dirty = Object.values(form).some((value) => String(value).trim() !== "");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,61 +43,61 @@ export default function CycleFormModal({ onClose, onCreated }) {
   };
 
   return (
-    <DetailModal onClose={onClose}>
-        <h3 className="text-lg font-semibold mb-4">New Cycle</h3>
+    <DetailModal onClose={onClose} labelledBy={titleId} dirty={dirty}>
+        <h3 id={titleId} className="text-lg font-semibold mb-4">New Cycle</h3>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-            <input
+            <label htmlFor={`${fieldId}-name`} className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
+            <input id={`${fieldId}-name`}
               type="text"
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="e.g. Q3 2026 Deliverables"
-              className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+              className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
+            <label htmlFor={`${fieldId}-description`} className="block text-sm font-medium text-ui-text-secondary mb-1">Description</label>
+            <textarea id={`${fieldId}-description`}
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               rows={3}
               placeholder="Cycle goals and context..."
-              className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+              className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-              <input
+              <label htmlFor={`${fieldId}-start-date`} className="block text-sm font-medium text-ui-text-secondary mb-1">Start Date</label>
+              <input id={`${fieldId}-start-date`}
                 type="date"
                 value={form.start_date}
                 onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
-                className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Due Date (Optional)</label>
-              <input
+              <label htmlFor={`${fieldId}-due-date`} className="block text-sm font-medium text-ui-text-secondary mb-1">Due Date (Optional)</label>
+              <input id={`${fieldId}-due-date`}
                 type="date"
                 value={form.due_date}
                 onChange={(e) => setForm((f) => ({ ...f, due_date: e.target.value }))}
-                className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
               />
             </div>
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-status-red-fg">{error}</p>}
 
           <div className="flex justify-end gap-2 mt-2">
             <button
               type="button"
               onClick={onClose}
-              className="text-sm font-medium px-4 py-2 rounded-md text-gray-600 hover:bg-gray-100"
+              className="text-sm font-medium px-4 py-2 rounded-md text-ui-text-secondary hover:bg-ui-surface-2"
             >
               Cancel
             </button>

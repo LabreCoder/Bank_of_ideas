@@ -1,4 +1,8 @@
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { friendlyValidationMessage } from "../utils/validationMessages.js";
+
+// E01: por padrão chama /api no próprio frontend (proxy do Vite em dev, nginx
+// em produção). VITE_API_URL continua permitindo apontar para outra API.
+const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -18,14 +22,9 @@ async function request(path, options = {}) {
     // FastAPI manda 422 de validação como lista de { loc, msg }.
     let message;
     if (typeof detail === "string") {
-      message = detail;
+      message = detail.replace(/^Value error, /, "");
     } else if (Array.isArray(detail)) {
-      message = detail
-        .map((d) => {
-          const field = Array.isArray(d.loc) ? d.loc.filter((p) => p !== "body").join(".") : "";
-          return field ? `${field}: ${d.msg}` : d.msg;
-        })
-        .join("; ");
+      message = detail.map(friendlyValidationMessage).join(" ");
     } else {
       message = detail?.message || JSON.stringify(detail);
     }

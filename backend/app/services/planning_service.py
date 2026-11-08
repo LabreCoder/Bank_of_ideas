@@ -1,11 +1,14 @@
 from typing import List
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
+
+from services._loading import planning_load_options
 
 from models.planning import Planning, PlanningChecklistItem
 from models.idea import Idea
 from schemas.planning import PlanningCreate, PlanningUpdate, PlanningResponse
+from services.cycle_service import find_cycle_conflicts_for_planning_due
 
 
 def _serialize(planning: Planning) -> PlanningResponse:
@@ -16,7 +19,7 @@ def _serialize(planning: Planning) -> PlanningResponse:
 def _get_or_404(db: Session, planning_id: int) -> Planning:
     planning = (
         db.query(Planning)
-        .options(joinedload(Planning.idea), joinedload(Planning.checklist_items))
+        .options(*planning_load_options())
         .filter(Planning.id == planning_id)
         .first()
     )
@@ -30,7 +33,7 @@ def _get_or_404(db: Session, planning_id: int) -> Planning:
 def list_plannings(db: Session) -> List[PlanningResponse]:
     plannings = (
         db.query(Planning)
-        .options(joinedload(Planning.idea), joinedload(Planning.checklist_items))
+        .options(*planning_load_options())
         .order_by(Planning.created_at.desc())
         .all()
     )
@@ -86,6 +89,26 @@ def update_planning(
         updates["status"] = updates["status"].value if hasattr(updates["status"], "value") else updates["status"]
 
     checklist_payload = updates.pop("checklist_items", None)
+
+    # Datas efetivas = payload quando enviado, senão o valor já gravado.
+    new_start = updates["start_date"] if "start_date" in updates else planning.start_date
+    new_due = updates["due_date"] if "due_date" in updates else planning.due_date
+    if new_start and new_due and new_due < new_start:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="due_date cannot be earlier than start_date",
+        )
+
+    if "due_date" in updates and new_due != planning.due_date:
+        conflicts = find_cycle_conflicts_for_planning_due(planning, new_due)
+        if conflicts:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "message": " ".join(c["message"] for c in conflicts),
+                    "conflicts": conflicts,
+                },
+            )
 
     for field, value in updates.items():
         setattr(planning, field, value)

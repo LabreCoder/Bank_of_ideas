@@ -71,7 +71,7 @@ export default function ProjectsTable({ rows, colorMap, onOpenPlanning }) {
                     </div>
 
                     <span
-                      className={`font-mono text-xs ${overdue ? "text-rose-500" : "text-ui-text-secondary"}`}
+                      className={`font-mono text-xs ${overdue ? "text-status-rose-fg" : "text-ui-text-secondary"}`}
                     >
                       {formatDueLabel(row.planning.due_date)}
                     </span>

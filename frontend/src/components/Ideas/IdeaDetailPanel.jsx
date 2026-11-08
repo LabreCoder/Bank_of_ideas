@@ -1,29 +1,65 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
+import { Link } from "react-router-dom";
+
+export const IDEA_DESCRIPTION_MAX = 200; // VARCHAR(200) no banco
+export const IDEA_NAME_MAX = 200; // VARCHAR(200) no banco (migração Alembic 0002)
+
+// D07: ideia sem planning ganha uma ação direta, em vez de só um aviso.
+function NoPlanningState({ idea, loaded }) {
+  if (!loaded) return <p className="text-sm text-ui-text-muted mt-2">Loading planning…</p>;
+  return (
+    <div className="mt-2 rounded-lg border border-dashed border-ui-border p-6 text-center">
+      <h2 className="text-lg font-semibold text-ui-text-primary">Planning</h2>
+      <p className="mt-1 text-sm text-ui-text-muted">This idea does not have a planning yet.</p>
+      {idea.is_active ? (
+        <Link
+          to={`/planning/new?ideaId=${idea.id}`}
+          className="mt-4 inline-block rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700"
+        >
+          + Create planning
+        </Link>
+      ) : (
+        <p className="mt-3 text-xs text-ui-text-muted">Activate the idea to create a planning for it.</p>
+      )}
+    </div>
+  );
+}
+
+const SAVE_STATE_LABELS = {
+  saving: { text: "Saving…", className: "text-ui-text-muted" },
+  saved: { text: "Saved", className: "text-status-emerald-fg" },
+  error: { text: "Not saved", className: "text-status-red-fg" },
+};
 import { ideasApi } from "../../services/ideas";
 import { checklistApi } from "../../services/checklist";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 
-const IDEA_STATUS_STYLES = {
-  Free: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "In Planning": "bg-indigo-50 text-indigo-700 border-indigo-200",
-};
+import { IDEA_STATUS_STYLES, STATUS_FALLBACK_STYLE } from "../../utils/ideaStatus";
 
 export default function IdeaDetail({
   idea,
   planning,
   categories,
   owners,
+  backLabel = "Ideas",
   onClose,
   onUpdated,
   onToggleActive,
+  planningsLoaded = true,
   onPlanningUpdated,
 }) {
+  const fieldId = useId(); // D10: liga <label htmlFor> aos campos
   const [name, setName] = useState(idea.name);
   const [description, setDescription] = useState(idea.description || "");
   const [categoryId, setCategoryId] = useState(idea.category?.id ?? "");
   const [ownerId, setOwnerId] = useState(idea.owner.id);
   const [newItem, setNewItem] = useState("");
+  const [newItemDue, setNewItemDue] = useState("");
   const [error, setError] = useState(null);
+  // D06: feedback do autosave — "idle" | "saving" | "saved" | "error".
+  const [saveState, setSaveState] = useState("idle");
+  const savedTimer = useRef(null);
+  const pendingSaves = useRef(0);
 
   useEffect(() => {
     setName(idea.name);
@@ -32,45 +68,76 @@ export default function IdeaDetail({
     setOwnerId(idea.owner.id);
   }, [idea]);
 
-  const saveField = async (patch) => {
+  useEffect(() => () => clearTimeout(savedTimer.current), []);
+
+  // Salva um campo; em erro, `revert` devolve o campo ao valor gravado.
+  const saveField = async (patch, revert) => {
     setError(null);
+    clearTimeout(savedTimer.current);
+    pendingSaves.current += 1;
+    setSaveState("saving");
     try {
       const updated = await ideasApi.update(idea.id, patch);
       onUpdated(updated);
+      pendingSaves.current -= 1;
+      if (pendingSaves.current === 0) {
+        setSaveState("saved");
+        savedTimer.current = setTimeout(() => setSaveState("idle"), 2500);
+      }
     } catch (err) {
+      pendingSaves.current -= 1;
+      setSaveState("error");
+      revert?.();
       setError(err.message || "It was not possible to update the idea.");
     }
   };
 
-  const statusClass = IDEA_STATUS_STYLES[idea.execution_status] || "bg-gray-100 text-gray-600 border-gray-200";
+  const statusClass = IDEA_STATUS_STYLES[idea.execution_status] || STATUS_FALLBACK_STYLE;
 
   const handleNameBlur = () => {
     const trimmed = name.trim();
-    if (trimmed && trimmed !== idea.name) saveField({ name: trimmed });
+    if (!trimmed) {
+      // Nome não pode ficar vazio: volta ao valor salvo em vez de deixar o
+      // campo em branco na tela sem gravar nada.
+      setName(idea.name);
+      setError("The name can't be empty — the previous name was restored.");
+      return;
+    }
+    if (trimmed !== idea.name) saveField({ name: trimmed }, () => setName(idea.name));
+    else if (trimmed !== name) setName(trimmed);
   };
 
   const handleDescriptionBlur = () => {
     const trimmed = description.trim() || null;
-    if (trimmed !== (idea.description || null)) saveField({ description: trimmed });
+    if (trimmed !== (idea.description || null)) {
+      saveField({ description: trimmed }, () => setDescription(idea.description || ""));
+    }
   };
 
   const handleCategoryChange = (value) => {
     setCategoryId(value);
-    saveField({ category_id: value ? Number(value) : null });
+    saveField({ category_id: value ? Number(value) : null }, () =>
+      setCategoryId(idea.category?.id ?? "")
+    );
   };
 
   const handleOwnerChange = (value) => {
     setOwnerId(value);
-    saveField({ owner_id: Number(value) });
+    saveField({ owner_id: Number(value) }, () => setOwnerId(idea.owner.id));
   };
   
   const handleAddItem = async () => {
     if (!newItem.trim() || !planning) return;
     setError(null);
     try {
-      const updated = await checklistApi.addChecklistItem(planning.id, newItem.trim());
+      // D07: mesmo formulário do detalhe do planning (descrição + data opcional).
+      const updated = await checklistApi.addChecklistItem(planning.id, {
+        description: newItem.trim(),
+        due_date: newItemDue || null,
+      });
       onPlanningUpdated(updated);
       setNewItem("");
+      setNewItemDue("");
     } catch (err) {
       setError(err.message || "It was not possible to add the item.");
     }
@@ -93,62 +160,90 @@ export default function IdeaDetail({
   return (
     <div className="animate-fade-in w-full pb-10">
       {/* Top Navigation */}
-      <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <button onClick={onClose} className="hover:text-gray-900">&larr; Ideas</button>
+      <div className="flex items-center gap-2 text-sm text-ui-text-muted mb-6">
+        <button onClick={onClose} className="hover:text-ui-text-primary">&larr; {backLabel}</button>
         <span>/</span>
-        <span className="text-gray-900">{idea.name}</span>
+        <span className="text-ui-text-primary">{idea.name}</span>
       </div>
 
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{idea.name}</h1>
-          <p className="text-gray-500 mt-1">Idea details and planning, together in one place.</p>
+          <h1 className="text-3xl font-bold text-ui-text-primary">{idea.name}</h1>
+          <p className="text-ui-text-muted mt-1">Idea details and planning, together in one place.</p>
         </div>
-        <button onClick={onClose} className="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
+        <button onClick={onClose} className="text-sm font-medium text-ui-text-secondary hover:text-ui-text-primary flex items-center gap-2">
           ✕ Close
         </button>
       </div>
 
       {/* Main Container */}
-      <div className="bg-white border border-gray-200 rounded-xl p-8 flex flex-col md:flex-row gap-12">
+      <div className="bg-ui-surface border border-ui-border rounded-xl p-8 flex flex-col md:flex-row gap-12">
         
         {/* Left Column: Idea Details */}
         <div className="flex-1 flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">Idea</h2>
+            <div className="flex items-baseline gap-3">
+              <h2 className="text-lg font-semibold text-ui-text-primary">Idea</h2>
+              {/* aria-live: leitores de tela anunciam "Saving…/Saved" */}
+              <span
+                role="status"
+                aria-live="polite"
+                className={`text-xs ${SAVE_STATE_LABELS[saveState]?.className ?? ""}`}
+              >
+                {SAVE_STATE_LABELS[saveState]?.text ?? ""}
+              </span>
+            </div>
             <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${statusClass}`}>
               {idea.execution_status}
             </span>
           </div>
+          <p className="text-xs text-ui-text-muted -mt-4 mb-4">Changes are saved automatically.</p>
+
+          {error && (
+            <p role="alert" className="text-sm text-status-red-fg mb-4">
+              {error}
+            </p>
+          )}
 
           <div className="flex flex-col gap-4 flex-grow">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-              <input
+              <label htmlFor={`${fieldId}-name`} className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
+              <input id={`${fieldId}-name`}
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onBlur={handleNameBlur}
-                className="w-full text-sm border border-gray-200 rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                maxLength={IDEA_NAME_MAX}
+                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-              <textarea
+              <div className="flex items-baseline justify-between mb-1">
+                <label htmlFor={`${fieldId}-description`} className="block text-sm font-medium text-ui-text-secondary">Description</label>
+                <span
+                  className={`text-xs tabular-nums ${
+                    description.length >= IDEA_DESCRIPTION_MAX ? "text-status-amber-fg" : "text-ui-text-muted"
+                  }`}
+                >
+                  {description.length}/{IDEA_DESCRIPTION_MAX}
+                </span>
+              </div>
+              <textarea id={`${fieldId}-description`}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onBlur={handleDescriptionBlur}
+                maxLength={IDEA_DESCRIPTION_MAX}
                 rows={8}
-                className="w-full text-sm border border-gray-200 rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 resize-none"
+                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 resize-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-              <select
+              <label htmlFor={`${fieldId}-category`} className="block text-sm font-medium text-ui-text-secondary mb-1">Category</label>
+              <select id={`${fieldId}-category`}
                 value={categoryId}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
               >
                 <option value="">No category</option>
                 {categories.map((c) => (
@@ -157,11 +252,11 @@ export default function IdeaDetail({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Owner</label>
-              <select
+              <label htmlFor={`${fieldId}-owner`} className="block text-sm font-medium text-ui-text-secondary mb-1">Owner</label>
+              <select id={`${fieldId}-owner`}
                 value={ownerId}
                 onChange={(e) => handleOwnerChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
               >
                 {owners.map((o) => (
                   <option key={o.id} value={o.id}>{o.name}</option>
@@ -171,63 +266,77 @@ export default function IdeaDetail({
           </div>
 
           <div className="mt-8 pt-4">
-            <button onClick={() => onToggleActive(idea)} className="text-sm font-medium text-red-500 hover:text-red-600">
+            <button
+              onClick={() => onToggleActive(idea)}
+              className={`text-sm font-medium hover:underline ${
+                idea.is_active ? "text-status-red-fg" : "text-status-emerald-fg"
+              }`}
+            >
               {idea.is_active ? "Deactivate" : "Activate"}
             </button>
           </div>
         </div>
 
         {/* Vertical Divider (Desktop) */}
-        <div className="hidden md:block w-px bg-gray-100 -my-8"></div>
+        <div className="hidden md:block w-px bg-ui-surface-2 -my-8"></div>
 
         {/* Right Column: Planning */}
         <div className="flex-1 flex flex-col">
           {!planning ? (
-            <p className="text-sm text-gray-400 mt-2">This idea does not have a planning yet.</p>
+            <NoPlanningState idea={idea} loaded={planningsLoaded} />
           ) : (
             <>
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">Planning</h2>
-                <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${PLANNING_STATUS_STYLES[planning.status] || "bg-gray-100 text-gray-600 border-gray-200"}`}>
+                <h2 className="text-lg font-semibold text-ui-text-primary">Planning</h2>
+                <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${PLANNING_STATUS_STYLES[planning.status] || STATUS_FALLBACK_STYLE}`}>
                   {planning.status}
                 </span>
               </div>
 
               <div className="mb-6">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Planning Description</p>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{planning.details || "--"}</p>
+                <p className="text-xs font-medium text-ui-text-muted uppercase tracking-wide mb-2">Planning Description</p>
+                <p className="text-sm text-ui-text-secondary whitespace-pre-wrap">{planning.details || "--"}</p>
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Checklist</h3>
-                  <span className="text-xs font-medium text-gray-400">{completedCount}/{totalCount}</span>
+                  <h3 className="text-lg font-semibold text-ui-text-primary">Checklist</h3>
+                  <span className="text-xs font-medium text-ui-text-muted">{completedCount}/{totalCount}</span>
                 </div>
 
-                <div className="flex gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 mb-4">
                   <input
                     type="text"
                     value={newItem}
                     onChange={(e) => setNewItem(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
                     placeholder="New item..."
-                    className="flex-1 text-sm border border-gray-200 rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                    aria-label="New checklist item"
+                    className="flex-1 min-w-[12rem] text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
                   />
-                  <button onClick={handleAddItem} className="text-sm font-medium px-4 py-2 rounded-md border border-gray-200 hover:bg-gray-50">
+                  <input
+                    type="date"
+                    value={newItemDue}
+                    onChange={(e) => setNewItemDue(e.target.value)}
+                    aria-label="Due date (optional)"
+                    className="text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                  />
+                  <button onClick={handleAddItem} className="text-sm font-medium px-4 py-2 rounded-md border border-ui-border hover:bg-ui-surface-2">
                     Add
                   </button>
                 </div>
 
                 <ul className="flex flex-col gap-2">
                   {planning.checklist_items.map((item) => (
-                    <li key={item.id} className="flex items-center gap-3 text-sm border border-gray-100 rounded-md px-4 py-3">
+                    <li key={item.id} className="flex items-center gap-3 text-sm border border-ui-border/60 rounded-md px-4 py-3">
                       <input
                         type="checkbox"
                         checked={item.is_done}
                         onChange={() => handleToggleItem(item.id)}
-                        className="w-4 h-4 rounded border-gray-300 text-accent-600 focus:ring-accent-600"
+                        aria-label={`Mark "${item.description}" as done`}
+                        className="w-4 h-4 rounded border-ui-border text-accent-600 focus:ring-accent-600"
                       />
-                      <span className={`flex-1 ${item.is_done ? "line-through text-gray-400" : "text-gray-700"}`}>
+                      <span className={`flex-1 ${item.is_done ? "line-through text-ui-text-muted" : "text-ui-text-secondary"}`}>
                         {item.description}
                       </span>
                     </li>

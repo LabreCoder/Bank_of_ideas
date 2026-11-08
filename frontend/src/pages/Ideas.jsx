@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ideasApi } from "../services/ideas";
 import { categoriesApi } from "../services/categories";
 import { ownersApi } from "../services/owners";
@@ -8,19 +8,22 @@ import IdeaCard from "../components/Ideas/IdeaCard";
 import IdeaFormPanel from "../components/Ideas/IdeaFormPanel";
 import IdeaDetailPanel from "../components/Ideas/IdeaDetailPanel";
 import IdeaFilterBar from "../components/Filters/IdeaFilterBar";
+import NotFoundMessage from "../components/Default/NotFoundMessage";
 import { useIdeaFilters } from "../hooks/useIdeaFilters";
+import { useGoBack } from "../hooks/useGoBack";
 import { matchesIdeaFilters } from "../utils/ideaFilters";
 
 const EXECUTION_STATUS_OPTIONS = ["Free", "In Planning"];
 
+// D02: lista (/ideas), criação (/ideas/new) e detalhe (/ideas/:id) vêm da URL.
 export default function Ideas() {
-  const location = useLocation();
+  const { ideaId: ideaParam } = useParams();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { goBack, hasInternalHistory } = useGoBack("/ideas");
 
-  // Quando o formulário é aberto de outra página (ex.: Dashboard), guardamos
-  // o nome da origem uma única vez; cancelar ou salvar volta pra lá.
-  const [originLabel] = useState(() => location.state?.fromLabel ?? null);
+  const isCreate = ideaParam === "new";
+  const detailId = ideaParam && !isCreate ? Number(ideaParam) : null;
+  const invalidParam = Boolean(ideaParam) && !isCreate && !Number.isInteger(detailId);
 
   const [ideas, setIdeas] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -28,26 +31,29 @@ export default function Ideas() {
   const [plannings, setPlannings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Controle de Visualização da Tela: "list" | "create" | "detail"
-  const [currentView, setCurrentView] = useState(() =>
-    searchParams.get("new") === "1" ? "create" : "list"
-  );
-  const [viewingIdea, setViewingIdea] = useState(null);
+  // Ideia buscada por id (GET /ideas/{id}) quando a URL é aberta direto.
+  const [fetchedIdea, setFetchedIdea] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
-  // Remove o ?new=1 da URL (sem criar nova entrada no histórico) pra que um
-  // refresh ou um retorno à lista não reabra o formulário.
+  const listedIdea = detailId ? ideas.find((i) => i.id === detailId) : null;
+  const viewingIdea = listedIdea ?? (fetchedIdea?.id === detailId ? fetchedIdea : null);
+
   useEffect(() => {
-    if (searchParams.get("new") !== "1") return;
-    const next = new URLSearchParams(searchParams);
-    next.delete("new");
-    setSearchParams(next, { replace: true, state: location.state });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const closeCreate = () => {
-    if (originLabel) navigate(-1);
-    else setCurrentView("list");
-  };
+    setNotFound(false);
+    if (!detailId || listedIdea) return undefined;
+    let cancelled = false;
+    ideasApi
+      .get(detailId)
+      .then((idea) => !cancelled && setFetchedIdea(idea))
+      .catch((err) => {
+        if (cancelled) return;
+        if (err.status === 404) setNotFound(true);
+        else setError(err.message || "It was not possible to load the idea.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [detailId, Boolean(listedIdea)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filtros Locais (padrão: só ideias ativas)
   const [activeTab, setActiveTab] = useState("All");
@@ -118,19 +124,18 @@ export default function Ideas() {
   const handleCreate = async (payload) => {
     const created = await ideasApi.create(payload);
     setIdeas((prev) => [created, ...prev]);
-    closeCreate();
+    goBack();
   };
 
   const handleIdeaUpdated = (updated) => {
     setIdeas((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
-    setViewingIdea(updated);
+    setFetchedIdea((current) => (current?.id === updated.id ? updated : current));
   };
 
   const handleToggleActive = async (idea) => {
     try {
       const updated = await ideasApi.toggleActive(idea.id);
-      setIdeas((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
-      setViewingIdea((current) => (current?.id === updated.id ? updated : current));
+      handleIdeaUpdated(updated);
     } catch (err) {
       setError(err.message || "It was not possible to update the idea status.");
     }
@@ -144,26 +149,38 @@ export default function Ideas() {
   // RENDERIZAÇÃO CONDICIONAL DA TELA ATUAL
   // ----------------------------------------------------
 
-  if (currentView === "create") {
+  if (invalidParam || (detailId && notFound)) {
+    return <NotFoundMessage title="Idea not found" listPath="/ideas" listLabel="Ideas" />;
+  }
+
+  if (isCreate) {
     return (
       <IdeaFormPanel
         categories={categories}
         owners={owners}
-        backLabel={originLabel ?? "Ideas"}
-        onClose={closeCreate}
+        backLabel={hasInternalHistory ? "Back" : "Ideas"}
+        onClose={goBack}
         onSubmit={handleCreate}
       />
     );
   }
 
-  if (currentView === "detail" && viewingIdea) {
+  if (detailId) {
+    if (!viewingIdea) {
+      return (
+        <div className="py-20 text-center text-ui-text-muted">{error || "Loading idea..."}</div>
+      );
+    }
     return (
       <IdeaDetailPanel
+        key={viewingIdea.id}
         idea={viewingIdea}
         planning={planningByIdeaId.get(viewingIdea.id) || null}
+        planningsLoaded={!loading}
         categories={categories}
         owners={owners}
-        onClose={() => { setViewingIdea(null); setCurrentView("list"); }}
+        backLabel={hasInternalHistory ? "Back" : "Ideas"}
+        onClose={goBack}
         onUpdated={handleIdeaUpdated}
         onToggleActive={handleToggleActive}
         onPlanningUpdated={handlePlanningUpdated}
@@ -187,7 +204,7 @@ export default function Ideas() {
           </div>
         </header>
         <button
-          onClick={() => setCurrentView("create")}
+          onClick={() => navigate("/ideas/new")}
           className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-800 shrink-0"
         >
           + New Idea
@@ -206,23 +223,23 @@ export default function Ideas() {
       />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md p-3 mb-4">
+        <div className="bg-status-red-bg border border-status-red-border text-status-red-fg text-sm rounded-md p-3 mb-4">
           {error}
         </div>
       )}
 
       {/* Grid de Ideias */}
       {loading ? (
-        <div className="text-center text-gray-400 py-20">Loading ideas...</div>
+        <div className="text-center text-ui-text-muted py-20">Loading ideas...</div>
       ) : filteredIdeas.length === 0 ? (
-        <div className="text-center text-gray-400 py-20">No ideas found with the current filters.</div>
+        <div className="text-center text-ui-text-muted py-20">No ideas found with the current filters.</div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredIdeas.map((idea) => (
             <IdeaCard
               key={idea.id}
               idea={idea}
-              onOpen={(i) => { setViewingIdea(i); setCurrentView("detail"); }}
+              onOpen={(i) => navigate(`/ideas/${i.id}`)}
             />
           ))}
         </div>

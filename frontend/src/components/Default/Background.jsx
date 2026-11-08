@@ -1,4 +1,4 @@
-import bg1 from "../../../public/assets/fundo-1.jpg";
+import bg1 from "../../assets/backgrounds/fundo-1.jpg";
 
 const backgroundImagePath = {
   bg1: bg1,

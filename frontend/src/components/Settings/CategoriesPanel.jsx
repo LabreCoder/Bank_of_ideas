@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ConfirmDialog from "../Default/ConfirmDialog";
 import { categoriesApi } from "../../services/categories";
 
 const EMPTY_DRAFT = { name: "", description: "" };
@@ -93,6 +94,9 @@ export default function CategoriesPanel() {
     }
   };
 
+  // D03: exclusão só depois de confirmar no ConfirmDialog.
+  const [pendingDelete, setPendingDelete] = useState(null);
+
   const handleDelete = async (id) => {
     setError(null);
     try {
@@ -105,21 +109,22 @@ export default function CategoriesPanel() {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
+    <div className="bg-ui-surface rounded-lg border border-ui-border p-4">
       <h3 className="text-lg font-semibold mb-2">Categories</h3>
-      <p className="text-gray-500 text-sm mb-4">
+      <p className="text-ui-text-muted text-sm mb-4">
         Manage your content categories. You can add, edit, or remove categories as needed.
       </p>
 
       {/* Formulário de criação */}
-      <div className="border border-dashed border-gray-300 rounded-lg p-3 mb-4 flex flex-col gap-2">
+      <div className="border border-dashed border-ui-border rounded-lg p-3 mb-4 flex flex-col gap-2">
         <div className="grid sm:grid-cols-1 gap-2">
           <input
             type="text"
             value={newDraft.name}
             onChange={(e) => setNewDraft((d) => ({ ...d, name: e.target.value }))}
             placeholder="Category name..."
-            className="text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+            aria-label="Category name"
+            className="text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
           />
           <input
             type="text"
@@ -132,7 +137,8 @@ export default function CategoriesPanel() {
               }
             }}
             placeholder="Description (optional)..."
-            className="h-[100px] text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+            aria-label="Category description"
+            className="h-[100px] text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
           />
         </div>
         <button
@@ -145,24 +151,25 @@ export default function CategoriesPanel() {
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+      {error && <p className="text-sm text-status-red-fg mb-3">{error}</p>}
 
       {loading ? (
-        <p className="text-sm text-gray-400">Loading categories...</p>
+        <p className="text-sm text-ui-text-muted">Loading categories...</p>
       ) : categories.length === 0 ? (
-        <p className="text-sm text-gray-400">No categories yet.</p>
+        <p className="text-sm text-ui-text-muted">No categories yet.</p>
       ) : (
         <div className="grid sm:grid-cols-4 gap-3">
           {categories.map((c) => (
-            <div key={c.id} className="border border-gray-200 rounded-lg p-3">
+            <div key={c.id} className="border border-ui-border rounded-lg p-3">
               {editingId === c.id ? (
                 <div className="flex flex-col gap-2">
                   <input
                     type="text"
                     value={editDraft.name}
+                    aria-label="Name"
                     onChange={(e) => setEditDraft((d) => ({ ...d, name: e.target.value }))}
                     autoFocus
-                    className="text-sm font-medium border border-gray-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                    className="text-sm font-medium border border-ui-border rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-600"
                   />
                   <textarea
                     value={editDraft.description}
@@ -172,12 +179,13 @@ export default function CategoriesPanel() {
                     }}
                     rows={2}
                     placeholder="Description..."
-                    className="text-sm text-gray-600 border border-gray-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                    aria-label="Category description"
+                    className="text-sm text-ui-text-secondary border border-ui-border rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-600"
                   />
                   <div className="flex gap-2 justify-end">
                     <button
                       onClick={cancelEditing}
-                      className="text-xs font-medium text-gray-500 hover:text-gray-700 px-2 py-1"
+                      className="text-xs font-medium text-ui-text-muted hover:text-ui-text-primary px-2 py-1"
                     >
                       Cancel
                     </button>
@@ -193,10 +201,10 @@ export default function CategoriesPanel() {
               ) : (
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="font-medium text-gray-900 text-sm">{c.name}</p>
+                    <p className="font-medium text-ui-text-primary text-sm">{c.name}</p>
                     <p
                       className={`text-sm mt-0.5 ${
-                        c.description ? "text-gray-500" : "text-gray-300 italic"
+                        c.description ? "text-ui-text-muted" : "text-ui-text-muted/70 italic"
                       }`}
                     >
                       {c.description || "No description"}
@@ -206,14 +214,16 @@ export default function CategoriesPanel() {
                     <button
                       onClick={() => startEditing(c)}
                       title="Edit"
-                      className="p-1.5 text-gray-400 hover:text-accent-600 hover:bg-accent-50 rounded-md transition-colors"
+                      aria-label={`Edit ${c.name}`}
+                      className="p-1.5 text-ui-text-muted hover:text-accent-600 hover:bg-accent-50 rounded-md transition-colors"
                     >
                       <PencilIcon />
                     </button>
                     <button
-                      onClick={() => handleDelete(c.id)}
+                      onClick={() => setPendingDelete(c)}
                       title="Remove"
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      aria-label={`Remove ${c.name}`}
+                      className="p-1.5 text-ui-text-muted hover:text-status-red-fg hover:bg-status-red-bg rounded-md transition-colors"
                     >
                       <TrashIcon />
                     </button>
@@ -224,6 +234,24 @@ export default function CategoriesPanel() {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        title="Delete this category?"
+        message={
+          <>
+            <strong>{pendingDelete?.name}</strong> will be deleted. Categories still used by an idea cannot be deleted — change those ideas first. This cannot be
+            undone.
+          </>
+        }
+        confirmLabel="Delete category"
+        onConfirm={() => {
+          const id = pendingDelete.id;
+          setPendingDelete(null);
+          handleDelete(id);
+        }}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

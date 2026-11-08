@@ -1,21 +1,32 @@
 from typing import List, Optional
 from datetime import date, datetime
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
+from schemas._common import INPUT_CONFIG, ORM_CONFIG, reject_null
 from schemas.planning import PlanningResponse
 
 
 class CycleCreate(BaseModel):
-    name: str
+    model_config = INPUT_CONFIG
+
+    name: str = Field(min_length=1, max_length=255)  # VARCHAR(255) no banco
     description: Optional[str] = None
     start_date: date
     due_date: Optional[date] = None
 
 
 class CycleUpdate(BaseModel):
-    name: Optional[str] = None
+    model_config = INPUT_CONFIG
+
+    name: Optional[str] = Field(default=None, min_length=1, max_length=255)
     description: Optional[str] = None
     start_date: Optional[date] = None
+    # D09: due_date também pode vir aqui, para salvar tudo de uma vez (atômico).
+    # null explícito limpa a data final; omitir mantém a atual.
+    due_date: Optional[date] = None
+
+    # name e start_date são NOT NULL no banco: null explícito -> 422.
+    _not_null = field_validator("name", "start_date")(reject_null)
 
 
 class CycleDueDateUpdate(BaseModel):
@@ -52,6 +63,8 @@ class CycleResponse(BaseModel):
     # Derived, never stored — same philosophy as Idea.execution_status.
     # One of: "Waiting Start", "In Progress", "Finished".
     status: str
+    # D09: data final já passou e o ciclo não está "Finished". Derivado.
+    is_overdue: bool = False
     # Também derivados. progress_percentage = completed / (total - cancelled),
     # em % (0-100). Quando o denominador é 0 (nenhum planning ainda, ou
     # todos os vinculados foram cancelados), o valor é 0.0 — esses casos
@@ -63,5 +76,4 @@ class CycleResponse(BaseModel):
     created_at: datetime
     plannings: List[PlanningResponse] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ORM_CONFIG

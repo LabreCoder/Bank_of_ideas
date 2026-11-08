@@ -32,7 +32,19 @@ export default {
           feature: "rgb(var(--color-ui-feature) / <alpha-value>)",
           "feature-text": "rgb(var(--color-ui-feature-text) / <alpha-value>)",
           "feature-muted": "rgb(var(--color-ui-feature-muted) / <alpha-value>)",
+          input: "rgb(var(--color-ui-input) / <alpha-value>)",
         },
+        // Tons de status (D04): bg-status-blue-bg, text-status-blue-fg,
+        // border-status-blue-border... valores em theme-variables.css.
+        status: Object.fromEntries(
+          ["neutral", "blue", "purple", "indigo", "amber", "emerald", "rose", "red"].flatMap(
+            (tone) =>
+              ["bg", "fg", "border"].map((part) => [
+                `${tone}-${part}`,
+                `rgb(var(--color-status-${tone}-${part}) / <alpha-value>)`,
+              ])
+          )
+        ),
       },
     },
   },
