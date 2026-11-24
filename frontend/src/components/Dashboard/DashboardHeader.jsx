@@ -1,5 +1,6 @@
 import { CYCLE_FILTER_ALL, CYCLE_FILTER_NONE } from "../../utils/dashboardMetrics";
 import { formatMediumDate } from "../../utils/dateFormat";
+import { Button, Select } from "../ui";
 
 export default function DashboardHeader({ cycles, cycleFilter, onCycleFilterChange, onNewIdea }) {
   const dateLabel = formatMediumDate(new Date());
@@ -18,12 +19,13 @@ export default function DashboardHeader({ cycles, cycleFilter, onCycleFilterChan
         </p>
       </div>
 
-      <div className="flex shrink-0 items-center gap-3">
-        <select
+      <div className="flex shrink-0 flex-wrap items-center gap-3">
+        <Select
           value={cycleFilter}
           onChange={(e) => onCycleFilterChange(e.target.value)}
           aria-label="Filter dashboard by cycle"
-          className="max-w-[14rem] rounded-lg border border-ui-border bg-ui-surface px-3 py-2.5 text-sm text-ui-text-primary focus:outline-none focus:ring-1 focus:ring-accent-600"
+          fullWidth={false}
+          className="max-w-[14rem]"
         >
           <option value={CYCLE_FILTER_ALL}>All cycles</option>
           <option value={CYCLE_FILTER_NONE}>No cycle</option>
@@ -32,15 +34,11 @@ export default function DashboardHeader({ cycles, cycleFilter, onCycleFilterChan
               {cycle.name}
             </option>
           ))}
-        </select>
+        </Select>
 
-        <button
-          type="button"
-          onClick={onNewIdea}
-          className="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-700"
-        >
+        <Button onClick={onNewIdea}>
           <span className="text-lg leading-none">+</span> New idea
-        </button>
+        </Button>
       </div>
     </header>
   );

@@ -14,12 +14,21 @@ export default function Topbar() {
   const { mode, toggleMode } = useTheme();
 
   const modeIconSrc = mode === "dark" ? brightIcon : darkIcon;
-  const modeLabel = mode === "dark" ? "Light mode" : "Dark mode";
   const modeSwitchLabel = mode === "dark" ? "Switch to light mode" : "Switch to dark mode";
 
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
+
+  // Esc fecha o menu mobile.
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
 
   return (
     <header className="sticky top-0 z-30 border-b border-ui-border bg-ui-surface/90 backdrop-blur">
@@ -61,7 +70,7 @@ export default function Topbar() {
             aria-label={modeSwitchLabel}
             title={modeSwitchLabel}
           >
-            <img src={modeIconSrc} alt={modeLabel} className="h-4 w-4 object-contain" />
+            <img src={modeIconSrc} alt="" className="h-4 w-4 object-contain" />
             <span className="hidden sm:inline">{mode === "dark" ? "Light" : "Dark"}</span>
           </button>
         </div>
@@ -74,7 +83,7 @@ export default function Topbar() {
           aria-expanded={menuOpen}
           aria-controls="mobile-nav"
         >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             {menuOpen ? (
               <path d="M6 6l12 12M6 18L18 6" strokeLinecap="round" strokeLinejoin="round" />
             ) : (

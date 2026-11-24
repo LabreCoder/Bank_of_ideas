@@ -12,7 +12,7 @@ export default function CycleProgressRing({ percentage, size = 110 }) {
     >
       {/* -rotate-90: SVG começa o traço às 3h por padrão; giramos pra
           começar às 12h, que é a leitura visual esperada de um "progresso". */}
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90" aria-hidden="true">
         <circle
           cx={size / 2}
           cy={size / 2}

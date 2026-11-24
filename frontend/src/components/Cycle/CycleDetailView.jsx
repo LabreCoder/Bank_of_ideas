@@ -3,6 +3,7 @@ import CycleProgressRing from "./CycleProgressRing";
 import { getPlanningGroup, PLANNING_GROUP_LEGEND } from "../../utils/cyclePlanningGroup";
 import { formatShortDate } from "../../utils/dateFormat";
 import ProgressBar from "../Default/ProgressBar";
+import { Badge, Button } from "../ui";
 
 import {
   CYCLE_OVERDUE_LABEL,
@@ -32,28 +33,23 @@ export default function CycleDetailView({ cycle, titleId, onEdit, onClose }) {
     <div>
       <div className="flex items-start justify-between mb-4">
         <div className="flex flex-wrap gap-1">
-          <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusClass}`}>
-          {cycle.status}
-        </span>
+          <Badge toneClass={statusClass}>{cycle.status}</Badge>
           {cycle.is_overdue && (
-            <span
-              className={`text-xs font-medium px-2 py-0.5 rounded-full border ${CYCLE_OVERDUE_STYLE}`}
+            <Badge
+              toneClass={CYCLE_OVERDUE_STYLE}
               title="The due date has passed and the cycle is not finished"
             >
               {CYCLE_OVERDUE_LABEL}
-            </span>
+            </Badge>
           )}
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={onEdit}
-            className="text-ui-text-muted hover:text-accent-600 text-sm font-medium"
-          >
+          <Button variant="muted-accent" size="inline" onClick={onEdit}>
             Edit
-          </button>
-          <button onClick={onClose} className="text-ui-text-muted hover:text-ui-text-primary text-sm">
+          </Button>
+          <Button variant="muted" size="inline" onClick={onClose}>
             Close
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -133,7 +129,7 @@ export default function CycleDetailView({ cycle, titleId, onEdit, onClose }) {
                       <span className={`w-2 h-2 rounded-full shrink-0 ${group.dotClass}`} />
                       {p.idea?.name || `Planning #${p.id}`}
                     </span>
-                    <span className="text-ui-text-muted/70">›</span>
+                    <span className="text-ui-text-muted/70" aria-hidden="true">›</span>
                   </button>
                 </li>
               );
@@ -152,13 +148,9 @@ export default function CycleDetailView({ cycle, titleId, onEdit, onClose }) {
       </div>
 
       <div className="flex justify-end pt-4 mt-4 border-t border-ui-border/60">
-        <button
-          type="button"
-          onClick={handleOpenAllPlannings}
-          className="bg-accent-600 hover:bg-accent-700 text-white text-sm font-medium px-4 py-2 rounded-md"
-        >
+        <Button onClick={handleOpenAllPlannings}>
           Open All Plannings →
-        </button>
+        </Button>
       </div>
     </div>
   );

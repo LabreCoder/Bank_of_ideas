@@ -15,7 +15,7 @@ export default function StatCard({
   };
 
   const valueClasses = {
-    primary: "text-[32px] md:text-[40px] text-accent-600",
+    primary: "text-[32px] md:text-[40px] text-ui-accent",
     secondary: "text-[28px] md:text-[32px] text-accent-500",
     chart: "text-[24px] md:text-[28px] text-accent-500",
     operational: "text-[24px] md:text-[28px] text-accent-500",

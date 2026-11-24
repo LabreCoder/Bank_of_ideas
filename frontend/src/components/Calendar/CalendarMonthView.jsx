@@ -1,4 +1,5 @@
 import { isSameMonth, isToday, localDateToKey, WEEKDAY_LABELS } from "../../utils/calendar";
+import { formatLongDate } from "../../utils/dateFormat";
 
 function intensityClass(count) {
   if (count >= 3) return "bg-accent-800 text-white";
@@ -28,8 +29,10 @@ export default function CalendarMonthView({ weeks, anchorDate, dueMap, onDayClic
           return (
             <button
               key={key}
+              type="button"
               onClick={() => dayPlannings.length > 0 && onDayClick(key, dayPlannings)}
               disabled={dayPlannings.length === 0}
+              aria-label={`${formatLongDate(date)}, ${dayPlannings.length} planning(s)`}
               className={`h-14 md:h-16 rounded-md p-1 md:p-1.5 flex flex-col items-start justify-between text-left transition-colors
                 ${inCurrentMonth ? "text-ui-text-secondary" : "text-ui-text-muted/70"}
                 ${today ? "ring-2 ring-accent-600" : ""}

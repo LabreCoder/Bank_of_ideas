@@ -22,8 +22,9 @@ export default function CalendarWeekView({ weekDates, plannings, onDayClick }) {
         return (
           <button
             key={key}
+            type="button"
             onClick={() => onDayClick(key, dayPlannings)}
-            className="border border-ui-border rounded-md p-3 text-left bg-ui-surface-2 hover:bg-ui-surface-2 transition-colors justify-between flex flex-col"
+            className="w-full min-w-0 border border-ui-border rounded-md p-3 text-left bg-ui-surface-2 hover:bg-ui-surface-2 transition-colors justify-between flex flex-col"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-semibold text-ui-text-secondary">{WEEKDAY_LABELS[date.getDay()]}</span>
@@ -39,9 +40,9 @@ export default function CalendarWeekView({ weekDates, plannings, onDayClick }) {
             </div>
 
             {dayPlannings.length > 0 && (
-              <div className="flex flex-col mt-2 space-y-3 border-t border-ui-border pt-4">
+              <div className="flex w-full min-w-0 flex-col mt-2 space-y-3 border-t border-ui-border pt-4">
                 {dayPlannings.slice(0, 2).map((planning) => (
-                  <div key={planning.id} className="rounded border border-ui-border bg-ui-surface p-2 mt-auto">
+                  <div key={planning.id} className="w-full min-w-0 rounded border border-ui-border bg-ui-surface p-2 mt-auto">
                     <p className="text-[11px] font-semibold text-ui-text-secondary truncate">{planning.idea?.name}</p>
                     <ul className="mt-1 space-y-0.5">
                       {planning.dayChecklistItems.slice(0, 2).map((item) => (

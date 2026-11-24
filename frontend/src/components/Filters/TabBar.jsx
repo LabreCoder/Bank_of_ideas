@@ -1,13 +1,16 @@
 export default function TabBar({ tabs, active, onChange }) {
   return (
-    <div className="flex gap-2 mb-4 border-b border-ui-border ">
+    <div role="tablist" className="tablist-scroll flex gap-2 mb-4">
       {tabs.map((tab) => (
         <button
           key={tab.value}
+          type="button"
+          role="tab"
+          aria-selected={active === tab.value}
           onClick={() => onChange(tab.value)}
-          className={`text-sm font-medium px-4 py-2 border-b-2 -mb-px transition-colors whitespace-nowrap ${
+          className={`shrink-0 text-sm font-medium px-4 py-2 border-b-2 transition-colors whitespace-nowrap ${
             active === tab.value
-              ? "border-accent-600 text-accent-700"
+              ? "border-accent-600 text-ui-accent-strong"
               : "border-transparent text-ui-text-muted hover:text-ui-text-primary"
           }`}
         >

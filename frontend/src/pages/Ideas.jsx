@@ -9,6 +9,7 @@ import IdeaFormPanel from "../components/Ideas/IdeaFormPanel";
 import IdeaDetailPanel from "../components/Ideas/IdeaDetailPanel";
 import IdeaFilterBar from "../components/Filters/IdeaFilterBar";
 import NotFoundMessage from "../components/Default/NotFoundMessage";
+import { Button } from "../components/ui";
 import { useIdeaFilters } from "../hooks/useIdeaFilters";
 import { useGoBack } from "../hooks/useGoBack";
 import { matchesIdeaFilters } from "../utils/ideaFilters";
@@ -192,8 +193,8 @@ export default function Ideas() {
   return (
     <div className="animate-fade-in pb-10">
       {/* Cabeçalho */}
-      <div className="flex justify-between items-start mb-6">
-        <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
+        <header className="min-w-0 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0">
             <h2 className="mt-3 text-4xl font-semibold tracking-tight text-ui-text-primary md:text-5xl">
               Ideas
@@ -203,12 +204,9 @@ export default function Ideas() {
             </p>
           </div>
         </header>
-        <button
-          onClick={() => navigate("/ideas/new")}
-          className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-800 shrink-0"
-        >
+        <Button onClick={() => navigate("/ideas/new")} className="shrink-0">
           + New Idea
-        </button>
+        </Button>
       </div>
 
 

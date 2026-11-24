@@ -23,7 +23,7 @@ export default function ProjectsTable({ rows, colorMap, onOpenPlanning }) {
           </p>
           <h3 className="mt-3 text-xl font-medium text-ui-text-primary">Projects that need you</h3>
         </div>
-        <Link to="/planning" className="shrink-0 text-sm text-accent-500 hover:text-accent-600">
+        <Link to="/planning" className="shrink-0 text-sm text-accent-500 hover:text-ui-accent">
           All {rows.length} active plans &rarr;
         </Link>
       </div>

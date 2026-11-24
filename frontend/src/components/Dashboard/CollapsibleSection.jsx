@@ -15,6 +15,7 @@ export default function CollapsibleSection({ title, children, defaultOpen = fals
       >
         <span className="text-lg font-medium text-ui-text-primary">{title}</span>
         <svg
+          aria-hidden="true"
           viewBox="0 0 24 24"
           className={`h-4 w-4 text-ui-text-muted transition-transform ${open ? "rotate-180" : ""}`}
           fill="none"

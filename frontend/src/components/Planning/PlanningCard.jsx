@@ -1,5 +1,6 @@
 import ProgressBar from "../Default/ProgressBar";
 import { formatMediumDate } from "../../utils/dateFormat";
+import { Badge } from "../ui";
 
 import { PLANNING_STATUS_STYLES, STATUS_FALLBACK_STYLE } from "../../utils/planningStatus";
 
@@ -11,14 +12,15 @@ export default function PlanningCard({ planning, checklist, onOpen }) {
 
   return (
     <button
+      type="button"
       onClick={() => onOpen(planning)}
-      className="text-left bg-ui-surface rounded-lg border border-ui-border p-4 flex flex-col justify-between gap-3 hover:border-accent-300 transition-colors"
+      className="min-w-0 text-left bg-ui-surface rounded-lg border border-ui-border p-4 flex flex-col justify-between gap-3 hover:border-accent-300 transition-colors"
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-medium text-ui-text-primary leading-snug">{planning.idea.name}</h3>
-        <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full border ${statusClass}`}>
+        <h3 className="min-w-0 font-medium text-ui-text-primary leading-snug [overflow-wrap:anywhere]">{planning.idea.name}</h3>
+        <Badge toneClass={statusClass} className="shrink-0">
           {planning.status}
-        </span>
+        </Badge>
       </div>
 
       {total > 0 && (

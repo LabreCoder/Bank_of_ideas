@@ -6,6 +6,7 @@ import {
   shiftAnchorDate,
 } from "../../utils/calendar";
 import TabBar from "../Filters/TabBar";
+import { Button, Card } from "../ui";
 import CalendarMonthView from "./CalendarMonthView";
 import CalendarWeekView from "./CalendarWeekView";
 import CalendarDayView from "./CalendarDayView";
@@ -39,30 +40,21 @@ export default function CalendarGrid({
   const periodLabel = getPeriodLabel(anchorDate, view);
 
   return (
-    <div className="bg-ui-surface rounded-lg border border-ui-border p-4">
+    <Card>
       <TabBar tabs={viewTabs} active={view} onChange={onViewChange} />
 
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <h3 className="text-lg font-semibold">{periodLabel}</h3>
         <div className="flex items-center gap-2">
-          <button
-            onClick={goPrev}
-            className="text-sm px-2 py-1 rounded-md border border-ui-border hover:bg-ui-surface-2"
-          >
-            ‹
-          </button>
-          <button
-            onClick={goToToday}
-            className="text-sm px-3 py-1 rounded-md border border-ui-border hover:bg-ui-surface-2"
-          >
+          <Button variant="secondary" size="sm" onClick={goPrev} aria-label="Previous period" title="Previous period">
+            <span aria-hidden="true">‹</span>
+          </Button>
+          <Button variant="secondary" size="sm" onClick={goToToday}>
             Today
-          </button>
-          <button
-            onClick={goNext}
-            className="text-sm px-2 py-1 rounded-md border border-ui-border hover:bg-ui-surface-2"
-          >
-            ›
-          </button>
+          </Button>
+          <Button variant="secondary" size="sm" onClick={goNext} aria-label="Next period" title="Next period">
+            <span aria-hidden="true">›</span>
+          </Button>
         </div>
       </div>
 
@@ -80,6 +72,6 @@ export default function CalendarGrid({
       {view === "day" && (
         <CalendarDayView dayDate={dayDate} plannings={plannings} onOpenPlanning={onOpenPlanning} />
       )}
-    </div>
+    </Card>
   );
 }

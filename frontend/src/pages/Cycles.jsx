@@ -7,6 +7,7 @@ import CycleDetailModal from "../components/Cycle/CycleDetailModal";
 import CycleFilterBar from "../components/Cycle/Filters/CycleFilterBar";
 import { useCycleFilters } from "../hooks/useCycleFilters";
 import { applyCycleFilters } from "../utils/cycleFilters";
+import { Button } from "../components/ui";
 
 export default function Cycles() {
   const [cycles, setCycles] = useState([]);
@@ -105,7 +106,7 @@ export default function Cycles() {
         <div className="relative pl-6 border-l-2 border-ui-border">
           {sectionCycles.map((cycle) => (
             <div key={cycle.id} className="relative mb-4 last:mb-0">
-              <span className="absolute -left-[29px] top-2 w-3 h-3 rounded-full bg-accent-600 ring-4 ring-white" />
+              <span className="absolute -left-[29px] top-2 w-3 h-3 rounded-full bg-accent-600 ring-4 ring-ui-page" />
               <CycleTimelineCard cycle={cycle} onClick={setSelectedCycle} />
             </div>
           ))}
@@ -116,8 +117,8 @@ export default function Cycles() {
 
   return (
     <div>
-      <div className="flex justify-between items-start mb-6">
-        <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
+        <header className="min-w-0 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0">
             <h2 className="mt-3 text-4xl font-semibold tracking-tight text-ui-text-primary md:text-5xl">
               Cycles
@@ -128,12 +129,9 @@ export default function Cycles() {
           </div>
         </header>
         <div className="mb-4 flex justify-end">
-          <button
-            onClick={() => setIsCreateOpen(true)}
-            className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-800 shrink-0"
-          >
+          <Button onClick={() => setIsCreateOpen(true)} className="shrink-0">
             + New Cycle
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -164,13 +162,9 @@ export default function Cycles() {
               <p className="text-sm text-ui-text-muted mb-3">
                 No cycles match your filters.
               </p>
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="text-sm font-medium text-accent-600 hover:text-accent-700"
-              >
+              <Button variant="accent-text" size="inline" onClick={resetFilters}>
                 Clear filters
-              </button>
+              </Button>
             </div>
           ) : (
             <>

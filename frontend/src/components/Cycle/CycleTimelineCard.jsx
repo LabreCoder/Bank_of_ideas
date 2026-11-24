@@ -1,4 +1,5 @@
 import { formatShortDate } from "../../utils/dateFormat";
+import { Badge } from "../ui";
 
 import {
   CYCLE_OVERDUE_LABEL,
@@ -32,13 +33,11 @@ export default function CycleTimelineCard({ cycle, onClick }) {
         <h4 className="font-semibold text-ui-text-primary text-base">{cycle.name}</h4>
         <div className="flex shrink-0 flex-wrap justify-end gap-1">
           {cycle.is_overdue && (
-            <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${CYCLE_OVERDUE_STYLE}`}>
-              {CYCLE_OVERDUE_LABEL}
-            </span>
+            <Badge toneClass={CYCLE_OVERDUE_STYLE}>{CYCLE_OVERDUE_LABEL}</Badge>
           )}
-          <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full border font-medium ${statusClass}`}>
-          {cycle.status}
-        </span>
+          <Badge toneClass={statusClass} className="shrink-0">
+            {cycle.status}
+          </Badge>
         </div>
       </div>
 

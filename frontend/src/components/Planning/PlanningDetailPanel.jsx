@@ -6,10 +6,11 @@ import { useUnsavedChangesGuard } from "../../hooks/useUnsavedChangesGuard";
 import { PLANNING_STATUS_OPTIONS, PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 import ProgressBar from "../Default/ProgressBar";
 import ConfirmDialog from "../Default/ConfirmDialog";
+import { Badge, Button, Card, IconButton, Input, Label, Select, Textarea } from "../ui";
 
 function PencilIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
     </svg>
@@ -18,7 +19,7 @@ function PencilIcon() {
 
 function TrashIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
       <path d="M3 6h18" />
       <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
       <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
@@ -235,83 +236,67 @@ export default function PlanningDetailPanel({
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={handleClose}
-        className="text-sm text-ui-text-muted hover:text-ui-text-primary mb-2"
-      >
+      <Button variant="muted" size="inline" onClick={handleClose} className="mb-2">
         ← {backLabel}
-      </button>
+      </Button>
 
-      <div className="flex items-start justify-between mb-1">
-        <h1 className="text-3xl font-bold text-ui-text-primary">{planning.idea.name}</h1>
-        <button
-          type="button"
-          onClick={handleClose}
-          className="text-ui-text-muted hover:text-ui-text-primary text-sm"
-        >
+      <div className="flex items-start justify-between gap-4 mb-1">
+        <h1 className="min-w-0 text-3xl font-bold text-ui-text-primary [overflow-wrap:anywhere]">{planning.idea.name}</h1>
+        <Button variant="muted" size="inline" onClick={handleClose} className="shrink-0">
           Close
-        </button>
+        </Button>
       </div>
       <p className="text-ui-text-muted mb-6">Manage the plan, dates and checklist in one place.</p>
 
-      <div className="bg-ui-surface border border-ui-border rounded-lg p-6">
+      <Card padding={6}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* ---- Planning ---- */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-ui-text-primary">Planning</h3>
-              <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusClass}`}
-              >
-                {status}
-              </span>
+              <Badge toneClass={statusClass}>{status}</Badge>
             </div>
 
             <div className="flex flex-col gap-4">
               <div>
-                <label htmlFor={`${fieldId}-status`} className="block text-sm font-medium text-ui-text-secondary mb-1">Status</label>
-                <select id={`${fieldId}-status`}
+                <Label htmlFor={`${fieldId}-status`}>Status</Label>
+                <Select id={`${fieldId}-status`}
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                 >
                   {PLANNING_STATUS_OPTIONS.map((s) => (
                     <option key={s} value={s}>
                       {s}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor={`${fieldId}-start`} className="block text-sm font-medium text-ui-text-secondary mb-1">Start</label>
-                  <input id={`${fieldId}-start`}
+                  <Label htmlFor={`${fieldId}-start`}>Start</Label>
+                  <Input id={`${fieldId}-start`}
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                   />
                 </div>
                 <div>
-                  <label htmlFor={`${fieldId}-due`} className="block text-sm font-medium text-ui-text-secondary mb-1">Due</label>
-                  <input id={`${fieldId}-due`}
+                  <Label htmlFor={`${fieldId}-due`}>Due</Label>
+                  <Input id={`${fieldId}-due`}
                     type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor={`${fieldId}-details`} className="block text-sm font-medium text-ui-text-secondary mb-1">Details</label>
-                <textarea id={`${fieldId}-details`}
+                <Label htmlFor={`${fieldId}-details`}>Details</Label>
+                <Textarea id={`${fieldId}-details`}
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
                   rows={6}
-                  className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                 />
               </div>
             </div>
@@ -332,8 +317,8 @@ export default function PlanningDetailPanel({
 
             <div className="flex flex-wrap gap-2 mb-2 items-end">
               <div className="flex-1 min-w-[12rem]">
-                <label htmlFor={`${fieldId}-description`} className="block text-xs font-medium text-ui-text-muted mb-1">Description</label>
-                <input id={`${fieldId}-description`}
+                <Label size="sm" htmlFor={`${fieldId}-description`}>Description</Label>
+                <Input id={`${fieldId}-description`}
                   type="text"
                   value={newItem.description}
                   onChange={(e) => setNewItem((prev) => ({ ...prev, description: e.target.value }))}
@@ -344,25 +329,20 @@ export default function PlanningDetailPanel({
                     }
                   }}
                   placeholder="New item..."
-                  className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                 />
               </div>
               <div>
-                <label htmlFor={`${fieldId}-due-2`} className="block text-xs font-medium text-ui-text-muted mb-1">Due</label>
-                <input id={`${fieldId}-due-2`}
+                <Label size="sm" htmlFor={`${fieldId}-due-2`}>Due</Label>
+                <Input id={`${fieldId}-due-2`}
                   type="date"
                   value={newItem.due_date}
                   onChange={(e) => setNewItem((prev) => ({ ...prev, due_date: e.target.value }))}
-                  className="text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                  fullWidth={false}
                 />
               </div>
-              <button
-                type="button"
-                onClick={handleAddItem}
-                className="text-sm font-medium px-3 py-2 rounded-md border border-ui-border hover:bg-ui-surface-2 shrink-0"
-              >
+              <Button variant="secondary" onClick={handleAddItem} className="shrink-0">
                 Add
-              </button>
+              </Button>
             </div>
 
             {checklistItems.length === 0 ? (
@@ -376,7 +356,7 @@ export default function PlanningDetailPanel({
                   >
                     {editingItemId === item.id ? (
                       <div className="flex flex-wrap items-center gap-2 w-full">
-                        <input
+                        <Input
                           type="text"
                           value={editItem.description}
                           aria-label="Item description"
@@ -392,32 +372,31 @@ export default function PlanningDetailPanel({
                             }
                           }}
                           autoFocus
-                          className="flex-1 min-w-[10rem] text-sm border border-ui-border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                          size="sm"
+                          fullWidth={false}
+                          className="flex-1 min-w-[10rem]"
                         />
-                        <input
+                        <Input
                           type="date"
                           value={editItem.due_date}
                           aria-label="Item due date"
                           onChange={(e) =>
                             setEditItem((prev) => ({ ...prev, due_date: e.target.value }))
                           }
-                          className="text-sm border border-ui-border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                          size="sm"
+                          fullWidth={false}
                         />
-                        <button
-                          type="button"
+                        <Button
+                          size="xs"
                           onClick={() => handleSaveEditItem(item.id)}
                           disabled={!editItem.description.trim()}
-                          className="text-xs font-medium bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white px-2 py-1 rounded shrink-0"
+                          className="shrink-0"
                         >
                           Save
-                        </button>
-                        <button
-                          type="button"
-                          onClick={cancelEditingItem}
-                          className="text-xs font-medium text-ui-text-muted hover:text-ui-text-primary px-1 py-1 shrink-0"
-                        >
+                        </Button>
+                        <Button variant="muted" size="xs" onClick={cancelEditingItem} className="shrink-0">
                           Cancel
-                        </button>
+                        </Button>
                       </div>
                     ) : (
                       <>
@@ -436,24 +415,22 @@ export default function PlanningDetailPanel({
                           <span className="text-xs text-ui-text-muted">{formatShortDate(item.due_date)}</span>
                         )}
                         <div className="flex gap-1 shrink-0">
-                          <button
-                            type="button"
+                          <IconButton
+                            label={`Edit ${item.description}`}
+                            tone="accent"
+                            size="sm"
                             onClick={() => startEditingItem(item)}
-                            title="Edit"
-                            aria-label={`Edit ${item.description}`}
-                            className="p-1 text-ui-text-muted hover:text-accent-600 hover:bg-accent-50 rounded transition-colors"
                           >
                             <PencilIcon />
-                          </button>
-                          <button
-                            type="button"
+                          </IconButton>
+                          <IconButton
+                            label={`Remove ${item.description}`}
+                            tone="danger"
+                            size="sm"
                             onClick={() => setPendingDelete({ type: "item", item })}
-                            title="Remove"
-                            aria-label={`Remove ${item.description}`}
-                            className="p-1 text-ui-text-muted hover:text-status-red-fg hover:bg-status-red-bg rounded transition-colors"
                           >
                             <TrashIcon />
-                          </button>
+                          </IconButton>
                         </div>
                       </>
                     )}
@@ -476,31 +453,26 @@ export default function PlanningDetailPanel({
         )}
 
         <div className="flex justify-between items-center pt-6 mt-6 border-t border-ui-border/60">
-          <button
-            type="button"
+          <Button
+            variant="danger-text"
+            size="inline"
             onClick={() => setPendingDelete({ type: "planning" })}
             disabled={saving}
-            className="text-sm font-medium text-status-red-fg hover:text-status-red-fg disabled:opacity-50"
           >
             Delete planning
-          </button>
+          </Button>
           <div className="flex items-center gap-3">
             {dirty && (
               <span role="status" className="text-xs font-medium text-status-amber-fg">
                 Unsaved changes
               </span>
             )}
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving || !dirty}
-              className="bg-accent-600 hover:bg-accent-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-4 py-2 rounded-md"
-            >
+            <Button onClick={handleSave} disabled={saving || !dirty}>
               {saving ? "Saving..." : "Save"}
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
       <ConfirmDialog
         open={pendingDelete?.type === "planning"}

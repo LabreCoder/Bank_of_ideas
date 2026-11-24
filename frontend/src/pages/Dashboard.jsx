@@ -144,15 +144,15 @@ export default function Dashboard() {
         <>
           <KpiStrip kpis={kpis} />
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="min-w-0 lg:col-span-2">
               <StageFunnelCard funnel={funnel} colorMap={colorMap} />
             </div>
             <CategoryBalanceCard rows={categoryRows} colorMap={colorMap} />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="min-w-0 lg:col-span-2">
               <ProjectsTable
                 rows={projectRows}
                 colorMap={colorMap}

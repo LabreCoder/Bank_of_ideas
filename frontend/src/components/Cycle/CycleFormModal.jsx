@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 import { cycleApi } from "../../services/cycle";
 import DetailModal from "../Default/DetailModal";
+import { Button, Input, Label, Textarea } from "../ui";
 
 export default function CycleFormModal({ onClose, onCreated }) {
   const fieldId = useId(); // D10: liga <label htmlFor> aos campos
@@ -48,45 +49,41 @@ export default function CycleFormModal({ onClose, onCreated }) {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label htmlFor={`${fieldId}-name`} className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
-            <input id={`${fieldId}-name`}
+            <Label htmlFor={`${fieldId}-name`}>Name</Label>
+            <Input id={`${fieldId}-name`}
               type="text"
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="e.g. Q3 2026 Deliverables"
-              className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             />
           </div>
 
           <div>
-            <label htmlFor={`${fieldId}-description`} className="block text-sm font-medium text-ui-text-secondary mb-1">Description</label>
-            <textarea id={`${fieldId}-description`}
+            <Label htmlFor={`${fieldId}-description`}>Description</Label>
+            <Textarea id={`${fieldId}-description`}
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               rows={3}
               placeholder="Cycle goals and context..."
-              className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor={`${fieldId}-start-date`} className="block text-sm font-medium text-ui-text-secondary mb-1">Start Date</label>
-              <input id={`${fieldId}-start-date`}
+              <Label htmlFor={`${fieldId}-start-date`}>Start Date</Label>
+              <Input id={`${fieldId}-start-date`}
                 type="date"
                 value={form.start_date}
                 onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
-                className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
               />
             </div>
 
             <div>
-              <label htmlFor={`${fieldId}-due-date`} className="block text-sm font-medium text-ui-text-secondary mb-1">Due Date (Optional)</label>
-              <input id={`${fieldId}-due-date`}
+              <Label htmlFor={`${fieldId}-due-date`}>Due Date (Optional)</Label>
+              <Input id={`${fieldId}-due-date`}
                 type="date"
                 value={form.due_date}
                 onChange={(e) => setForm((f) => ({ ...f, due_date: e.target.value }))}
-                className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
               />
             </div>
           </div>
@@ -94,20 +91,12 @@ export default function CycleFormModal({ onClose, onCreated }) {
           {error && <p className="text-sm text-status-red-fg">{error}</p>}
 
           <div className="flex justify-end gap-2 mt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-sm font-medium px-4 py-2 rounded-md text-ui-text-secondary hover:bg-ui-surface-2"
-            >
+            <Button variant="ghost" onClick={onClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-accent-600 hover:bg-accent-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-md"
-            >
+            </Button>
+            <Button type="submit" disabled={saving}>
               {saving ? "Saving..." : "Create cycle"}
-            </button>
+            </Button>
           </div>
         </form>
     </DetailModal>

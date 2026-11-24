@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import ConfirmDialog from "../Default/ConfirmDialog";
 import { ownersApi } from "../../services/owners";
+import { Button, Card, IconButton, Input } from "../ui";
 
 const EMPTY_DRAFT = { name: "" };
 
 function PencilIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
     </svg>
@@ -15,7 +16,7 @@ function PencilIcon() {
 
 function TrashIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
       <path d="M3 6h18" />
       <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
       <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
@@ -107,7 +108,7 @@ export default function OwnersPanel() {
   };
 
   return (
-    <div className="bg-ui-surface rounded-lg border border-ui-border p-4">
+    <Card>
       <h3 className="text-lg font-semibold mb-2">Owners</h3>
       <p className="text-ui-text-muted text-sm mb-4">
         Manage your content owners. You can add, edit, or remove owners as needed.
@@ -116,23 +117,24 @@ export default function OwnersPanel() {
       {/* Formulário de criação */}
       <div className="border border-dashed border-ui-border rounded-lg p-3 mb-4 flex flex-col gap-2">
         <div className="grid sm:grid-cols-1 gap-2">
-          <input
+          <Input
             type="text"
             value={newDraft.name}
             onChange={(e) => setNewDraft((d) => ({ ...d, name: e.target.value }))}
             placeholder="Owner name..."
             aria-label="Owner name"
-            className="text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
+            fullWidth={false}
           />
         </div>
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="md"
           onClick={handleAdd}
           disabled={saving || !newDraft.name.trim()}
-          className="self-start bg-accent-500 hover:bg-accent-600 disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="self-start"
         >
           {saving ? "Adding..." : "+ Add owner"}
-        </button>
+        </Button>
       </div>
 
       {error && <p className="text-sm text-status-red-fg mb-3">{error}</p>}
@@ -147,28 +149,28 @@ export default function OwnersPanel() {
             <div key={c.id} className="border border-ui-border rounded-lg p-3">
               {editingId === c.id ? (
                 <div className="flex flex-col gap-2">
-                  <input
+                  <Input
                     type="text"
                     value={editDraft.name}
                     aria-label="Name"
                     onChange={(e) => setEditDraft((d) => ({ ...d, name: e.target.value }))}
                     autoFocus
-                    className="text-sm font-medium border border-ui-border rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-600"
+                    size="sm"
+                    fullWidth={false}
+                    className="font-medium"
                   />
                   <div className="flex gap-2 justify-end">
-                    <button
-                      onClick={cancelEditing}
-                      className="text-xs font-medium text-ui-text-muted hover:text-ui-text-primary px-2 py-1"
-                    >
+                    <Button variant="muted" size="xs" onClick={cancelEditing}>
                       Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="xs"
                       onClick={() => handleSaveEdit(c.id)}
                       disabled={!editDraft.name.trim()}
-                      className="text-xs font-medium bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white px-3 py-1 rounded-md"
                     >
                       Save
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -177,22 +179,12 @@ export default function OwnersPanel() {
                     <p className="font-medium text-ui-text-primary text-sm">{c.name}</p>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <button
-                      onClick={() => startEditing(c)}
-                      title="Edit"
-                      aria-label={`Edit ${c.name}`}
-                      className="p-1.5 text-ui-text-muted hover:text-accent-600 hover:bg-accent-50 rounded-md transition-colors"
-                    >
+                    <IconButton label={`Edit ${c.name}`} tone="accent" size="md" onClick={() => startEditing(c)}>
                       <PencilIcon />
-                    </button>
-                    <button
-                      onClick={() => setPendingDelete(c)}
-                      title="Remove"
-                      aria-label={`Remove ${c.name}`}
-                      className="p-1.5 text-ui-text-muted hover:text-status-red-fg hover:bg-status-red-bg rounded-md transition-colors"
-                    >
+                    </IconButton>
+                    <IconButton label={`Remove ${c.name}`} tone="danger" size="md" onClick={() => setPendingDelete(c)}>
                       <TrashIcon />
-                    </button>
+                    </IconButton>
                   </div>
                 </div>
               )}
@@ -218,6 +210,6 @@ export default function OwnersPanel() {
         }}
         onCancel={() => setPendingDelete(null)}
       />
-    </div>
+    </Card>
   );
 }

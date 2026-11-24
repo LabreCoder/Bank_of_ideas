@@ -2,6 +2,7 @@ import { formatLongDate, formatWeekday } from "../../utils/dateFormat";
 import { localDateToKey } from "../../utils/calendar";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 import { getChecklistProgress, getDayPlanningEntriesByDate } from "./calendarViewUtils";
+import { Badge, Button } from "../ui";
 
 export default function CalendarDayView({ dayDate, plannings, onOpenPlanning }) {
   const dateKey = localDateToKey(dayDate);
@@ -33,14 +34,9 @@ export default function CalendarDayView({ dayDate, plannings, onOpenPlanning }) 
                   <span className="text-sm font-medium text-ui-text-primary truncate">
                     {planning.idea?.name || "Untitled"}
                   </span>
-                  <span
-                    className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full border ${
-                      PLANNING_STATUS_STYLES[planning.status] ||
-                      "bg-ui-surface-2 text-ui-text-secondary border-ui-border"
-                    }`}
-                  >
+                  <Badge toneClass={PLANNING_STATUS_STYLES[planning.status]} className="shrink-0">
                     {planning.status}
-                  </span>
+                  </Badge>
                 </div>
 
                 <div className="mb-2">
@@ -73,13 +69,9 @@ export default function CalendarDayView({ dayDate, plannings, onOpenPlanning }) 
                   <p className="text-xs text-ui-text-muted mb-3">No checklist items due on this day.</p>
                 )}
 
-                <button
-                  type="button"
-                  onClick={() => onOpenPlanning?.(planning.id)}
-                  className="text-xs rounded-md border border-ui-border px-2 py-1 hover:bg-ui-surface-2"
-                >
+                <Button variant="secondary" size="xs" onClick={() => onOpenPlanning?.(planning.id)}>
                   Open in Planning
-                </button>
+                </Button>
               </li>
             );
           })}

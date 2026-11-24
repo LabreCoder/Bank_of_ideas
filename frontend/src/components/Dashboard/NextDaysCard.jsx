@@ -1,5 +1,5 @@
 import { getCategoryColor } from "../../utils/categoryColors";
-import { formatMonthYear, formatWeekday } from "../../utils/dateFormat";
+import { formatFullDate, formatMonthYear, formatWeekday } from "../../utils/dateFormat";
 
 const MAX_ROWS = 4;
 const MAX_DOTS = 3;
@@ -33,6 +33,7 @@ export default function NextDaysCard({ days, ideaById, colorMap, onDayClick, onO
               key={day.key}
               type="button"
               disabled={!hasPlannings}
+              aria-label={`${formatFullDate(day.date)}, ${day.plannings.length} planning(s) due`}
               onClick={() => onDayClick(day.key, day.plannings)}
               className={`flex flex-col items-center gap-1 rounded-lg py-2.5 transition-colors ${
                 day.isToday
@@ -89,7 +90,7 @@ export default function NextDaysCard({ days, ideaById, colorMap, onDayClick, onO
                       {[categoryName, planning.status].filter(Boolean).join(" · ")}
                     </span>
                   </span>
-                  <span className="text-ui-text-muted">&rsaquo;</span>
+                  <span aria-hidden="true" className="text-ui-text-muted">&rsaquo;</span>
                 </button>
               </li>
             );

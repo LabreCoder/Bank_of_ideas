@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-// Precisa bater exatamente com os blocos [data-theme="..."] definidos em index.css.
+// Precisa bater exatamente com os blocos [data-theme="..."] definidos em theme-variables.css.
 export const AVAILABLE_THEMES = [
   { id: "cyan", label: "Cyan" },
   { id: "indigo", label: "Blue" },
@@ -14,35 +14,77 @@ export const AVAILABLE_THEMES = [
   { id: "stone", label: "Stone" },
 ];
 
+// Tamanho do texto da interface (acessibilidade). Precisa bater com os
+// seletores html[data-text-size="..."] em index.css.
+export const TEXT_SIZES = [
+  { id: "default", label: "Default" },
+  { id: "large", label: "Large" },
+  { id: "xlarge", label: "Extra large" },
+];
+
 const STORAGE_KEY = "content-planner-theme";
 const MODE_STORAGE_KEY = "content-planner-mode";
+const TEXT_SIZE_STORAGE_KEY = "content-planner-text-size";
 const DEFAULT_THEME = "cyan";
 const DEFAULT_MODE = "dark";
+const DEFAULT_TEXT_SIZE = "default";
+
+// localStorage pode lançar exceção (modo privado, armazenamento bloqueado).
+// Nesses casos a preferência só não persiste — a interface não quebra.
+function readStorage(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStorage(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignora: preferência fica só na sessão atual
+  }
+}
+
+const isTheme = (id) => AVAILABLE_THEMES.some((t) => t.id === id);
+const isTextSize = (id) => TEXT_SIZES.some((s) => s.id === id);
 
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
+  // Valores salvos são validados: um tema removido ou valor corrompido no
+  // storage cai no padrão em vez de deixar a página sem cor de destaque.
   const [theme, setThemeState] = useState(() => {
-    return localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME;
+    const stored = readStorage(STORAGE_KEY);
+    return isTheme(stored) ? stored : DEFAULT_THEME;
   });
   const [mode, setModeState] = useState(() => {
-    const stored = localStorage.getItem(MODE_STORAGE_KEY);
+    const stored = readStorage(MODE_STORAGE_KEY);
     return stored === "light" || stored === "dark" ? stored : DEFAULT_MODE;
+  });
+  const [textSize, setTextSizeState] = useState(() => {
+    const stored = readStorage(TEXT_SIZE_STORAGE_KEY);
+    return isTextSize(stored) ? stored : DEFAULT_TEXT_SIZE;
   });
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem(STORAGE_KEY, theme);
+    writeStorage(STORAGE_KEY, theme);
   }, [theme]);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-mode", mode);
-    localStorage.setItem(MODE_STORAGE_KEY, mode);
+    writeStorage(MODE_STORAGE_KEY, mode);
   }, [mode]);
 
+  useEffect(() => {
+    document.documentElement.setAttribute("data-text-size", textSize);
+    writeStorage(TEXT_SIZE_STORAGE_KEY, textSize);
+  }, [textSize]);
+
   const setTheme = (newTheme) => {
-    const isValid = AVAILABLE_THEMES.some((t) => t.id === newTheme);
-    setThemeState(isValid ? newTheme : DEFAULT_THEME);
+    setThemeState(isTheme(newTheme) ? newTheme : DEFAULT_THEME);
   };
 
   const setMode = (newMode) => {
@@ -51,6 +93,10 @@ export function ThemeProvider({ children }) {
 
   const toggleMode = () => {
     setModeState((currentMode) => (currentMode === "dark" ? "light" : "dark"));
+  };
+
+  const setTextSize = (size) => {
+    setTextSizeState(isTextSize(size) ? size : DEFAULT_TEXT_SIZE);
   };
 
   return (
@@ -62,6 +108,9 @@ export function ThemeProvider({ children }) {
         mode,
         setMode,
         toggleMode,
+        textSize,
+        setTextSize,
+        textSizes: TEXT_SIZES,
       }}
     >
       {children}

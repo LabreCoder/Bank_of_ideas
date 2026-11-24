@@ -48,7 +48,7 @@ export default function FilterBar({
   return (
     <div className="mb-6 rounded-lg border border-ui-border bg-ui-surface shadow-sm">
       {tabs && (
-        <div role="tablist" className="flex gap-1 border-b border-ui-border px-2 mt-2 mb-2">
+        <div role="tablist" className="tablist-scroll flex gap-1 px-2 mt-2 mb-2">
           {tabs.items.map((tab) => {
             const isActive = tabs.active === tab.value;
             return (
@@ -58,9 +58,9 @@ export default function FilterBar({
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => tabs.onChange(tab.value)}
-                className={`-mb-px flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-lg font-medium transition-colors ${
+                className={`flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-lg font-medium transition-colors ${
                   isActive
-                    ? "border-accent-600 text-accent-700"
+                    ? "border-accent-600 text-ui-accent-strong"
                     : "border-transparent text-ui-text-muted hover:text-ui-text-primary"
                 }`}
               >

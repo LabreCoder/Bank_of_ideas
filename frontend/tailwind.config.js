@@ -33,6 +33,10 @@ export default {
           "feature-text": "rgb(var(--color-ui-feature-text) / <alpha-value>)",
           "feature-muted": "rgb(var(--color-ui-feature-muted) / <alpha-value>)",
           input: "rgb(var(--color-ui-input) / <alpha-value>)",
+          // Destaque legível nos dois modos (text-ui-accent, bg-ui-accent-soft).
+          accent: "rgb(var(--color-ui-accent) / <alpha-value>)",
+          "accent-strong": "rgb(var(--color-ui-accent-strong) / <alpha-value>)",
+          "accent-soft": "rgb(var(--color-ui-accent-soft) / <alpha-value>)",
         },
         // Tons de status (D04): bg-status-blue-bg, text-status-blue-fg,
         // border-status-blue-border... valores em theme-variables.css.

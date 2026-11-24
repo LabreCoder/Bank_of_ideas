@@ -4,6 +4,7 @@ import {
   SORT_OPTIONS,
 } from "../../../utils/cycleFilters";
 import { FILTER_FIELD_CLASS } from "../../Filters/filterStyles";
+import { Card } from "../../ui";
 
 const FIELD_CLASS = `w-full ${FILTER_FIELD_CLASS}`;
 const LABEL_CLASS =
@@ -31,11 +32,11 @@ export default function CycleFilterPopover({ filters, onChange, onClose, anchorR
   }, [onClose, anchorRef]);
 
   return (
-    <div
+    <Card
       ref={panelRef}
       role="dialog"
       aria-label="Cycle filters"
-      className="absolute right-0 top-full z-20 mt-2 w-[min(92vw,22rem)] space-y-4 rounded-lg border border-ui-border bg-ui-surface p-4 shadow-lg"
+      className="absolute right-0 top-full z-20 mt-2 w-[min(92vw,22rem)] space-y-4 shadow-lg"
     >
       <div>
         <label htmlFor="cycle-filter-deadline" className={LABEL_CLASS}>
@@ -136,6 +137,6 @@ export default function CycleFilterPopover({ filters, onChange, onClose, anchorR
           </button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

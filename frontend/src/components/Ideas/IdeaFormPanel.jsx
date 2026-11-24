@@ -1,5 +1,6 @@
 import { IDEA_DESCRIPTION_MAX, IDEA_NAME_MAX } from "./IdeaDetailPanel";
 import { useEffect, useState, useId } from "react";
+import { Button, Card, Input, Label, Select, Textarea } from "../ui";
 
 const EMPTY_FORM = { name: "", description: "", category_id: "", owner_id: "" };
 
@@ -43,9 +44,9 @@ export default function IdeaForm({ categories, owners, onClose, onSubmit, backLa
     <div className="animate-fade-in w-full pb-10">
       {/* Top Navigation */}
       <div className="flex items-center gap-2 text-sm text-ui-text-muted mb-6">
-        <button onClick={onClose} className="hover:text-ui-text-primary flex items-center gap-1">
+        <Button variant="muted" size="inline" onClick={onClose}>
           &larr; {backLabel}
-        </button>
+        </Button>
         <span>/</span>
         <span className="text-ui-text-primary">New idea</span>
       </div>
@@ -56,13 +57,13 @@ export default function IdeaForm({ categories, owners, onClose, onSubmit, backLa
           <h1 className="text-3xl font-bold text-ui-text-primary">New idea</h1>
           <p className="text-ui-text-muted mt-1">Capture an idea and give it a place to grow.</p>
         </div>
-        <button onClick={onClose} className="text-sm font-medium text-ui-text-secondary hover:text-ui-text-primary flex items-center gap-2">
-          ✕ Cancel
-        </button>
+        <Button variant="text" size="inline" onClick={onClose}>
+          <span aria-hidden="true">✕</span> Cancel
+        </Button>
       </div>
 
       {/* Main Content Box */}
-      <div className="bg-ui-surface border border-ui-border rounded-xl p-8">
+      <Card padding={8} radius="xl">
         <form id="new-idea-form" onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-12">
           
           {/* Left Column: Idea Details */}
@@ -70,20 +71,19 @@ export default function IdeaForm({ categories, owners, onClose, onSubmit, backLa
             <h2 className="text-lg font-semibold text-ui-text-primary">Idea</h2>
             
             <div>
-              <label htmlFor={`${fieldId}-name`} className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
-              <input id={`${fieldId}-name`}
+              <Label htmlFor={`${fieldId}-name`}>Name</Label>
+              <Input id={`${fieldId}-name`}
                 type="text"
                 value={form.name}
                 onChange={(e) => update("name", e.target.value)}
                 maxLength={IDEA_NAME_MAX}
-                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 focus:border-accent-600"
                 autoFocus
               />
             </div>
 
             <div>
               <div className="flex items-baseline justify-between mb-1">
-                <label htmlFor={`${fieldId}-description`} className="block text-sm font-medium text-ui-text-secondary">Description</label>
+                <Label flush htmlFor={`${fieldId}-description`}>Description</Label>
                 <span
                   className={`text-xs tabular-nums ${
                     form.description.length >= IDEA_DESCRIPTION_MAX
@@ -94,12 +94,12 @@ export default function IdeaForm({ categories, owners, onClose, onSubmit, backLa
                   {form.description.length}/{IDEA_DESCRIPTION_MAX}
                 </span>
               </div>
-              <textarea id={`${fieldId}-description`}
+              <Textarea id={`${fieldId}-description`}
                 value={form.description}
                 onChange={(e) => update("description", e.target.value)}
                 maxLength={IDEA_DESCRIPTION_MAX}
                 rows={8}
-                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 focus:border-accent-600 resize-none"
+                className="resize-none"
               />
             </div>
           </div>
@@ -109,54 +109,43 @@ export default function IdeaForm({ categories, owners, onClose, onSubmit, backLa
             <h2 className="text-lg font-semibold text-ui-text-primary">Organization</h2>
             
             <div>
-              <label htmlFor={`${fieldId}-category`} className="block text-sm font-medium text-ui-text-secondary mb-1">Category</label>
-              <select id={`${fieldId}-category`}
+              <Label htmlFor={`${fieldId}-category`}>Category</Label>
+              <Select id={`${fieldId}-category`}
                 value={form.category_id}
                 onChange={(e) => update("category_id", e.target.value)}
-                className="w-full text-sm bg-ui-surface border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 focus:border-accent-600"
               >
                 <option value="">No category</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div>
-              <label htmlFor={`${fieldId}-owner`} className="block text-sm font-medium text-ui-text-secondary mb-1">Owner</label>
-              <select id={`${fieldId}-owner`}
+              <Label htmlFor={`${fieldId}-owner`}>Owner</Label>
+              <Select id={`${fieldId}-owner`}
                 value={form.owner_id}
                 onChange={(e) => update("owner_id", e.target.value)}
-                className="w-full text-sm bg-ui-surface border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 focus:border-accent-600"
               >
                 <option value="">Select...</option>
                 {owners.map((o) => (
                   <option key={o.id} value={o.id}>{o.name}</option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         </form>
-      </div>
+      </Card>
 
       {/* Footer Actions */}
       <div className="border-t border-ui-border mt-6 pt-6 flex justify-end items-center gap-4">
         {error && <p className="text-sm text-status-red-fg mr-auto">{error}</p>}
-        <button
-          type="button"
-          onClick={onClose}
-          className="text-sm font-medium text-ui-text-secondary hover:text-ui-text-primary"
-        >
+        <Button variant="text" size="inline" onClick={onClose}>
           Cancel
-        </button>
-        <button
-          type="submit"
-          form="new-idea-form"
-          disabled={saving}
-          className="bg-accent-600 hover:bg-accent-700 text-white text-sm font-medium px-6 py-2.5 rounded-md transition-colors disabled:opacity-50"
-        >
+        </Button>
+        <Button type="submit" form="new-idea-form" size="lg" disabled={saving}>
           {saving ? "Saving..." : "Save"}
-        </button>
+        </Button>
       </div>
     </div>
   );

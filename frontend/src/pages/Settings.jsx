@@ -21,14 +21,17 @@ export default function Settings() {
         <p className="text-ui-text-muted">Customize your application settings.</p>
       </div>
 
-      <div className="flex gap-2 mb-4 border-b border-ui-border">
+      <div role="tablist" aria-label="Settings sections" className="tablist-scroll flex gap-2 mb-4">
         {TABS.map((tab) => (
           <button
             key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`text-sm font-medium px-4 py-2 border-b-2 -mb-px transition-colors ${
+            className={`shrink-0 whitespace-nowrap text-sm font-medium px-4 py-2 border-b-2 transition-colors ${
               activeTab === tab.id
-                ? "border-accent-600 text-accent-700"
+                ? "border-accent-600 text-ui-accent-strong"
                 : "border-transparent text-ui-text-muted hover:text-ui-text-primary"
             }`}
           >

@@ -22,6 +22,15 @@
   --color-ui-feature-text: 241 245 249;
   --color-ui-feature-muted: 148 163 184;
 
+  /* Destaque como TEXTO/FUNDO SUAVE sobre superfícies (acessibilidade).
+     accent-600/700 sobre fundo escuro ficava com contraste baixo (ex.: aba
+     ativa, chips de filtro); accent-50 virava uma caixa clara no escuro.
+     No escuro usamos degraus claros da mesma escala; no claro os valores
+     são exatamente os de antes (600/700/50). */
+  --color-ui-accent: var(--color-accent-400);
+  --color-ui-accent-strong: var(--color-accent-300);
+  --color-ui-accent-soft: var(--color-accent-900);
+
   /* Tons de status (D04): badges, avisos e caixas de erro. Cada tom tem
      fundo (bg), texto (fg) e borda (border), com versão própria no claro e
      no escuro — sem caixas claras sobre fundo escuro. */
@@ -77,6 +86,10 @@
   --color-ui-feature: 31 36 56;
   --color-ui-feature-text: 248 250 252;
   --color-ui-feature-muted: 161 168 190;
+
+  --color-ui-accent: var(--color-accent-600);
+  --color-ui-accent-strong: var(--color-accent-700);
+  --color-ui-accent-soft: var(--color-accent-50);
 
   --color-status-neutral-bg: 243 244 246;
   --color-status-neutral-fg: 75 85 99;

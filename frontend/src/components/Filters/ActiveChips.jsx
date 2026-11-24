@@ -8,14 +8,14 @@ export default function ActiveChips({ chips }) {
       {chips.map((chip) => (
         <li
           key={chip.key}
-          className="flex items-center gap-1.5 rounded-md border border-accent-500/20 bg-accent-500/10 py-1 pl-2.5 pr-1.5 text-sm text-accent-700"
+          className="flex items-center gap-1.5 rounded-md border border-accent-500/20 bg-accent-500/10 py-1 pl-2.5 pr-1.5 text-sm text-ui-accent-strong"
         >
           {chip.label}
           <button
             type="button"
             onClick={chip.onRemove}
             aria-label={`Remove filter ${chip.label}`}
-            className="flex h-4 w-4 items-center justify-center rounded text-accent-700 transition-colors hover:bg-accent-500/20"
+            className="flex h-4 w-4 items-center justify-center rounded text-ui-accent-strong transition-colors hover:bg-accent-500/20"
           >
             <svg
               width="10"

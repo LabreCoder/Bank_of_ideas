@@ -2,6 +2,7 @@ import { useId } from "react";
 import DetailModal from "../Default/DetailModal";
 import { PLANNING_STATUS_STYLES } from "../../utils/planningStatus";
 import { formatLongDate } from "../../utils/dateFormat";
+import { Badge, Button } from "../ui";
 
 const formatDateLabel = formatLongDate;
 
@@ -27,13 +28,9 @@ function MonthPlanningCard({ planning, dateKey, onOpenPlanning }) {
     <li className="bg-ui-surface-2 rounded-md p-3 border border-ui-border">
       <div className="flex items-start justify-between gap-3 mb-2">
         <span className="text-sm font-medium text-ui-text-primary">{planning.idea?.name || "Untitled"}</span>
-        <span
-          className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full border ${
-            PLANNING_STATUS_STYLES[planning.status] || "bg-ui-surface-2 text-ui-text-secondary border-ui-border"
-          }`}
-        >
+        <Badge toneClass={PLANNING_STATUS_STYLES[planning.status]} className="shrink-0">
           {planning.status}
-        </span>
+        </Badge>
       </div>
 
       <div className="text-base text-ui-text-secondary mb-3">
@@ -43,13 +40,9 @@ function MonthPlanningCard({ planning, dateKey, onOpenPlanning }) {
         <p className="mt-0.5">Due date: {formatDateLabel(dateKey)}</p>
       </div>
 
-      <button
-        type="button"
-        onClick={() => onOpenPlanning?.(planning.id)}
-        className="text-xs rounded-md border border-ui-border px-2 py-1 hover:bg-ui-surface-2"
-      >
+      <Button variant="secondary" size="xs" onClick={() => onOpenPlanning?.(planning.id)}>
         Open in Planning
-      </button>
+      </Button>
     </li>
   );
 }
@@ -62,13 +55,9 @@ function WeekPlanningCard({ planning, dateKey, onOpenPlanning }) {
     <li className="bg-ui-surface-2 rounded-md p-3 border border-ui-border">
       <div className="flex items-start justify-between gap-3 mb-2">
         <span className="text-sm font-medium text-ui-text-primary">{planning.idea?.name || "Untitled"}</span>
-        <span
-          className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full border ${
-            PLANNING_STATUS_STYLES[planning.status] || "bg-ui-surface-2 text-ui-text-secondary border-ui-border"
-          }`}
-        >
+        <Badge toneClass={PLANNING_STATUS_STYLES[planning.status]} className="shrink-0">
           {planning.status}
-        </span>
+        </Badge>
       </div>
 
       <div className="text-base text-ui-text-secondary mb-2">
@@ -92,13 +81,9 @@ function WeekPlanningCard({ planning, dateKey, onOpenPlanning }) {
         <p className="text-xs text-ui-text-muted mb-3">No checklist items due on this day.</p>
       )}
 
-      <button
-        type="button"
-        onClick={() => onOpenPlanning?.(planning.id)}
-        className="text-xs rounded-md border border-ui-border px-2 py-1 hover:bg-ui-surface-2"
-      >
+      <Button variant="secondary" size="xs" onClick={() => onOpenPlanning?.(planning.id)}>
         Open in Planning
-      </button>
+      </Button>
     </li>
   );
 }
@@ -113,13 +98,9 @@ function DayPlanningCard({ planning, dateKey, onOpenPlanning }) {
     <li className="bg-ui-surface-2 rounded-md p-3 border border-ui-border min-w-0">
       <div className="flex items-start justify-between gap-3 mb-2">
         <span className="text-lg font-medium text-ui-text-primary truncate">{planning.idea?.name || "Untitled"}</span>
-        <span
-          className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full border ${
-            PLANNING_STATUS_STYLES[planning.status] || "bg-ui-surface-2 text-ui-text-secondary border-ui-border"
-          }`}
-        >
+        <Badge toneClass={PLANNING_STATUS_STYLES[planning.status]} className="shrink-0">
           {planning.status}
-        </span>
+        </Badge>
       </div>
 
       <div className="mb-2">
@@ -145,13 +126,9 @@ function DayPlanningCard({ planning, dateKey, onOpenPlanning }) {
         <p className="text-xs text-ui-text-muted mb-3">No checklist items due on this day.</p>
       )}
 
-      <button
-        type="button"
-        onClick={() => onOpenPlanning?.(planning.id)}
-        className="text-xs rounded-md border border-ui-border px-2 py-1 hover:bg-ui-surface-2"
-      >
+      <Button variant="secondary" size="xs" onClick={() => onOpenPlanning?.(planning.id)}>
         Open in Planning
-      </button>
+      </Button>
     </li>
   );
 }
@@ -236,9 +213,9 @@ export default function DayIdeasModal({ dateKey, plannings, view, onOpenPlanning
             <p className="text-xs uppercase tracking-wide text-ui-text-muted mb-1">{viewTitle}</p>
             <h3 id={titleId} className="text-lg font-semibold capitalize">{formatDateLabel(dateKey)}</h3>
           </div>
-          <button onClick={onClose} className="text-ui-text-muted hover:text-ui-text-primary text-sm">
+          <Button variant="muted" size="inline" onClick={onClose}>
             Close
-          </button>
+          </Button>
         </div>
 
         {renderByView()}

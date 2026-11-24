@@ -9,6 +9,7 @@ import PlanningFormPanel from "../components/Planning/PlanningFormPanel";
 import PlanningDetailPanel from "../components/Planning/PlanningDetailPanel";
 import IdeaFilterBar from "../components/Filters/IdeaFilterBar";
 import NotFoundMessage from "../components/Default/NotFoundMessage";
+import { Button, Card } from "../components/ui";
 import { useIdeaFilters } from "../hooks/useIdeaFilters";
 import { useGoBack } from "../hooks/useGoBack";
 import { matchesIdeaFilters } from "../utils/ideaFilters";
@@ -191,8 +192,8 @@ export default function Planning() {
   return (
     <div className="animate-fade-in pb-10">
       {/* Cabeçalho */}
-      <div className="flex justify-between items-start mb-6">
-        <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
+        <header className="min-w-0 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0">
             <h2 className="mt-3 text-4xl font-semibold tracking-tight text-ui-text-primary md:text-5xl">
               Planning
@@ -202,12 +203,9 @@ export default function Planning() {
             </p>
           </div>
         </header>
-        <button
-          onClick={() => navigate("/planning/new")}
-          className="rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-800 shrink-0"
-        >
+        <Button onClick={() => navigate("/planning/new")} className="shrink-0">
           + New Planning
-        </button>
+        </Button>
       </div>
 
       <IdeaFilterBar
@@ -227,13 +225,13 @@ export default function Planning() {
       )}
 
       {loading ? (
-        <div className="bg-ui-surface rounded-lg border border-ui-border p-4 h-96 flex items-center justify-center text-ui-text-muted">
+        <Card className="h-96 flex items-center justify-center text-ui-text-muted">
           Loading plannings...
-        </div>
+        </Card>
       ) : filteredPlannings.length === 0 ? (
-        <div className="bg-ui-surface rounded-lg border border-ui-border p-4 h-96 flex items-center justify-center text-ui-text-muted">
+        <Card className="h-96 flex items-center justify-center text-ui-text-muted">
           No planning found with the current filters.
-        </div>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredPlannings.map((planning) => (

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useDialogFocus } from "../../hooks/useDialogFocus";
 import ConfirmDialog from "./ConfirmDialog";
+import { Card } from "../ui";
 
 const SIZE_CLASSES = {
   md: "max-w-lg", // ~32rem — formulários simples (ex: criar ideia)
@@ -53,7 +54,7 @@ export default function DetailModal({
         if (e.target === e.currentTarget) requestClose();
       }}
     >
-      <div
+      <Card
         ref={panelRef}
         role="dialog"
         aria-modal="true"
@@ -61,12 +62,11 @@ export default function DetailModal({
         aria-label={labelledBy ? undefined : ariaLabel}
         tabIndex={-1}
         onKeyDown={handleKeyDown}
-        className={`bg-ui-surface rounded-lg border border-ui-border w-full ${
-          SIZE_CLASSES[size] || SIZE_CLASSES.lg
-        } p-8 max-h-[90vh] overflow-y-auto focus:outline-none`}
+        padding={8}
+        className={`w-full ${SIZE_CLASSES[size] || SIZE_CLASSES.lg} max-h-[90vh] overflow-y-auto focus:outline-none`}
       >
         {children}
-      </div>
+      </Card>
 
       <ConfirmDialog
         open={confirmingClose}

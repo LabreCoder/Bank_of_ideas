@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useId } from "react";
-import { Link } from "react-router-dom";
+import { Badge, Button, ButtonLink, Card, Input, Label, Select, Textarea } from "../ui";
 
 export const IDEA_DESCRIPTION_MAX = 200; // VARCHAR(200) no banco
 export const IDEA_NAME_MAX = 200; // VARCHAR(200) no banco (migração Alembic 0002)
@@ -12,12 +12,9 @@ function NoPlanningState({ idea, loaded }) {
       <h2 className="text-lg font-semibold text-ui-text-primary">Planning</h2>
       <p className="mt-1 text-sm text-ui-text-muted">This idea does not have a planning yet.</p>
       {idea.is_active ? (
-        <Link
-          to={`/planning/new?ideaId=${idea.id}`}
-          className="mt-4 inline-block rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700"
-        >
+        <ButtonLink to={`/planning/new?ideaId=${idea.id}`} className="mt-4">
           + Create planning
-        </Link>
+        </ButtonLink>
       ) : (
         <p className="mt-3 text-xs text-ui-text-muted">Activate the idea to create a planning for it.</p>
       )}
@@ -161,24 +158,26 @@ export default function IdeaDetail({
     <div className="animate-fade-in w-full pb-10">
       {/* Top Navigation */}
       <div className="flex items-center gap-2 text-sm text-ui-text-muted mb-6">
-        <button onClick={onClose} className="hover:text-ui-text-primary">&larr; {backLabel}</button>
+        <Button variant="muted" size="inline" onClick={onClose}>
+          &larr; {backLabel}
+        </Button>
         <span>/</span>
-        <span className="text-ui-text-primary">{idea.name}</span>
+        <span className="min-w-0 text-ui-text-primary [overflow-wrap:anywhere]">{idea.name}</span>
       </div>
 
       {/* Header */}
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-ui-text-primary">{idea.name}</h1>
+      <div className="flex justify-between items-start gap-4 mb-6">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-bold text-ui-text-primary [overflow-wrap:anywhere]">{idea.name}</h1>
           <p className="text-ui-text-muted mt-1">Idea details and planning, together in one place.</p>
         </div>
-        <button onClick={onClose} className="text-sm font-medium text-ui-text-secondary hover:text-ui-text-primary flex items-center gap-2">
-          ✕ Close
-        </button>
+        <Button variant="text" size="inline" onClick={onClose} className="shrink-0">
+          <span aria-hidden="true">✕</span> Close
+        </Button>
       </div>
 
       {/* Main Container */}
-      <div className="bg-ui-surface border border-ui-border rounded-xl p-8 flex flex-col md:flex-row gap-12">
+      <Card padding={8} radius="xl" className="flex flex-col md:flex-row gap-12">
         
         {/* Left Column: Idea Details */}
         <div className="flex-1 flex flex-col">
@@ -194,9 +193,7 @@ export default function IdeaDetail({
                 {SAVE_STATE_LABELS[saveState]?.text ?? ""}
               </span>
             </div>
-            <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${statusClass}`}>
-              {idea.execution_status}
-            </span>
+            <Badge toneClass={statusClass}>{idea.execution_status}</Badge>
           </div>
           <p className="text-xs text-ui-text-muted -mt-4 mb-4">Changes are saved automatically.</p>
 
@@ -208,19 +205,18 @@ export default function IdeaDetail({
 
           <div className="flex flex-col gap-4 flex-grow">
             <div>
-              <label htmlFor={`${fieldId}-name`} className="block text-sm font-medium text-ui-text-secondary mb-1">Name</label>
-              <input id={`${fieldId}-name`}
+              <Label htmlFor={`${fieldId}-name`}>Name</Label>
+              <Input id={`${fieldId}-name`}
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onBlur={handleNameBlur}
                 maxLength={IDEA_NAME_MAX}
-                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
               />
             </div>
             <div>
               <div className="flex items-baseline justify-between mb-1">
-                <label htmlFor={`${fieldId}-description`} className="block text-sm font-medium text-ui-text-secondary">Description</label>
+                <Label flush htmlFor={`${fieldId}-description`}>Description</Label>
                 <span
                   className={`text-xs tabular-nums ${
                     description.length >= IDEA_DESCRIPTION_MAX ? "text-status-amber-fg" : "text-ui-text-muted"
@@ -229,44 +225,43 @@ export default function IdeaDetail({
                   {description.length}/{IDEA_DESCRIPTION_MAX}
                 </span>
               </div>
-              <textarea id={`${fieldId}-description`}
+              <Textarea id={`${fieldId}-description`}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onBlur={handleDescriptionBlur}
                 maxLength={IDEA_DESCRIPTION_MAX}
                 rows={8}
-                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600 resize-none"
+                className="resize-none"
               />
             </div>
             <div>
-              <label htmlFor={`${fieldId}-category`} className="block text-sm font-medium text-ui-text-secondary mb-1">Category</label>
-              <select id={`${fieldId}-category`}
+              <Label htmlFor={`${fieldId}-category`}>Category</Label>
+              <Select id={`${fieldId}-category`}
                 value={categoryId}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
               >
                 <option value="">No category</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div>
-              <label htmlFor={`${fieldId}-owner`} className="block text-sm font-medium text-ui-text-secondary mb-1">Owner</label>
-              <select id={`${fieldId}-owner`}
+              <Label htmlFor={`${fieldId}-owner`}>Owner</Label>
+              <Select id={`${fieldId}-owner`}
                 value={ownerId}
                 onChange={(e) => handleOwnerChange(e.target.value)}
-                className="w-full text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
               >
                 {owners.map((o) => (
                   <option key={o.id} value={o.id}>{o.name}</option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
 
           <div className="mt-8 pt-4">
             <button
+              type="button"
               onClick={() => onToggleActive(idea)}
               className={`text-sm font-medium hover:underline ${
                 idea.is_active ? "text-status-red-fg" : "text-status-emerald-fg"
@@ -288,9 +283,7 @@ export default function IdeaDetail({
             <>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold text-ui-text-primary">Planning</h2>
-                <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${PLANNING_STATUS_STYLES[planning.status] || STATUS_FALLBACK_STYLE}`}>
-                  {planning.status}
-                </span>
+                <Badge toneClass={PLANNING_STATUS_STYLES[planning.status]}>{planning.status}</Badge>
               </div>
 
               <div className="mb-6">
@@ -305,25 +298,26 @@ export default function IdeaDetail({
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <input
+                  <Input
                     type="text"
                     value={newItem}
                     onChange={(e) => setNewItem(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
                     placeholder="New item..."
                     aria-label="New checklist item"
-                    className="flex-1 min-w-[12rem] text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                    fullWidth={false}
+                    className="flex-1 min-w-[12rem]"
                   />
-                  <input
+                  <Input
                     type="date"
                     value={newItemDue}
                     onChange={(e) => setNewItemDue(e.target.value)}
                     aria-label="Due date (optional)"
-                    className="text-sm border border-ui-border rounded-md px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                    fullWidth={false}
                   />
-                  <button onClick={handleAddItem} className="text-sm font-medium px-4 py-2 rounded-md border border-ui-border hover:bg-ui-surface-2">
+                  <Button variant="secondary" onClick={handleAddItem}>
                     Add
-                  </button>
+                  </Button>
                 </div>
 
                 <ul className="flex flex-col gap-2">
@@ -346,7 +340,7 @@ export default function IdeaDetail({
             </>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

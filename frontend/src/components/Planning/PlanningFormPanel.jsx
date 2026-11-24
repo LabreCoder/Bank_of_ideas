@@ -1,10 +1,11 @@
 import { formatShortDate } from "../../utils/dateFormat";
 import { useState, useId } from "react";
 import { PLANNING_STATUS_OPTIONS } from "../../utils/planningStatus";
+import { Badge, Button, Card, Input, Label, Select, Textarea } from "../ui";
 
 function ChecklistEmptyIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
       <path d="M9 11l3 3L22 4" />
       <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
     </svg>
@@ -80,20 +81,20 @@ export default function PlanningFormPanel({
 
   return (
     <div>
-      <button type="button" onClick={onClose} className="text-sm text-ui-text-muted hover:text-ui-text-primary mb-2">
+      <Button variant="muted" size="inline" onClick={onClose} className="mb-2">
         ← {backLabel}
-      </button>
+      </Button>
 
       <div className="flex items-start justify-between mb-1">
         <h1 className="text-3xl font-bold text-ui-text-primary">New planning</h1>
-        <button type="button" onClick={onClose} className="text-ui-text-muted hover:text-ui-text-primary text-sm">
+        <Button variant="muted" size="inline" onClick={onClose}>
           Cancel
-        </button>
+        </Button>
       </div>
       <p className="text-ui-text-muted mb-6">Choose an idea and define the next steps.</p>
 
       <form onSubmit={handleSubmit}>
-        <div className="bg-ui-surface border border-ui-border rounded-lg p-6">
+        <Card padding={6}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* ---- Planning ---- */}
             <div>
@@ -101,11 +102,10 @@ export default function PlanningFormPanel({
 
               <div className="flex flex-col gap-4">
                 <div>
-                  <label htmlFor={`${fieldId}-idea`} className="block text-sm font-medium text-ui-text-secondary mb-1">Idea</label>
-                  <select id={`${fieldId}-idea`}
+                  <Label htmlFor={`${fieldId}-idea`}>Idea</Label>
+                  <Select id={`${fieldId}-idea`}
                     value={form.idea_id}
                     onChange={(e) => updateForm("idea_id", e.target.value)}
-                    className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                   >
                     <option value="">Select...</option>
                     {availableIdeas.map((idea) => (
@@ -113,7 +113,7 @@ export default function PlanningFormPanel({
                         {idea.name}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                   {availableIdeas.length === 0 && (
                     <p className="text-xs text-ui-text-muted mt-1">
                       No free ideas to plan — all already have a planning.
@@ -122,12 +122,11 @@ export default function PlanningFormPanel({
                 </div>
 
                 <div>
-                  <label htmlFor={`${fieldId}-details`} className="block text-sm font-medium text-ui-text-secondary mb-1">Details</label>
-                  <textarea id={`${fieldId}-details`}
+                  <Label htmlFor={`${fieldId}-details`}>Details</Label>
+                  <Textarea id={`${fieldId}-details`}
                     value={form.details}
                     onChange={(e) => updateForm("details", e.target.value)}
                     rows={8}
-                    className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                   />
                 </div>
               </div>
@@ -140,38 +139,35 @@ export default function PlanningFormPanel({
               <div className="flex flex-col gap-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor={`${fieldId}-start`} className="block text-sm font-medium text-ui-text-secondary mb-1">Start</label>
-                    <input id={`${fieldId}-start`}
+                    <Label htmlFor={`${fieldId}-start`}>Start</Label>
+                    <Input id={`${fieldId}-start`}
                       type="date"
                       value={form.start_date}
                       onChange={(e) => updateForm("start_date", e.target.value)}
-                      className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                     />
                   </div>
                   <div>
-                    <label htmlFor={`${fieldId}-due`} className="block text-sm font-medium text-ui-text-secondary mb-1">Due</label>
-                    <input id={`${fieldId}-due`}
+                    <Label htmlFor={`${fieldId}-due`}>Due</Label>
+                    <Input id={`${fieldId}-due`}
                       type="date"
                       value={form.due_date}
                       onChange={(e) => updateForm("due_date", e.target.value)}
-                      className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor={`${fieldId}-status`} className="block text-sm font-medium text-ui-text-secondary mb-1">Status</label>
-                  <select id={`${fieldId}-status`}
+                  <Label htmlFor={`${fieldId}-status`}>Status</Label>
+                  <Select id={`${fieldId}-status`}
                     value={form.status}
                     onChange={(e) => updateForm("status", e.target.value)}
-                    className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                   >
                     {PLANNING_STATUS_OPTIONS.map((s) => (
                       <option key={s} value={s}>
                         {s}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -183,14 +179,14 @@ export default function PlanningFormPanel({
           <div>
             <div className="flex items-center gap-2 mb-3">
               <h3 className="text-lg font-semibold text-ui-text-primary">Initial checklist</h3>
-              <span className="text-xs font-medium text-ui-text-muted border border-ui-border rounded-full px-2 py-0.5">
+              <Badge toneClass="border-ui-border text-ui-text-muted">
                 optional
-              </span>
+              </Badge>
             </div>
 
             <div className="flex flex-wrap gap-2 mb-2 items-end">
               <div className="flex-1 min-w-[12rem]">
-                <input
+                <Input
                   type="text"
                   value={checklistItem.description}
                   onChange={(e) =>
@@ -204,27 +200,21 @@ export default function PlanningFormPanel({
                   }}
                   placeholder="Item description..."
                   aria-label="New checklist item"
-                  className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                 />
               </div>
               <div>
-                <input
+                <Input
                   type="date"
                   value={checklistItem.due_date}
                   aria-label="Checklist item due date (optional)"
                   onChange={(e) =>
                     setChecklistItem((prev) => ({ ...prev, due_date: e.target.value }))
                   }
-                  className="w-full text-sm border border-ui-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-600"
                 />
               </div>
-              <button
-                type="button"
-                onClick={handleAddChecklistItem}
-                className="text-sm font-medium px-3 py-2 rounded-md border border-ui-border hover:bg-ui-surface-2 shrink-0"
-              >
+              <Button variant="secondary" onClick={handleAddChecklistItem} className="shrink-0">
                 Add
-              </button>
+              </Button>
             </div>
 
             {checklistDraft.length === 0 ? (
@@ -252,14 +242,15 @@ export default function PlanningFormPanel({
                         <span className="text-xs text-ui-text-muted">{formatShortDate(item.due_date)}</span>
                       )}
                     </span>
-                    <button
-                      type="button"
+                    <Button
+                      variant="muted-danger"
+                      size="inline-xs"
                       onClick={() => removeChecklistDraftItem(index)}
                       aria-label={`Remove ${item.description}`}
-                      className="text-ui-text-muted hover:text-status-red-fg text-xs ml-2"
+                      className="ml-2"
                     >
                       remove
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>
@@ -271,23 +262,15 @@ export default function PlanningFormPanel({
           <div className="flex items-center justify-between pt-6 mt-6 border-t border-ui-border/60">
             <p className="text-xs text-ui-text-muted">Start with an idea. The rest can take shape later.</p>
             <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-sm font-medium px-4 py-2 rounded-md text-ui-text-secondary hover:bg-ui-surface-2"
-              >
+              <Button variant="ghost" onClick={onClose}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="bg-accent-600 hover:bg-accent-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-md"
-              >
+              </Button>
+              <Button type="submit" disabled={saving}>
                 {saving ? "Saving..." : "+ Create planning"}
-              </button>
+              </Button>
             </div>
           </div>
-        </div>
+        </Card>
       </form>
     </div>
   );

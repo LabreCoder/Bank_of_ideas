@@ -3,7 +3,7 @@
  */
 export default function ToggleSwitch({ checked, onChange, label }) {
   return (
-    <label className="flex cursor-pointer select-none items-center gap-2 ml-2 mr-2text-lg font-medium text-ui-text-secondary">
+    <label className="flex cursor-pointer select-none items-center gap-2 mx-2 text-lg font-medium text-ui-text-secondary">
       <button
         type="button"
         role="switch"
